@@ -1,0 +1,2032 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Airlines Support HUB</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=Barlow:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<script>if(window.pdfjsLib) pdfjsLib.GlobalWorkerOptions.workerSrc='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';</script>
+<style>
+:root{
+  --bg:#07090f;--s1:#0d1117;--s2:#131a24;--s3:#1a2332;
+  --border:#1e2d42;--border2:#263547;
+  --text:#cdd6e8;--text2:#7a90ab;--text3:#3d5470;
+  --accent:#2d7aee;--cyan:#0eb8c9;--green:#17c97a;
+  --amber:#f0a500;--red:#e84545;--purple:#8b5cf6;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'Barlow',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;}
+
+/* HEADER */
+header{background:var(--s1);border-bottom:1px solid var(--border);padding:0 16px;height:54px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;gap:8px;}
+.logo{font-size:17px;font-weight:900;white-space:nowrap;}.logo span{color:var(--cyan);}
+.header-mid{display:flex;align-items:center;gap:7px;flex:1;justify-content:center;}
+.date-pill{font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--text2);background:var(--s2);border:1px solid var(--border);padding:4px 10px;border-radius:20px;white-space:nowrap;}
+.hactions{display:flex;gap:6px;}
+
+/* TABS */
+.tabs{background:var(--s1);border-bottom:1px solid var(--border);display:flex;padding:0 16px;overflow-x:auto;}
+.tab{padding:11px 14px;font-size:11px;font-weight:700;letter-spacing:.5px;color:var(--text3);cursor:pointer;border-bottom:2px solid transparent;transition:all .15s;text-transform:uppercase;white-space:nowrap;}
+.tab:hover{color:var(--text2);}.tab.active{color:var(--accent);border-bottom-color:var(--accent);}
+
+/* LAYOUT */
+.app{display:flex;height:calc(100vh - 96px);overflow:hidden;}
+.page{display:none;flex:1;overflow:hidden;}.page.active{display:flex;}
+
+/* MOBILE */
+@media(max-width:640px){
+  .app{height:auto;min-height:calc(100vh - 96px);flex-direction:column;}
+  .page.active{flex-direction:column;height:auto;}
+  .board-wrap{min-height:400px;}
+  .out-panel{width:100%;min-width:unset;border-left:none;border-top:1px solid var(--border);max-height:280px;}
+  .logo{font-size:13px;}
+  .hactions{gap:4px;}
+  .hactions .btn{font-size:11px;padding:5px 8px;}
+  .header-mid{display:none;}
+}
+
+/* BOARD */
+.board-wrap{flex:1;overflow-y:auto;padding:14px;}
+
+/* OUTPUT */
+.out-panel{width:300px;min-width:300px;background:var(--s1);border-left:1px solid var(--border);display:flex;flex-direction:column;}
+.out-head{padding:11px 13px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;}
+.out-title{font-size:10px;font-weight:800;letter-spacing:1px;text-transform:uppercase;color:var(--text2);}
+.out-body{flex:1;overflow-y:auto;padding:13px;font-family:'IBM Plex Mono',monospace;font-size:11px;line-height:1.8;color:var(--text2);white-space:pre-wrap;}
+
+/* STATS */
+.stats{display:flex;gap:7px;margin-bottom:12px;flex-wrap:wrap;}
+.stat{background:var(--s1);border:1px solid var(--border);border-radius:9px;padding:9px 13px;}
+.sn{font-size:20px;font-weight:900;font-family:'IBM Plex Mono',monospace;}
+.sl{font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:1px;margin-top:1px;}
+
+/* BANNER */
+.banner{background:rgba(240,165,0,.08);border:1px solid rgba(240,165,0,.25);border-radius:9px;padding:9px 13px;margin-bottom:12px;display:flex;align-items:flex-start;gap:7px;flex-wrap:wrap;}
+.blabel{font-size:10px;font-weight:800;letter-spacing:1px;color:var(--amber);text-transform:uppercase;padding-top:3px;white-space:nowrap;}
+.bchips{display:flex;flex-wrap:wrap;gap:5px;}
+.bchip{background:var(--s3);border:1px solid var(--border2);border-radius:16px;padding:3px 9px;font-size:11px;font-weight:700;cursor:pointer;transition:border-color .15s;}
+.bchip:hover{border-color:var(--accent);}
+
+/* SHIFT BLOCKS */
+.shift-block{background:var(--s1);border:1px solid var(--border);border-radius:11px;margin-bottom:12px;overflow:hidden;}
+.shift-head{display:flex;align-items:center;gap:9px;padding:10px 14px;border-bottom:1px solid var(--border);}
+.shift-tag{font-size:10px;font-weight:800;letter-spacing:1.5px;padding:3px 9px;border-radius:5px;text-transform:uppercase;white-space:nowrap;}
+.shift-time{font-size:11px;color:var(--text3);font-family:'IBM Plex Mono',monospace;}
+.shift-count{font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--text3);margin-left:auto;}
+.shift-add{background:var(--s2);border:1px solid var(--border);border-radius:5px;color:var(--text2);width:24px;height:24px;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:14px;transition:all .15s;flex-shrink:0;}
+.shift-add:hover{border-color:var(--accent);color:var(--accent);}
+.shift-body{padding:11px 14px;}
+.empty-sh{color:var(--text3);font-size:12px;}
+
+/* AGENT GRID */
+.agents-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(255px,1fr));gap:9px;}
+.agent-card{background:var(--s2);border:1px solid var(--border);border-radius:9px;padding:12px;transition:border-color .15s;}
+.agent-card:hover{border-color:var(--border2);}
+.atop{display:flex;align-items:center;gap:9px;margin-bottom:9px;}
+.av{width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:800;flex-shrink:0;}
+.aname{font-size:13px;font-weight:700;line-height:1.2;}
+.aterm{font-size:9px;color:var(--text3);margin-top:2px;}
+.abtns{margin-left:auto;display:flex;gap:3px;}
+.ib{background:var(--s3);border:1px solid var(--border);border-radius:4px;color:var(--text2);width:24px;height:24px;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:11px;transition:all .15s;}
+.ib:hover{border-color:var(--accent);color:var(--accent);}
+.ib.del:hover{border-color:var(--red);color:var(--red);}
+
+/* DUTY ROWS */
+.drows{display:flex;flex-direction:column;gap:4px;}
+.drow{display:flex;align-items:flex-start;gap:5px;font-size:11px;}
+.dk{font-family:'IBM Plex Mono',monospace;font-size:10px;font-weight:600;color:var(--text3);min-width:54px;padding-top:1px;text-transform:uppercase;}
+.dv{color:var(--text);font-size:11px;font-weight:600;flex:1;}
+.bp{background:rgba(45,122,238,.15);color:var(--accent);border:1px solid rgba(45,122,238,.3);border-radius:4px;padding:1px 6px;font-size:10px;font-weight:700;margin-right:2px;display:inline-block;}
+.bt{background:rgba(240,165,0,.12);color:var(--amber);border:1px solid rgba(240,165,0,.25);border-radius:4px;padding:1px 6px;font-size:10px;font-weight:700;display:inline-block;}
+.bc{background:rgba(139,92,246,.12);color:var(--purple);border:1px solid rgba(139,92,246,.25);border-radius:4px;padding:1px 6px;font-size:10px;font-weight:700;display:inline-block;}
+.bm{background:rgba(23,201,122,.1);color:var(--green);border:1px solid rgba(23,201,122,.2);border-radius:4px;padding:1px 6px;font-size:10px;font-weight:700;font-family:'IBM Plex Mono',monospace;display:inline-block;}
+
+/* SUPS */
+.sup-bar{background:var(--s1);border:1px solid var(--border);border-radius:9px;padding:10px 14px;margin-bottom:12px;display:flex;align-items:center;flex-wrap:wrap;gap:7px;}
+.sup-lbl{font-size:10px;font-weight:800;letter-spacing:1px;color:var(--text3);text-transform:uppercase;}
+.sup-chip{background:rgba(232,69,69,.1);color:var(--red);border:1px solid rgba(232,69,69,.25);border-radius:16px;padding:3px 11px;font-size:12px;font-weight:700;}
+
+/* OBS */
+.obs-sec{background:var(--s1);border:1px solid var(--border);border-radius:9px;padding:12px 14px;margin-bottom:12px;}
+.obs-item{font-size:12px;color:var(--text2);margin-bottom:3px;display:flex;gap:6px;}
+.obs-item::before{content:'•';color:var(--amber);}
+
+/* FULL PAGES */
+.full-page{flex:1;overflow-y:auto;padding:18px;}
+
+/* TEAM GRID */
+.team-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:9px;margin-top:14px;}
+.tc{background:var(--s1);border:1px solid var(--border);border-radius:11px;padding:13px;display:flex;align-items:flex-start;gap:10px;}
+.tc-info{flex:1;min-width:0;}
+.tc-name{font-size:13px;font-weight:700;}
+.tc-sched{display:flex;gap:2px;flex-wrap:wrap;margin-top:5px;}
+.tc-day{font-size:9px;font-family:'IBM Plex Mono',monospace;background:var(--s2);border:1px solid var(--border);border-radius:3px;padding:1px 3px;}
+.tc-acts{display:flex;flex-direction:column;gap:3px;}
+
+/* HIST */
+.hcard{background:var(--s1);border:1px solid var(--border);border-radius:11px;margin-bottom:9px;overflow:hidden;}
+.hcard-head{padding:12px 14px;display:flex;align-items:center;justify-content:space-between;cursor:pointer;}
+.hcard-body{display:none;padding:12px 14px;border-top:1px solid var(--border);font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--text2);white-space:pre-wrap;}
+.hcard-body.open{display:block;}
+
+/* CHANGES */
+.ctable{width:100%;border-collapse:collapse;}
+.ctable th{text-align:left;padding:7px 10px;font-size:10px;font-weight:800;letter-spacing:1px;color:var(--text3);text-transform:uppercase;border-bottom:1px solid var(--border);}
+.ctable td{padding:9px 10px;font-size:12px;border-bottom:1px solid rgba(30,45,66,.5);vertical-align:middle;}
+.swap-card{background:var(--s1);border:1px solid var(--border);border-radius:9px;padding:12px 14px;margin-bottom:7px;display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
+
+/* ═══ ASSIGN MODAL ═══ */
+.overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.8);z-index:200;align-items:flex-start;justify-content:center;padding-top:30px;overflow-y:auto;}
+.overlay.open{display:flex;}
+.modal{background:var(--s2);border:1px solid var(--border2);border-radius:14px;padding:20px;width:560px;max-width:96vw;}
+.modal-title{font-size:16px;font-weight:800;margin-bottom:14px;}
+.form-group{margin-bottom:11px;}
+.fl{font-size:10px;font-weight:800;letter-spacing:1px;color:var(--text3);text-transform:uppercase;margin-bottom:5px;display:block;}
+.fi,.fs,.fta{width:100%;background:var(--s1);border:1px solid var(--border2);border-radius:6px;padding:8px 10px;font-size:13px;color:var(--text);font-family:'Barlow',sans-serif;outline:none;transition:border-color .15s;}
+.fi:focus,.fs:focus,.fta:focus{border-color:var(--accent);}
+.fta{min-height:55px;resize:vertical;}
+.frow{display:flex;gap:9px;}.frow .form-group{flex:1;}
+.divider{display:flex;align-items:center;gap:9px;margin:8px 0 11px;}
+.divider span{font-size:10px;font-weight:800;letter-spacing:1px;color:var(--text3);text-transform:uppercase;white-space:nowrap;}
+.divider::before,.divider::after{content:'';flex:1;height:1px;background:var(--border);}
+.mactions{display:flex;gap:7px;justify-content:flex-end;margin-top:14px;}
+
+/* POSITION PICKER */
+.pos-picker{display:flex;flex-direction:column;gap:8px;}
+.pos-section{background:var(--s1);border:1px solid var(--border);border-radius:8px;padding:10px 12px;}
+.pos-section-label{font-size:10px;font-weight:800;letter-spacing:1px;color:var(--text3);text-transform:uppercase;margin-bottom:7px;}
+.pos-buttons{display:flex;flex-wrap:wrap;gap:5px;}
+.pos-btn{background:var(--s2);border:1px solid var(--border2);border-radius:5px;padding:4px 9px;font-size:11px;font-weight:700;cursor:pointer;transition:all .15s;font-family:'IBM Plex Mono',monospace;color:var(--text2);}
+.pos-btn:hover{border-color:var(--accent);color:var(--accent);}
+.pos-btn.sel{background:rgba(45,122,238,.2);border-color:var(--accent);color:var(--accent);}
+.pos-btn.sel-end{background:rgba(23,201,122,.15);border-color:var(--green);color:var(--green);}
+.pos-range-display{font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--accent);margin-top:6px;min-height:18px;}
+
+/* TASK PICKER */
+.task-buttons{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:6px;}
+.task-btn{background:var(--s2);border:1px solid var(--border2);border-radius:5px;padding:4px 9px;font-size:11px;font-weight:700;cursor:pointer;transition:all .15s;color:var(--text2);}
+.task-btn:hover{border-color:var(--amber);color:var(--amber);}
+.task-btn.sel{background:rgba(240,165,0,.15);border-color:var(--amber);color:var(--amber);}
+
+/* COVER ROW */
+.cover-row{display:flex;gap:7px;margin-bottom:7px;align-items:flex-end;}
+.cover-person-sel{flex:1;background:var(--s1);border:1px solid var(--border2);border-radius:6px;padding:6px 8px;font-size:12px;color:var(--text);font-family:'Barlow',sans-serif;outline:none;}
+.cover-person-sel:focus{border-color:var(--accent);}
+
+/* BTN */
+.btn{padding:6px 13px;border-radius:6px;font-size:12px;font-weight:700;cursor:pointer;border:none;font-family:'Barlow',sans-serif;transition:all .15s;}
+.btn-primary{background:var(--accent);color:#fff;}.btn-primary:hover{background:#1a5fcc;}
+.btn-outline{background:transparent;color:var(--text2);border:1px solid var(--border2);}.btn-outline:hover{border-color:var(--accent);color:var(--text);}
+.btn-green{background:var(--green);color:#0a1a10;}.btn-green:hover{background:#12a864;}
+.btn-danger{background:rgba(232,69,69,.12);color:var(--red);border:1px solid rgba(232,69,69,.25);}.btn-danger:hover{background:rgba(232,69,69,.22);}
+
+.toast{position:fixed;bottom:18px;right:18px;background:var(--s3);border:1px solid var(--border2);border-radius:9px;padding:10px 14px;font-size:13px;font-weight:600;z-index:400;transform:translateY(50px);opacity:0;transition:all .25s;pointer-events:none;}
+.toast.show{transform:translateY(0);opacity:1;}
+::-webkit-scrollbar{width:4px;}::-webkit-scrollbar-track{background:transparent;}::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px;}
+@media print{header,.tabs,.out-panel,.shift-add,.abtns,.hactions,.btn-green,.btn-outline,.btn-danger{display:none!important;}body{background:#fff;color:#000;}.app{height:auto;}.board-wrap{overflow:visible;}.shift-block{border:1px solid #ccc;break-inside:avoid;}.agent-card{background:#f9f9f9;break-inside:avoid;}}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">Airlines Support <span>HUB</span></div>
+  <div class="header-mid">
+    <div class="date-pill" id="datePill"></div>
+    <input type="date" id="dateInput" class="fi" style="width:135px;font-size:11px;padding:4px 8px;font-family:'IBM Plex Mono',monospace;" onchange="onDateChange()">
+  </div>
+  <div class="hactions">
+    <button class="btn btn-outline" onclick="window.print()">🖨</button>
+    <button class="btn btn-outline" id="flightBtn" onclick="openFlightModal()" title="Cargar lista de vuelos">✈️ Vuelos</button>
+    <button class="btn btn-outline" id="undoBtn" onclick="undo()" title="Deshacer" style="opacity:0.35;" disabled>↩</button>
+    <button class="btn btn-outline" id="redoBtn" onclick="redo()" title="Rehacer" style="opacity:0.35;" disabled>↪</button>
+    <button class="btn btn-danger" onclick="clearDay()">🗑 Borrar día</button>
+    <button class="btn btn-outline" onclick="doCopy()">📋 Copiar</button>
+    <button class="btn btn-primary" onclick="autoGenerate()" id="autoBtn" style="background:linear-gradient(135deg,#2d7aee,#8b5cf6);">✨ Auto-generar</button>
+    <button class="btn btn-green" onclick="saveDay()">💾 Guardar</button>
+  </div>
+</header>
+
+<div class="tabs">
+  <div class="tab active" onclick="switchTab('board')">📋 Asignaciones</div>
+  <div class="tab" onclick="switchTab('team')">👥 Equipo</div>
+  <div class="tab" onclick="switchTab('changes')">🔄 Cambios</div>
+  <div class="tab" onclick="switchTab('history')">📅 Historial</div>
+</div>
+<!-- Mobile date bar -->
+<div id="mobileDateBar" style="display:none;background:var(--s1);border-bottom:1px solid var(--border);padding:8px 14px;gap:8px;align-items:center;">
+  <div class="date-pill" id="datePillMobile" style="flex:1;text-align:center;"></div>
+  <input type="date" id="dateInputMobile" class="fi" style="width:135px;font-size:11px;padding:4px 8px;font-family:'IBM Plex Mono',monospace;" onchange="onMobileDateChange()">
+</div>
+<script>
+  if(window.innerWidth<=640){
+    document.getElementById('mobileDateBar').style.display='flex';
+    document.getElementById('dateInputMobile').value=new Date().toISOString().split('T')[0];
+  }
+  function onMobileDateChange(){
+    document.getElementById('dateInput').value=document.getElementById('dateInputMobile').value;
+    onDateChange();
+    const d=new Date(S.activeDate+'T12:00:00');
+    document.getElementById('datePillMobile').textContent=d.toLocaleDateString('es-DO',{weekday:'long',day:'numeric',month:'long'});
+  }
+</script>
+
+<!-- BOARD -->
+<div class="page active" id="page-board">
+  <div class="board-wrap" id="boardWrap"></div>
+  <div class="out-panel">
+    <div class="out-head">
+      <span class="out-title">WhatsApp</span>
+      <button class="btn btn-outline" style="font-size:11px;padding:3px 9px;" onclick="doCopy()">Copiar</button>
+    </div>
+    <div class="out-body" id="outBody">El texto aparecerá aquí…</div>
+  </div>
+</div>
+
+<!-- TEAM -->
+<div class="page" id="page-team">
+  <div class="full-page">
+    <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;">
+      <h2 style="font-size:19px;font-weight:900;">Equipo</h2>
+      <div style="display:flex;gap:7px;">
+        <button class="btn btn-outline" onclick="openScheduleModal()" title="Actualizar el horario mensual del equipo">📅 Actualizar Horario</button>
+        <button class="btn btn-primary" onclick="openMemberModal()">+ Agregar</button>
+      </div>
+    </div>
+    <div class="team-grid" id="teamGrid"></div>
+  </div>
+</div>
+
+<!-- CHANGES -->
+<div class="page" id="page-changes">
+  <div class="full-page">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">
+      <div>
+        <h2 style="font-size:19px;font-weight:900;">Cambios de Turno</h2>
+        <p style="font-size:12px;color:var(--text3);margin-top:3px;">Horas extras, cambios de día y permutas.</p>
+      </div>
+      <div style="display:flex;gap:7px;">
+        <button class="btn btn-outline" onclick="openOverrideModal()">+ Horas Extra / Cambio</button>
+        <button class="btn btn-primary" onclick="openSwapModal()">⇄ Registrar Permuta</button>
+      </div>
+    </div>
+    <div style="font-size:10px;font-weight:800;letter-spacing:1px;color:var(--text3);text-transform:uppercase;margin-bottom:9px;">Overrides / Horas extra</div>
+    <div id="overridesList" style="margin-bottom:22px;"></div>
+    <div style="font-size:10px;font-weight:800;letter-spacing:1px;color:var(--text3);text-transform:uppercase;margin-bottom:9px;">Permutas registradas</div>
+    <div id="swapsList"></div>
+  </div>
+</div>
+
+<!-- HISTORY -->
+<div class="page" id="page-history">
+  <div class="full-page">
+    <h2 style="font-size:19px;font-weight:900;margin-bottom:14px;">Historial</h2>
+    <div id="historyList"></div>
+  </div>
+</div>
+
+<!-- ═══════ ASSIGN MODAL ═══════ -->
+<div class="overlay" id="assignModal">
+<div class="modal" style="width:580px;">
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">
+    <div class="modal-title" id="assignTitle" style="margin:0;">Asignar agente</div>
+    <button onclick="closeModal('assignModal')" style="background:none;border:none;color:var(--text3);font-size:18px;cursor:pointer;">✕</button>
+  </div>
+
+  <!-- Agent + extra shift -->
+  <div class="frow" style="align-items:flex-end;">
+    <div class="form-group" style="flex:1;">
+      <label class="fl">Agente</label>
+      <select class="fs" id="agentSel" onchange="onAgentChange()"></select>
+    </div>
+    <div class="form-group" style="flex:0 0 195px;">
+      <label class="fl">Horas extra <span style="color:var(--text3);font-weight:400;text-transform:none;letter-spacing:0;">— turno adicional</span></label>
+      <select class="fs" id="extraShiftSel" onchange="onExtraShiftChange()">
+        <option value="">Sin horas extra</option>
+        <option value="B">+ Turno B → queda en A+B</option>
+        <option value="C">+ Turno C → queda en A+C / T9+C / B+C</option>
+      </select>
+    </div>
+  </div>
+  <!-- Extra shift result badge -->
+  <div id="extraShiftBadge" style="display:none;margin-bottom:10px;padding:7px 12px;background:rgba(240,165,0,.1);border:1px solid rgba(240,165,0,.3);border-radius:7px;font-size:12px;font-weight:700;color:var(--amber);"></div>
+
+  <!-- PRIMARY POSITIONS -->
+  <div class="divider"><span id="primaryLabel">Posición inicial (primeras ops)</span></div>
+  <div id="primaryPicker">
+    <div class="pos-section">
+      <div class="pos-section-label">Terminal A</div>
+      <div class="pos-buttons" id="btnTA"></div>
+    </div>
+    <div class="pos-section">
+      <div class="pos-section-label">Terminal B</div>
+      <div class="pos-buttons" id="btnTB"></div>
+    </div>
+    <div class="pos-section">
+      <div class="pos-section-label">Terminal B2</div>
+      <div class="pos-buttons" id="btnTB2"></div>
+    </div>
+    <div class="pos-section" style="background:rgba(14,184,201,.05);border-color:rgba(14,184,201,.2);">
+      <div class="pos-section-label" style="color:var(--cyan);">N Positions</div>
+      <div class="pos-buttons" id="btnN"></div>
+    </div>
+    <div style="display:flex;align-items:center;gap:8px;margin-top:2px;">
+      <span style="font-size:11px;color:var(--text3);">Seleccionado:</span>
+      <span class="pos-range-display" id="primaryDisplay">—</span>
+      <button class="btn btn-outline" style="font-size:11px;padding:3px 9px;" onclick="clearPrimary()">Limpiar</button>
+    </div>
+  </div>
+
+  <!-- SPECIAL TASKS -->
+  <div class="divider"><span>Tareas / Vehículos</span></div>
+  <div class="task-buttons" id="taskBtns"></div>
+
+  <!-- MEAL -->
+  <div class="divider"><span>Comida</span></div>
+  <div class="frow">
+    <div class="form-group">
+      <label class="fl">Tipo</label>
+      <select class="fs" id="mealType">
+        <option value="">Ninguna</option>
+        <option value="Almuerzo">Almuerzo</option>
+        <option value="Cena">Cena</option>
+      </select>
+    </div>
+    <div class="form-group" style="flex:0 0 105px;">
+      <label class="fl">Hora</label>
+      <input class="fi" id="mealTime" placeholder="13:00">
+    </div>
+  </div>
+
+  <!-- RADIO -->
+  <div class="form-group">
+    <label class="fl">Radio #</label>
+    <input class="fi" id="radioNum" type="number" placeholder="ej: 10" style="max-width:100px;">
+  </div>
+
+  <!-- POST-MEAL POSITIONS — shown only for A, T9, C -->
+  <div id="afterMealSection">
+    <div class="divider"><span id="afterLabel">Posición después de comida</span></div>
+    <div>
+      <div class="pos-section">
+        <div class="pos-section-label">Terminal A</div>
+        <div class="pos-buttons" id="btnTA2"></div>
+      </div>
+      <div class="pos-section">
+        <div class="pos-section-label">Terminal B</div>
+        <div class="pos-buttons" id="btnTB22"></div>
+      </div>
+      <div class="pos-section">
+        <div class="pos-section-label">Terminal B2</div>
+        <div class="pos-buttons" id="btnTB222"></div>
+      </div>
+      <div class="pos-section" style="background:rgba(14,184,201,.05);border-color:rgba(14,184,201,.2);">
+        <div class="pos-section-label" style="color:var(--cyan);">N Positions</div>
+        <div class="pos-buttons" id="btnN2"></div>
+      </div>
+      <div style="display:flex;align-items:center;gap:8px;margin-top:2px;">
+        <span style="font-size:11px;color:var(--text3);">Seleccionado:</span>
+        <span class="pos-range-display" id="afterDisplay">—</span>
+        <button class="btn btn-outline" style="font-size:11px;padding:3px 9px;" onclick="clearAfter()">Limpiar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- COVERS -->
+  <div class="divider"><span>Coberturas de comida</span></div>
+  <div id="coverRows"></div>
+  <button class="btn btn-outline" style="font-size:11px;margin-bottom:10px;" onclick="addCoverRow()">+ Agregar cobertura</button>
+
+  <!-- CIERRE -->
+  <div class="divider"><span>Cierre</span></div>
+  <div class="pos-section" style="margin-bottom:6px;">
+    <div class="pos-buttons" id="btnCierre"></div>
+  </div>
+  <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;">
+    <span style="font-size:11px;color:var(--text3);">Seleccionado:</span>
+    <span class="pos-range-display" id="cierreDisplay">—</span>
+    <input class="fi" id="cierreNote" placeholder="ej: OPS ARAJET" style="flex:1;font-size:12px;padding:5px 9px;">
+    <button class="btn btn-outline" style="font-size:11px;padding:3px 9px;" onclick="clearCierre()">Limpiar</button>
+  </div>
+
+  <!-- EXTRA NOTES -->
+  <div class="form-group">
+    <label class="fl">Notas adicionales</label>
+    <textarea class="fta" id="extraNotes" placeholder="Instrucciones adicionales…"></textarea>
+  </div>
+
+  <div class="mactions">
+    <button class="btn btn-outline" onclick="closeModal('assignModal')">Cancelar</button>
+    <button class="btn btn-primary" onclick="saveAssign()">Guardar</button>
+  </div>
+</div>
+</div>
+
+<!-- SCHEDULE EDITOR MODAL -->
+<div class="overlay" id="scheduleModal">
+<div class="modal" style="width:680px;max-width:98vw;max-height:92vh;overflow-y:auto;">
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;">
+    <div class="modal-title" style="margin:0;">📅 Actualizar Horario Mensual</div>
+    <button onclick="closeModal('scheduleModal')" style="background:none;border:none;color:var(--text3);font-size:18px;cursor:pointer;">✕</button>
+  </div>
+  <p style="font-size:12px;color:var(--text3);margin-bottom:14px;">Edita el turno de cada persona por día de la semana. Usa <strong>L</strong> para LIBRE.</p>
+  <div style="overflow-x:auto;">
+    <table style="width:100%;border-collapse:collapse;" id="scheduleTable">
+      <thead>
+        <tr>
+          <th style="text-align:left;padding:8px 10px;font-size:11px;font-weight:800;color:var(--text3);letter-spacing:.5px;border-bottom:1px solid var(--border);min-width:140px;">Nombre</th>
+          <th style="padding:8px 6px;font-size:11px;font-weight:800;color:var(--green);letter-spacing:.5px;border-bottom:1px solid var(--border);text-align:center;">LUN</th>
+          <th style="padding:8px 6px;font-size:11px;font-weight:800;color:var(--text3);letter-spacing:.5px;border-bottom:1px solid var(--border);text-align:center;">MAR</th>
+          <th style="padding:8px 6px;font-size:11px;font-weight:800;color:var(--text3);letter-spacing:.5px;border-bottom:1px solid var(--border);text-align:center;">MIÉ</th>
+          <th style="padding:8px 6px;font-size:11px;font-weight:800;color:var(--text3);letter-spacing:.5px;border-bottom:1px solid var(--border);text-align:center;">JUE</th>
+          <th style="padding:8px 6px;font-size:11px;font-weight:800;color:var(--text3);letter-spacing:.5px;border-bottom:1px solid var(--border);text-align:center;">VIE</th>
+          <th style="padding:8px 6px;font-size:11px;font-weight:800;color:var(--accent);letter-spacing:.5px;border-bottom:1px solid var(--border);text-align:center;">SÁB</th>
+          <th style="padding:8px 6px;font-size:11px;font-weight:800;color:var(--red);letter-spacing:.5px;border-bottom:1px solid var(--border);text-align:center;">DOM</th>
+        </tr>
+      </thead>
+      <tbody id="scheduleBody"></tbody>
+    </table>
+  </div>
+  <div style="margin-top:12px;padding:10px 12px;background:var(--s1);border:1px solid var(--border);border-radius:8px;font-size:11px;color:var(--text3);">
+    Valores válidos: <span style="color:var(--green);font-weight:700;">A</span> · <span style="color:var(--accent);font-weight:700;">T9</span> · <span style="color:var(--purple);font-weight:700;">B</span> · <span style="color:var(--red);font-weight:700;">C</span> · <span style="color:var(--cyan);font-weight:700;">D</span> · <span style="color:var(--text3);font-weight:700;">L</span> (libre)
+  </div>
+  <div class="mactions" style="margin-top:14px;">
+    <button class="btn btn-outline" onclick="closeModal('scheduleModal')">Cancelar</button>
+    <button class="btn btn-primary" onclick="saveSchedule()">💾 Guardar horario</button>
+  </div>
+</div>
+</div>
+
+<!-- MEMBER MODAL -->
+<div class="overlay" id="memberModal">
+<div class="modal">
+  <div class="modal-title" id="memberModalTitle">Agregar Miembro</div>
+  <div class="form-group"><label class="fl">Nombre completo</label><input class="fi" id="memName" placeholder="ej: María López"></div>
+  <div class="form-group">
+    <label class="fl">Nombre en WhatsApp <span style="color:var(--text3);font-weight:400;text-transform:none;letter-spacing:0;">— exactamente como lo tienes agendado</span></label>
+    <input class="fi" id="memWaName" placeholder="ej: Madelin AS FLOTA">
+    <div style="font-size:10px;color:var(--text3);margin-top:4px;">El texto generará @[este nombre]. WhatsApp lo autocompletará con un toque.</div>
+  </div>
+  <div class="frow">
+    <div class="form-group"><label class="fl">Rol (opcional)</label><input class="fi" id="memRole" placeholder="ej: AS FLOTA"></div>
+    <div class="form-group" style="flex:0 0 75px;"><label class="fl">Color</label><input type="color" class="fi" id="memColor" value="#2d7aee" style="padding:3px;height:40px;cursor:pointer;"></div>
+  </div>
+  <div class="form-group">
+    <label class="fl">Terminal fija</label>
+    <select class="fs" id="memTerminal">
+      <option value="">Rota / Sin fija</option>
+      <option value="A">Terminal A</option>
+      <option value="B">Terminal B</option>
+      <option value="B2">Terminal B2</option>
+    </select>
+  </div>
+  <div class="form-group">
+    <label style="display:flex;align-items:center;gap:7px;cursor:pointer;">
+      <input type="checkbox" id="memIsSup" style="width:15px;height:15px;">
+      <span style="font-size:13px;font-weight:600;">Es Supervisor/a</span>
+    </label>
+  </div>
+  <div class="mactions">
+    <button class="btn btn-outline" onclick="closeModal('memberModal')">Cancelar</button>
+    <button class="btn btn-primary" onclick="saveMember()">Guardar</button>
+  </div>
+</div>
+</div>
+
+<!-- OVERRIDE MODAL -->
+<div class="overlay" id="overrideModal">
+<div class="modal">
+  <div class="modal-title">📅 Horas Extra / Cambio de Turno</div>
+  <p style="font-size:12px;color:var(--text3);margin-bottom:14px;">Registra cuando alguien trabaja su día libre, hace horas extra, o cambia de turno.</p>
+  <div class="frow">
+    <div class="form-group"><label class="fl">Persona</label><select class="fs" id="ovPerson"></select></div>
+    <div class="form-group" style="flex:0 0 140px;"><label class="fl">Fecha</label><input type="date" class="fi" id="ovDate"></div>
+  </div>
+  <div class="frow">
+    <div class="form-group">
+      <label class="fl">Turno que hace ese día</label>
+      <select class="fs" id="ovShift" onchange="toggleOvCustom()">
+        <option value="A">A (08:00–17:00)</option>
+        <option value="T9">T9 (09:00–18:00)</option>
+        <option value="B">B (11:00–20:00)</option>
+        <option value="C">C (15:00–00:00)</option>
+        <option value="D">D (23:00–08:00)</option>
+        <option value="A+B">Horas extra: entra A, sale B (08:00–20:00)</option>
+        <option value="B+C">Horas extra: entra B, sale C (11:00–00:00)</option>
+        <option value="A+C">Horas extra: entra A, sale C (08:00–00:00)</option>
+        <option value="T9+C">Horas extra: entra T9, sale C (09:00–00:00)</option>
+        <option value="LIBRE">LIBRE (día libre)</option>
+        <option value="custom">Otro…</option>
+      </select>
+    </div>
+    <div class="form-group" id="ovCustomGrp" style="display:none;flex:0 0 100px;">
+      <label class="fl">Especifica</label>
+      <input class="fi" id="ovCustom" placeholder="ej: T10">
+    </div>
+  </div>
+  <div class="form-group"><label class="fl">Motivo / Nota</label><input class="fi" id="ovReason" placeholder="ej: Cubre a Arlene, pidió horas extra…"></div>
+  <div class="mactions">
+    <button class="btn btn-outline" onclick="closeModal('overrideModal')">Cancelar</button>
+    <button class="btn btn-primary" onclick="saveOverride()">Guardar</button>
+  </div>
+</div>
+</div>
+
+<!-- SWAP MODAL -->
+<div class="overlay" id="swapModal">
+<div class="modal">
+  <div class="modal-title">⇄ Registrar Permuta</div>
+  <div class="divider"><span>Persona A</span></div>
+  <div class="frow">
+    <div class="form-group"><label class="fl">Nombre</label><select class="fs" id="swapA"></select></div>
+    <div class="form-group" style="flex:0 0 140px;"><label class="fl">Cede el día</label><input type="date" class="fi" id="swapDA"></div>
+  </div>
+  <div class="divider"><span>Persona B</span></div>
+  <div class="frow">
+    <div class="form-group"><label class="fl">Nombre</label><select class="fs" id="swapB"></select></div>
+    <div class="form-group" style="flex:0 0 140px;"><label class="fl">Cede el día</label><input type="date" class="fi" id="swapDB"></div>
+  </div>
+  <div class="form-group" style="margin-top:6px;"><label class="fl">Notas</label><input class="fi" id="swapNotes" placeholder="ej: acordado el 14 de marzo…"></div>
+  <div class="form-group">
+    <label style="display:flex;align-items:center;gap:7px;cursor:pointer;">
+      <input type="checkbox" id="swapPending" checked style="width:15px;height:15px;">
+      <span style="font-size:13px;font-weight:600;">Pendiente (B aún no ha devuelto el turno)</span>
+    </label>
+  </div>
+  <div class="mactions">
+    <button class="btn btn-outline" onclick="closeModal('swapModal')">Cancelar</button>
+    <button class="btn btn-primary" onclick="saveSwap()">Guardar</button>
+  </div>
+</div>
+</div>
+
+<!-- OBS MODAL -->
+<div class="overlay" id="obsModal">
+<div class="modal">
+  <div class="modal-title">Observaciones</div>
+  <div id="obsRows"></div>
+  <button class="btn btn-outline" style="font-size:11px;margin-bottom:9px;" onclick="addObsRow()">+ Agregar</button>
+  <div class="mactions">
+    <button class="btn btn-outline" onclick="closeModal('obsModal')">Cancelar</button>
+    <button class="btn btn-primary" onclick="saveObs()">Guardar</button>
+  </div>
+</div>
+</div>
+
+<!-- FLIGHT LIST MODAL -->
+<div class="overlay" id="flightModal" style="z-index:480;">
+  <div class="modal" style="width:540px;max-width:96vw;">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;">
+      <div class="modal-title" style="margin:0;">✈️ Lista de Vuelos del Día</div>
+      <button onclick="closeModal('flightModal')" style="background:none;border:none;color:var(--text3);font-size:18px;cursor:pointer;">✕</button>
+    </div>
+    <p style="font-size:12px;color:var(--text3);margin-bottom:14px;">Sube o pega los vuelos del día. La IA usará esta info para asignar personas según la actividad real por posición.</p>
+
+    <!-- Upload area — native file input, works on Android Chrome -->
+    <div style="border:2px dashed var(--border2);border-radius:10px;padding:20px 16px;text-align:center;margin-bottom:14px;">
+      <div style="font-size:22px;margin-bottom:6px;">📂</div>
+      <div style="font-size:13px;font-weight:700;margin-bottom:3px;">Selecciona un archivo</div>
+      <div style="font-size:11px;color:var(--text3);margin-bottom:14px;">Excel (.xlsx .csv) · PDF</div>
+      <input type="file" id="flightFileInput" accept=".xlsx,.xls,.csv,.pdf"
+        style="display:block;width:100%;font-size:14px;color:var(--text);background:var(--s1);border:1px solid var(--border2);border-radius:7px;padding:10px;cursor:pointer;"
+        onchange="handleFlightFileInput(event)">
+    </div>
+
+    <!-- File status -->
+    <div id="flightFileStatus" style="display:none;padding:9px 12px;border-radius:7px;margin-bottom:12px;font-size:12px;font-weight:600;"></div>
+
+    <!-- Paste fallback -->
+    <div style="font-size:10px;font-weight:800;letter-spacing:1px;color:var(--text3);text-transform:uppercase;margin-bottom:6px;">O pega el texto directamente</div>
+    <textarea class="fta" id="flightTextInput"
+      placeholder="Pega aquí los vuelos, por ejemplo:&#10;AA123   Pos 3    09:15  ARR&#10;UA456   Pos 7    10:30  DEP&#10;B6789   Pos 22   11:00  ARR&#10;CM012   Pos 24   13:45  DEP&#10;&#10;No importa el formato — la IA lo interpreta."
+      style="min-height:120px;font-family:'IBM Plex Mono',monospace;font-size:11px;line-height:1.7;"
+      oninput="onFlightTextChange()"></textarea>
+
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-top:5px;margin-bottom:14px;">
+      <div id="flightCharCount" style="font-size:10px;color:var(--text3);font-family:'IBM Plex Mono',monospace;"></div>
+    </div>
+
+    <div class="mactions">
+      <button class="btn btn-danger" onclick="clearFlightData()">🗑 Limpiar</button>
+      <button class="btn btn-outline" onclick="closeModal('flightModal')">Cancelar</button>
+      <button class="btn btn-primary" onclick="saveFlightData()">✅ Guardar vuelos</button>
+    </div>
+  </div>
+</div>
+
+<!-- AI LOADING -->
+<div class="overlay" id="aiLoading" style="z-index:500;">
+  <div class="modal" style="max-width:340px;text-align:center;padding:36px;">
+    <div style="font-size:32px;margin-bottom:12px;animation:spin 2s linear infinite;display:inline-block;">✨</div>
+    <div style="font-size:15px;font-weight:800;margin-bottom:6px;">Generando asignación…</div>
+    <div style="font-size:12px;color:var(--text3);margin-bottom:16px;" id="aiMsg">Leyendo el roster de hoy…</div>
+    <div style="height:4px;background:var(--border);border-radius:2px;overflow:hidden;">
+      <div id="aiBar" style="height:100%;width:0%;background:linear-gradient(90deg,#2d7aee,#8b5cf6);border-radius:2px;transition:width .4s ease;"></div>
+    </div>
+  </div>
+</div>
+
+<!-- AI REVIEW -->
+<div class="overlay" id="aiReview" style="z-index:490;">
+  <div class="modal" style="width:560px;max-width:96vw;">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;">
+      <div class="modal-title" style="margin:0;">✨ Borrador listo — revisa antes de aplicar</div>
+    </div>
+    <p style="font-size:12px;color:var(--text3);margin-bottom:12px;">Revisa el borrador. Aplícalo al tablero y ajusta lo que no corresponda a las ops de hoy.</p>
+    <div id="aiPreview" style="background:var(--bg);border:1px solid var(--border);border-radius:9px;padding:13px;font-family:'IBM Plex Mono',monospace;font-size:11px;line-height:1.9;color:var(--text2);white-space:pre-wrap;max-height:350px;overflow-y:auto;"></div>
+    <div style="margin-top:8px;padding:9px 12px;background:rgba(240,165,0,.07);border:1px solid rgba(240,165,0,.2);border-radius:7px;font-size:11px;color:var(--amber);">
+      ⚠️ Este es un borrador. Aplica y ajusta según las ops del día.
+    </div>
+    <div class="mactions" style="margin-top:14px;">
+      <button class="btn btn-outline" onclick="closeModal('aiReview')">Descartar</button>
+      <button class="btn btn-outline" onclick="autoGenerate()">↺ Regenerar</button>
+      <button class="btn btn-primary" style="background:linear-gradient(135deg,#2d7aee,#8b5cf6);" onclick="applyDraft()">✅ Aplicar al tablero</button>
+    </div>
+  </div>
+</div>
+
+<style>@keyframes spin{to{transform:rotate(360deg)}}</style>
+
+<!-- CONFIRM MODAL -->
+<div class="overlay" id="confirmModal" style="z-index:600;">
+  <div class="modal" style="max-width:360px;text-align:center;">
+    <div style="font-size:28px;margin-bottom:10px;" id="confirmIcon">⚠️</div>
+    <div class="modal-title" id="confirmTitle" style="text-align:center;margin-bottom:6px;"></div>
+    <p id="confirmMsg" style="font-size:13px;color:var(--text3);margin-bottom:18px;"></p>
+    <div style="display:flex;gap:8px;justify-content:center;">
+      <button class="btn btn-outline" onclick="closeModal('confirmModal')" style="min-width:90px;">Cancelar</button>
+      <button class="btn btn-danger" id="confirmOkBtn" style="min-width:90px;">Confirmar</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ═══════════════════════════════
+// POSITION DEFINITIONS
+// ═══════════════════════════════
+const POS = {
+  TA:  ['1','2','3','4','5','6','7','8','9','10','11'],
+  TB:  ['20','21','22','23','24','25','26'],
+  TB2: ['27','28','29','30','31','32','33','34','35','36','37'],
+  N:   ['N1','N2','N3','N4','N5','N6','N7','N8','N9','N10','N11','N12','N13'],
+};
+// All positions flat for cierre picker
+const ALL_POS = [...POS.TA,...POS.TB,...POS.TB2,...POS.N];
+
+const SPECIAL_TASKS = ['TTP119 (vehículo)','CGP17 (vehículo)','Cobus','Arreglo hojas C/D'];
+
+const SHIFT_DEFS = [
+  {id:'A',   label:'Turno A',   time:'08:00–17:00', color:'#17c97a', bg:'rgba(23,201,122,.1)'},
+  {id:'T9',  label:'Turno T9',  time:'09:00–18:00', color:'#2d7aee', bg:'rgba(45,122,238,.1)'},
+  {id:'B',   label:'Turno B',   time:'11:00–20:00', color:'#8b5cf6', bg:'rgba(139,92,246,.1)'},
+  {id:'B+C', label:'Turno BC',  time:'11:00–00:00', color:'#fb923c', bg:'rgba(251,146,60,.1)'},
+  {id:'C',   label:'Turno C',   time:'15:00–00:00', color:'#e84545', bg:'rgba(232,69,69,.1)'},
+  {id:'D',   label:'Turno D',   time:'23:00–08:00', color:'#0eb8c9', bg:'rgba(14,184,201,.1)'},
+  {id:'A+B', label:'Extra A→B', time:'08:00–20:00', color:'#f0a500', bg:'rgba(240,165,0,.1)'},
+  {id:'A+C', label:'Extra A→C', time:'08:00–00:00', color:'#ec4899', bg:'rgba(236,72,153,.1)'},
+  {id:'T9+C',label:'Extra T9→C',time:'09:00–00:00', color:'#a78bfa', bg:'rgba(167,139,250,.1)'},
+];
+
+const MEAL_DEFAULTS = {
+  A:{type:'Almuerzo',time:'13:00'}, T9:{type:'Almuerzo',time:'13:00'},
+  B:{type:'Cena',time:'19:00'}, C:{type:'Cena',time:'17:00'},
+  'A+B':{type:'Almuerzo',time:'13:00'}, 'B+C':{type:'Cena',time:'17:00'},
+  'A+C':{type:'Almuerzo',time:'13:00'}, 'T9+C':{type:'Almuerzo',time:'13:00'},
+};
+
+// ═══════════════════════════════
+// STATE
+// ═══════════════════════════════
+let S = { team:[], duties:{}, observations:{}, overrides:{}, swaps:[], activeDate:todayStr() };
+let modalShift=null, modalEditIdx=null;
+
+// Position picker state
+let primSel=[], afterSel=[], cierreSel=[];
+
+function todayStr(){ return new Date().toISOString().split('T')[0]; }
+
+// ═══════════════════════════════
+// STORAGE
+// ═══════════════════════════════
+// ═══════════════════════════════
+// STORAGE + UNDO/REDO
+// ═══════════════════════════════
+const UNDO_STACK=[], REDO_STACK=[], MAX_UNDO=50;
+
+function _snap(){ return JSON.stringify({duties:S.duties, observations:S.observations}); }
+function _restore(snap){ const p=JSON.parse(snap); S.duties=p.duties; S.observations=p.observations; }
+function _persist(){ localStorage.setItem('airops4', JSON.stringify(S)); }
+function _updateBtns(){
+  const u=document.getElementById('undoBtn'), r=document.getElementById('redoBtn');
+  if(u){ u.disabled=!UNDO_STACK.length; u.style.opacity=UNDO_STACK.length?'1':'0.35'; }
+  if(r){ r.disabled=!REDO_STACK.length; r.style.opacity=REDO_STACK.length?'1':'0.35'; }
+}
+
+// Call this BEFORE any mutation to duties/observations
+function pushUndo(){
+  UNDO_STACK.push(_snap());
+  if(UNDO_STACK.length>MAX_UNDO) UNDO_STACK.shift();
+  REDO_STACK.length=0;
+  _updateBtns();
+}
+
+function save(){ _persist(); _updateBtns(); }
+
+function undo(){
+  if(!UNDO_STACK.length){ toast('Nada que deshacer','error'); return; }
+  REDO_STACK.push(_snap());
+  _restore(UNDO_STACK.pop());
+  _persist(); _updateBtns();
+  renderBoard(); refreshOutput();
+  toast('↩ Deshecho');
+}
+
+function redo(){
+  if(!REDO_STACK.length){ toast('Nada que rehacer','error'); return; }
+  UNDO_STACK.push(_snap());
+  _restore(REDO_STACK.pop());
+  _persist(); _updateBtns();
+  renderBoard(); refreshOutput();
+  toast('↪ Rehecho');
+}
+
+function clearDay(){
+  // confirm() is blocked in some embedded contexts — use custom modal instead
+  showConfirm(
+    '¿Borrar toda la asignación de hoy?',
+    'Esta acción borrará todos los agentes asignados y observaciones del día. Puedes deshacerlo con ↩.',
+    () => {
+      pushUndo();
+      S.duties[S.activeDate]={};
+      S.observations[S.activeDate]=[];
+      _persist(); _updateBtns();
+      renderBoard(); refreshOutput();
+      toast('🗑 Asignación borrada');
+    }
+  );
+}
+
+function saveDay(){ _persist(); toast('✅ Guardado'); }
+
+function load(){
+  try{ const r=localStorage.getItem('airops4'); if(r) Object.assign(S, JSON.parse(r)); }catch(e){}
+  if(!S.team.length) seedTeam();
+  S.team.forEach(m=>{ if(!m.waName) m.waName=m.name.split(' ')[0]; });
+}
+
+function seedTeam(){
+  const m = [
+    {name:'Alexandra Delgado Torres', waName:'Alexandra', sup:false, color:'#ec4899', terminal:'B', schedule:['L','T9','A','T9','T9','T9','L']},
+    {name:'Arlene Mercedes Rijo',      waName:'Arlene',    sup:false, color:'#0eb8c9', terminal:'A', schedule:['L','T9','T9','T9','A','A','L']},
+    {name:'Sachariel Márquez',         waName:'Sachariel', sup:false, color:'#17c97a', terminal:'B', schedule:['L','C','C','B','B','B','L']},
+    {name:'Cándido Santana Collado',   waName:'Candido',   sup:false, color:'#a3e635', terminal:'A', schedule:['L','C','C','B','B','B','L']},
+    {name:'Yeidry Hernández',          waName:'Yeidry',    sup:false, color:'#2d7aee', terminal:'B', schedule:['L','T9','A','T9','T9','T9','L']},
+    {name:'Dalvin Cipriam',            waName:'Dalvin',    sup:false, color:'#8b5cf6', terminal:'',  schedule:['L','L','C','C','C','C','C']},
+    {name:'Angel Rijo de Jesús',       waName:'Angel',     sup:false, color:'#fb923c', terminal:'',  schedule:['A','L','L','C','B','B','A']},
+    {name:'Sheridam Peña',            waName:'Sheridam',  sup:false, color:'#f0a500', terminal:'',  schedule:['B','L','L','B','B','B','B']},
+    {name:'Iván Josep Rivas',          waName:'Ivan',      sup:false, color:'#38bdf8', terminal:'',  schedule:['A','L','L','B','B','B','A']},
+    {name:'Hilda Sánchez',            waName:'Hilda',     sup:false, color:'#f472b6', terminal:'',  schedule:['B','L','L','B','B','B','C']},
+    {name:'Emil Nathanael Sánchez',    waName:'Emil',      sup:false, color:'#34d399', terminal:'',  schedule:['B','L','L','B','B','B','B']},
+    {name:'Madelin María Delgado',     waName:'Madelin',   sup:false, color:'#fbbf24', terminal:'',  schedule:['B','A','L','L','C','B','B']},
+    {name:'José Misael Berroa',        waName:'Misael',    sup:false, color:'#60a5fa', terminal:'',  schedule:['C','B','L','L','C','B','B']},
+    {name:'Arismendy Marte',           waName:'Arismendy', sup:false, color:'#c084fc', terminal:'',  schedule:['C','B','L','L','C','B','B']},
+    {name:'Fernando Beltre de la Rosa',waName:'Fernando',  sup:false, color:'#f87171', terminal:'',  schedule:['D','D','L','L','D','D','D']},
+    {name:'Alan Rafael Paulino',       waName:'Alan',      sup:false, color:'#4ade80', terminal:'',  schedule:['A','L','L','C','T9','T9','T9']},
+    {name:'Katrini Peguero Sánchez',   waName:'Katrini',   sup:false, color:'#fb923c', terminal:'',  schedule:['B','C','B','L','L','C','B']},
+    {name:'Esmerling Guillermo',       waName:'Esmerling', sup:false, color:'#22d3ee', terminal:'',  schedule:['A','A','B','L','L','B','B']},
+    {name:'Kenia Candelaria',          waName:'Kenia',     sup:false, color:'#e879f9', terminal:'',  schedule:['B','B','B','L','L','C','C']},
+    {name:'Daniel Castro Morillo',     waName:'Daniel',    sup:true,  color:'#e84545', terminal:'',  schedule:['B','B','C','L','L','C','B']},
+    {name:'Jhonatan Pérez Acosta',     waName:'Jhonatan',  sup:true,  color:'#e84545', terminal:'',  schedule:['A','A','A','A','L','L','A']},
+    {name:'Andy Polanco Guerrero',     waName:'Andy',      sup:true,  color:'#e84545', terminal:'',  schedule:['L','B','B','C','B','B','L']},
+    {name:'Angelini Sosa Abreu',       waName:'Angelini',  sup:true,  color:'#e84545', terminal:'',  schedule:['C','C','L','L','C','C','C']},
+  ];
+  S.team = m.map((t,i)=>({id:'m'+i, role:'', ...t}));
+}
+
+// ═══════════════════════════════
+// SCHEDULE
+// ═══════════════════════════════
+function dowIdx(date){ return (new Date(date+'T12:00:00').getDay()+6)%7; }
+
+function resolvedShift(member, date){
+  const ov = S.overrides?.[member.id]?.[date];
+  if(ov) return ov.shift==='LIBRE' ? null : ov.shift;
+  for(const sw of (S.swaps||[])){
+    if(sw.personA===member.id&&sw.dateA===date) return null;
+    if(sw.personB===member.id&&sw.dateB===date) return null;
+  }
+  const s = member.schedule?.[dowIdx(date)];
+  return (!s||s==='L') ? null : s;
+}
+
+function membersOnShift(date){
+  const map={};
+  S.team.filter(m=>!m.sup).forEach(m=>{
+    const sh=resolvedShift(m,date);
+    if(!sh) return;
+    if(!map[sh]) map[sh]=[];
+    map[sh].push(m);
+  });
+  return map;
+}
+
+// ═══════════════════════════════
+// DATE
+// ═══════════════════════════════
+function initDate(){
+  document.getElementById('dateInput').value=S.activeDate;
+  updatePill();
+}
+function onDateChange(){
+  S.activeDate=document.getElementById('dateInput').value;
+  save(); updatePill(); renderBoard(); refreshOutput();
+}
+function updatePill(){
+  const d=new Date(S.activeDate+'T12:00:00');
+  document.getElementById('datePill').textContent=
+    d.toLocaleDateString('es-DO',{weekday:'long',day:'numeric',month:'long'});
+}
+
+// ═══════════════════════════════
+// TABS
+// ═══════════════════════════════
+function switchTab(tab){
+  const tabs=['board','team','changes','history'];
+  document.querySelectorAll('.tab').forEach((t,i)=>t.classList.toggle('active',tabs[i]===tab));
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.getElementById('page-'+tab).classList.add('active');
+  if(tab==='board'){renderBoard();refreshOutput();}
+  if(tab==='team') renderTeamGrid();
+  if(tab==='changes') renderChanges();
+  if(tab==='history') renderHistory();
+}
+
+// ═══════════════════════════════
+// BOARD RENDER
+// ═══════════════════════════════
+function getDuties(shiftId){ return ((S.duties[S.activeDate]||{})[shiftId])||[]; }
+function getObs(){ return S.observations[S.activeDate]||[]; }
+
+function renderBoard(){
+  const date=S.activeDate;
+  const dow=['Lunes','Martes','Miércoles','Jueves','Viernes','Sábado','Domingo'][dowIdx(date)];
+  const onShift=membersOnShift(date);
+  const allOn=Object.values(onShift).flat();
+  const assignedIds=new Set(SHIFT_DEFS.flatMap(s=>getDuties(s.id).map(d=>d.agentId)));
+  const sups=S.team.filter(m=>m.sup);
+
+  let h='';
+  // Stats
+  h+=`<div class="stats">
+    <div class="stat"><div class="sn" style="color:var(--accent)">${allOn.length}</div><div class="sl">En turno</div></div>
+    <div class="stat"><div class="sn" style="color:var(--green)">${assignedIds.size}</div><div class="sl">Asignados</div></div>
+    <div class="stat"><div class="sn" style="color:var(--amber)">${allOn.length-assignedIds.size}</div><div class="sl">Sin asignar</div></div>
+  </div>`;
+
+  // Sups — only those scheduled today
+  const supsToday=S.team.filter(m=>m.sup && resolvedShift(m,date)!==null);
+  if(supsToday.length) h+=`<div class="sup-bar"><span class="sup-lbl">Supervisores hoy</span>${supsToday.map(s=>{
+    const sh=resolvedShift(s,date);
+    const shDef=SHIFT_DEFS.find(d=>d.id===sh);
+    return `<span class="sup-chip">${s.name} <span style="font-size:10px;opacity:.7;">${sh}</span></span>`;
+  }).join('')}</div>`;
+
+  // Banner
+  const unassigned=allOn.filter(m=>!assignedIds.has(m.id));
+  const ovOn=S.team.filter(m=>!m.sup&&!allOn.includes(m)&&S.overrides?.[m.id]?.[date]?.shift&&S.overrides[m.id][date].shift!=='LIBRE'&&!assignedIds.has(m.id));
+  if(unassigned.length||ovOn.length){
+    h+=`<div class="banner"><span class="blabel">📅 ${dow} — Sin asignar:</span><div class="bchips">
+      ${[...unassigned,...ovOn].map(m=>{
+        const sh=resolvedShift(m,date)||'?';
+        const isOv=!!(S.overrides?.[m.id]?.[date]);
+        return `<span class="bchip${isOv?' override':''}" onclick="openAssignModal('${sh}',null,'${m.id}')">${m.name} <span style="color:var(--amber);font-size:10px;">${sh}${isOv?' ✦':''}</span></span>`;
+      }).join('')}
+    </div></div>`;
+  }
+
+  // Shift blocks
+  const base=SHIFT_DEFS.filter(s=>!s.id.includes('+'));
+  const extra=SHIFT_DEFS.filter(s=>s.id.includes('+')&&getDuties(s.id).length>0);
+  [...base,...extra].forEach(shift=>{
+    const duties=getDuties(shift.id);
+    h+=`<div class="shift-block">
+      <div class="shift-head">
+        <span class="shift-tag" style="background:${shift.bg};color:${shift.color};border:1px solid ${shift.color}44;">${shift.label}</span>
+        <span class="shift-time">${shift.time}</span>
+        <span class="shift-count">${duties.length} agente${duties.length!==1?'s':''}</span>
+        <div class="shift-add" onclick="openAssignModal('${shift.id}',null,null)" title="Agregar">+</div>
+      </div>
+      <div class="shift-body">
+        ${duties.length===0
+          ?`<div class="empty-sh">Sin agentes. Haz clic en + para agregar.</div>`
+          :`<div class="agents-grid">${duties.map((d,i)=>renderCard(d,shift,i)).join('')}</div>`}
+      </div>
+    </div>`;
+  });
+
+  // Obs
+  const obs=getObs();
+  h+=`<div class="obs-sec">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:7px;">
+      <span style="font-size:10px;font-weight:800;letter-spacing:1px;color:var(--text3);text-transform:uppercase;">Observaciones</span>
+      <div class="ib" onclick="openObsModal()" style="font-size:13px;">✏️</div>
+    </div>
+    ${obs.length?obs.map(o=>`<div class="obs-item"><span>${o}</span></div>`).join(''):'<div style="color:var(--text3);font-size:12px;">Sin observaciones.</div>'}
+  </div>`;
+
+  document.getElementById('boardWrap').innerHTML=h;
+}
+
+function renderCard(duty, shift, idx){
+  const m=S.team.find(t=>t.id===duty.agentId);
+  if(!m) return '';
+  const init=m.name.split(' ').map(p=>p[0]).join('').slice(0,2).toUpperCase();
+  let rows='';
+  if(duty.primaryPos) rows+=dr('Pendiente',`<span class="bp">${duty.primaryPos}</span>`);
+  if(duty.specialTasks) duty.specialTasks.split(',').filter(t=>t.trim()).forEach(t=>rows+=dr('Tarea',`<span class="bt">${t.trim()}</span>`));
+  if(duty.mealType&&duty.mealTime) rows+=dr(duty.mealType,`<span class="bm">${duty.mealTime}</span>`);
+  if(duty.radioNum) rows+=dr('Radio',`<span style="color:var(--cyan);font-family:'IBM Plex Mono',monospace;">📻 ${duty.radioNum}</span>`);
+  if(duty.afterMealPos) rows+=dr('Post-comida',`<span class="bp">${duty.afterMealPos}</span>`);
+  (duty.covers||[]).forEach(c=>{if(c.who||c.pos) rows+=dr('Cubre',`<span class="bc">${c.who?'Cena '+c.who:''}${c.time?' a las '+c.time:''}${c.pos?' '+c.pos:''}</span>`);});
+  if(duty.cierrePos) rows+=dr('Cierre',`<span class="bp">${duty.cierrePos}</span>`);
+  if(duty.extraNotes) rows+=dr('Nota',`<span style="color:var(--text2);">${duty.extraNotes}</span>`);
+
+  return `<div class="agent-card">
+    <div class="atop">
+      <div class="av" style="background:${m.color}22;color:${m.color};">${init}</div>
+      <div>
+        <div class="aname">${m.name}</div>
+        ${m.terminal?`<div class="aterm">Terminal ${m.terminal} fija</div>`:''}
+      </div>
+      <div class="abtns">
+        <div class="ib" onclick="openAssignModal('${shift.id}',${idx},null)">✏</div>
+        <div class="ib del" onclick="removeAgent('${shift.id}',${idx})">✕</div>
+      </div>
+    </div>
+    ${rows?`<div class="drows">${rows}</div>`:''}
+  </div>`;
+}
+
+function dr(key,val){
+  return `<div class="drow"><span class="dk">${key}</span><span class="dv">${val}</span></div>`;
+}
+
+// ═══════════════════════════════
+// POSITION PICKER HELPERS
+// ═══════════════════════════════
+function buildPosBtns(containerId, positions, selArr, onClickFn){
+  const c=document.getElementById(containerId);
+  if(!c) return;
+  c.innerHTML=positions.map(p=>`
+    <button class="pos-btn${selArr.includes(p)?' sel':''}" onclick="${onClickFn}('${p}')">${p}</button>
+  `).join('');
+}
+
+function refreshPosBtns(){
+  buildPosBtns('btnTA', POS.TA, primSel, 'togglePrim');
+  buildPosBtns('btnTB', POS.TB, primSel, 'togglePrim');
+  buildPosBtns('btnTB2', POS.TB2, primSel, 'togglePrim');
+  buildPosBtns('btnN', POS.N, primSel, 'togglePrim');
+
+  buildPosBtns('btnTA2', POS.TA, afterSel, 'toggleAfter');
+  buildPosBtns('btnTB22', POS.TB, afterSel, 'toggleAfter');
+  buildPosBtns('btnTB222', POS.TB2, afterSel, 'toggleAfter');
+  buildPosBtns('btnN2', POS.N, afterSel, 'toggleAfter');
+
+  buildPosBtns('btnCierre', ALL_POS, cierreSel, 'toggleCierre');
+
+  updateDisplay('primaryDisplay', primSel);
+  updateDisplay('afterDisplay', afterSel);
+  updateDisplay('cierreDisplay', cierreSel);
+}
+
+// Smart range display: consecutive numbers → "X/Y"
+function posToRange(sel){
+  if(!sel.length) return '—';
+  if(sel.length===1) return sel[0];
+  // Try to build range notation
+  const nums=sel.filter(p=>!isNaN(p)).map(Number).sort((a,b)=>a-b);
+  const nPosns=sel.filter(p=>p.startsWith('N'));
+  let parts=[];
+  if(nums.length){
+    // Group consecutive
+    let start=nums[0], end=nums[0];
+    for(let i=1;i<nums.length;i++){
+      if(nums[i]===end+1||nums[i]===end+2) end=nums[i]; // allow gap of 2 for TB even/odd
+      else{ parts.push(start===end?String(start):start+'/'+end); start=end=nums[i]; }
+    }
+    parts.push(start===end?String(start):start+'/'+end);
+  }
+  if(nPosns.length){
+    const nNums=nPosns.map(n=>parseInt(n.slice(1))).sort((a,b)=>a-b);
+    let s=nNums[0],e=nNums[0];
+    for(let i=1;i<nNums.length;i++){
+      if(nNums[i]===e+1) e=nNums[i];
+      else{ parts.push(s===e?'N'+s:'N'+s+'/N'+e); s=e=nNums[i]; }
+    }
+    parts.push(s===e?'N'+s:'N'+s+'/N'+e);
+  }
+  return parts.join(', ');
+}
+
+function updateDisplay(id, sel){
+  const el=document.getElementById(id);
+  if(el) el.textContent=posToRange(sel);
+}
+
+function togglePrim(p){
+  const i=primSel.indexOf(p);
+  if(i>-1) primSel.splice(i,1); else primSel.push(p);
+  refreshPosBtns();
+}
+function toggleAfter(p){
+  const i=afterSel.indexOf(p);
+  if(i>-1) afterSel.splice(i,1); else afterSel.push(p);
+  refreshPosBtns();
+}
+function toggleCierre(p){
+  const i=cierreSel.indexOf(p);
+  if(i>-1) cierreSel.splice(i,1); else cierreSel.push(p);
+  refreshPosBtns();
+}
+function clearPrimary(){ primSel=[]; refreshPosBtns(); }
+function clearAfter(){ afterSel=[]; refreshPosBtns(); }
+function clearCierre(){ cierreSel=[]; refreshPosBtns(); }
+
+// Task buttons
+function buildTaskBtns(selectedTasks){
+  const sel=selectedTasks||[];
+  document.getElementById('taskBtns').innerHTML=SPECIAL_TASKS.map(t=>
+    `<button class="task-btn${sel.includes(t)?' sel':''}" onclick="toggleTask('${t}')">${t}</button>`
+  ).join('');
+}
+function toggleTask(t){
+  const btns=document.querySelectorAll('.task-btn');
+  btns.forEach(b=>{ if(b.textContent===t) b.classList.toggle('sel'); });
+}
+function getSelectedTasks(){
+  return [...document.querySelectorAll('.task-btn.sel')].map(b=>b.textContent).join(', ');
+}
+
+// ═══════════════════════════════
+// ASSIGN MODAL
+// ═══════════════════════════════
+
+// Shifts where post-meal position makes sense
+const SHIFTS_WITH_AFTER = ['A','T9','C','A+B','A+C','T9+C','B+C'];
+// Shifts where B arrives, eats, then starts working (no pre-meal position)
+const SHIFTS_B_STYLE = ['B'];
+
+let currentModalShift = null; // track effective shift for UI decisions
+
+function shiftHasAfterMeal(shiftId){
+  return SHIFTS_WITH_AFTER.includes(shiftId);
+}
+
+function updateAfterMealVisibility(shiftId){
+  const show = shiftHasAfterMeal(shiftId);
+  document.getElementById('afterMealSection').style.display = show ? '' : 'none';
+  if(!show){ afterSel=[]; updateDisplay('afterDisplay', afterSel); }
+  // For B: rename primary label to "Posición al llegar / después de almuerzo"
+  const isBStyle = SHIFTS_B_STYLE.includes(shiftId) || shiftId==='B+C';
+  document.getElementById('primaryLabel').textContent = isBStyle
+    ? 'Posición (entra, almuerza, y cubre estas posiciones)'
+    : 'Posición inicial (primeras ops)';
+  if(shiftId==='C'||shiftId==='B+C'){
+    document.getElementById('afterLabel').textContent = 'Posición después de cena';
+  } else {
+    document.getElementById('afterLabel').textContent = 'Posición después de almuerzo';
+  }
+}
+
+function computeExtraShift(baseShift, extraShift){
+  if(!extraShift) return baseShift;
+  const combos = {
+    'A+B':'A+B', 'T9+B':'A+B', // T9+B not real, map to closest
+    'A+C':'A+C', 'T9+C':'T9+C', 'B+C':'B+C',
+  };
+  return combos[baseShift+'+'+extraShift] || (baseShift+'+'+extraShift);
+}
+
+function onAgentChange(){
+  // Re-evaluate extra shift options based on agent's base shift
+  onExtraShiftChange();
+}
+
+function onExtraShiftChange(){
+  const agentId = document.getElementById('agentSel').value;
+  const extra = document.getElementById('extraShiftSel').value;
+  const badge = document.getElementById('extraShiftBadge');
+  const baseShift = modalShift;
+
+  if(extra){
+    const combined = computeExtraShift(baseShift, extra);
+    const def = SHIFT_DEFS.find(s=>s.id===combined) || {label:'Extra '+baseShift+'→'+extra, time:'', color:'var(--amber)'};
+    badge.style.display='';
+    badge.innerHTML=`✦ Horas extra — quedará en <span style="color:${def.color};">${def.label} (${def.time||combined})</span>`;
+    currentModalShift = combined;
+    updateAfterMealVisibility(combined);
+    // Update meal defaults for combined shift
+    const meal = MEAL_DEFAULTS[combined] || MEAL_DEFAULTS[baseShift];
+    if(meal && !document.getElementById('mealTime').value){
+      document.getElementById('mealType').value=meal.type;
+      document.getElementById('mealTime').value=meal.time;
+    }
+  } else {
+    badge.style.display='none';
+    currentModalShift = baseShift;
+    updateAfterMealVisibility(baseShift);
+  }
+  refreshPosBtns();
+}
+
+function openAssignModal(shiftId, editIdx, preselect){
+  modalShift=shiftId;
+  modalEditIdx=editIdx;
+  currentModalShift=shiftId;
+
+  // Build agent dropdown
+  const date=S.activeDate;
+  const assignedIds=new Set(SHIFT_DEFS.flatMap(s=>getDuties(s.id)
+    .filter((_,i)=>!(s.id===shiftId&&i===editIdx))
+    .map(d=>d.agentId)));
+  const avail=S.team.filter(m=>!m.sup&&!assignedIds.has(m.id));
+  const scheduled=avail.filter(m=>resolvedShift(m,date)===shiftId);
+  const others=avail.filter(m=>resolvedShift(m,date)!==shiftId);
+
+  const sel=document.getElementById('agentSel');
+  sel.innerHTML='';
+  if(scheduled.length){
+    const g=document.createElement('optgroup');
+    g.label='✅ Programados Turno '+shiftId+' hoy';
+    g.innerHTML=scheduled.map(m=>`<option value="${m.id}">${m.name}${m.terminal?' [Term.'+m.terminal+']':''}</option>`).join('');
+    sel.appendChild(g);
+  }
+  if(others.length){
+    const g=document.createElement('optgroup');
+    g.label='Otros disponibles';
+    g.innerHTML=others.map(m=>`<option value="${m.id}">${m.name}${m.terminal?' [Term.'+m.terminal+']':''}</option>`).join('');
+    sel.appendChild(g);
+  }
+
+  // Reset
+  primSel=[]; afterSel=[]; cierreSel=[];
+  document.getElementById('mealType').value='';
+  document.getElementById('mealTime').value='';
+  document.getElementById('radioNum').value='';
+  document.getElementById('extraNotes').value='';
+  document.getElementById('cierreNote').value='';
+  document.getElementById('coverRows').innerHTML='';
+  document.getElementById('extraShiftSel').value='';
+  document.getElementById('extraShiftBadge').style.display='none';
+  buildTaskBtns([]);
+
+  // Show/hide after-meal section based on shift
+  updateAfterMealVisibility(shiftId);
+
+  if(editIdx!==null){
+    const d=getDuties(shiftId)[editIdx];
+    if(d){
+      sel.value=d.agentId;
+      if(d.primaryPos&&d.primaryPos!=='—') primSel=parseRangeToPositions(d.primaryPos);
+      if(d.afterMealPos&&d.afterMealPos!=='—') afterSel=parseRangeToPositions(d.afterMealPos);
+      if(d.cierrePos) cierreSel=parseRangeToPositions(d.cierrePos.split(' - ')[0]);
+      document.getElementById('cierreNote').value=d.cierrePos?.includes(' - ')?d.cierrePos.split(' - ').slice(1).join(' - '):'';
+      document.getElementById('mealType').value=d.mealType||'';
+      document.getElementById('mealTime').value=d.mealTime||'';
+      document.getElementById('radioNum').value=d.radioNum||'';
+      document.getElementById('extraNotes').value=d.extraNotes||'';
+      const tasks=(d.specialTasks||'').split(',').map(t=>t.trim()).filter(Boolean);
+      buildTaskBtns(tasks.filter(t=>SPECIAL_TASKS.includes(t)));
+      (d.covers||[]).forEach(c=>addCoverRow(c));
+    }
+    document.getElementById('assignTitle').textContent='Editar — '+(S.team.find(t=>t.id===getDuties(shiftId)[editIdx]?.agentId)?.name||'');
+  } else {
+    document.getElementById('assignTitle').textContent='Asignar — Turno '+shiftId;
+    if(preselect) sel.value=preselect;
+    else if(scheduled.length) sel.value=scheduled[0].id;
+    const meal=MEAL_DEFAULTS[shiftId];
+    if(meal){ document.getElementById('mealType').value=meal.type; document.getElementById('mealTime').value=meal.time; }
+  }
+
+  refreshPosBtns();
+  document.getElementById('assignModal').classList.add('open');
+}
+
+// Parse "9/11" → ['9','10','11'], "20/26" → ['20','21','22','23','24','25','26'], "N4/N5" → ['N4','N5']
+function parseRangeToPositions(rangeStr){
+  if(!rangeStr||rangeStr==='—') return [];
+  const positions=[];
+  rangeStr.split(',').forEach(part=>{
+    part=part.trim();
+    if(part.includes('/')){
+      const [a,b]=part.split('/');
+      const isN=a.startsWith('N');
+      const startN=parseInt(isN?a.slice(1):a);
+      const endN=parseInt(isN?b.replace('N',''):b);
+      for(let i=startN;i<=endN;i++) positions.push(isN?'N'+i:String(i));
+    } else if(part) positions.push(part);
+  });
+  return positions.filter(p=>ALL_POS.includes(p));
+}
+
+function addCoverRow(data){
+  const c=document.getElementById('coverRows');
+  const first=c.children.length===0;
+  const agentOpts=S.team.filter(m=>!m.sup).map(m=>`<option value="${m.name}"${data?.who===m.name?' selected':''}>${m.name}</option>`).join('');
+  const div=document.createElement('div');
+  div.className='cover-row';
+  div.innerHTML=`
+    <select class="cover-person-sel" style="flex:1;">${agentOpts}</select>
+    <input class="fi c-time" placeholder="Hora ej: 17:00" value="${data?.time||''}" style="flex:0 0 100px;font-size:12px;padding:5px 8px;">
+    <input class="fi c-pos" placeholder="Pos ej: 5/6" value="${data?.pos||''}" style="flex:0 0 90px;font-size:12px;padding:5px 8px;">
+    <button class="btn btn-danger" style="font-size:11px;padding:5px 8px;" onclick="this.parentElement.remove()">✕</button>
+  `;
+  c.appendChild(div);
+}
+
+function saveAssign(){
+  const agentId=document.getElementById('agentSel').value;
+  if(!agentId){ toast('Selecciona un agente','error'); return; }
+
+  // Determine effective shift (may be combined if extra hours selected)
+  const extra=document.getElementById('extraShiftSel').value;
+  const effectiveShift = extra ? computeExtraShift(modalShift, extra) : modalShift;
+
+  const primaryPos=posToRange(primSel)==='—'?'':posToRange(primSel);
+  const afterMealPos=shiftHasAfterMeal(effectiveShift)?(posToRange(afterSel)==='—'?'':posToRange(afterSel)):'';
+  const cierreRange=posToRange(cierreSel)==='—'?'':posToRange(cierreSel);
+  const cierreNote=document.getElementById('cierreNote').value.trim();
+  const cierrePos=cierreRange+(cierreNote?' - '+cierreNote:'');
+
+  const covers=[...document.querySelectorAll('#coverRows .cover-row')].map(row=>({
+    who:row.querySelector('.cover-person-sel').value.trim(),
+    time:row.querySelector('.c-time').value.trim(),
+    pos:row.querySelector('.c-pos').value.trim(),
+  })).filter(c=>c.who);
+
+  const duty={
+    agentId,
+    primaryPos,
+    radioNum:document.getElementById('radioNum').value.trim(),
+    specialTasks:getSelectedTasks(),
+    mealType:document.getElementById('mealType').value,
+    mealTime:document.getElementById('mealTime').value.trim(),
+    afterMealPos,
+    covers,
+    cierrePos,
+    extraNotes:document.getElementById('extraNotes').value.trim(),
+  };
+
+  if(!S.duties[S.activeDate]) S.duties[S.activeDate]={};
+
+  // snapshot before mutating
+  pushUndo();
+
+  // If extra shift: remove from original shift slot and place in combined shift
+  if(extra && modalEditIdx!==null){
+    S.duties[S.activeDate][modalShift]?.splice(modalEditIdx,1);
+  } else if(extra){
+    // Make sure we're not duplicating — remove from base shift if already there
+    const base = S.duties[S.activeDate][modalShift]||[];
+    const existingIdx = base.findIndex(d=>d.agentId===agentId);
+    if(existingIdx>-1) base.splice(existingIdx,1);
+  }
+
+  if(!S.duties[S.activeDate][effectiveShift]) S.duties[S.activeDate][effectiveShift]=[];
+
+  if(!extra && modalEditIdx!==null) S.duties[S.activeDate][effectiveShift][modalEditIdx]=duty;
+  else S.duties[S.activeDate][effectiveShift].push(duty);
+
+  save(); closeModal('assignModal'); renderBoard(); refreshOutput();
+  toast(extra ? `✅ Guardado en Turno ${effectiveShift}` : '✅ Guardado');
+}
+
+function removeAgent(shiftId, idx){
+  showConfirm('¿Eliminar este agente?', '', () => {
+    pushUndo();
+    S.duties[S.activeDate]?.[shiftId]?.splice(idx,1);
+    save(); renderBoard(); refreshOutput();
+  });
+}
+
+// ═══════════════════════════════
+// OBS
+// ═══════════════════════════════
+function openObsModal(){
+  const c=document.getElementById('obsRows');
+  c.innerHTML='';
+  getObs().forEach(o=>addObsRow(o));
+  document.getElementById('obsModal').classList.add('open');
+}
+function addObsRow(val=''){
+  const c=document.getElementById('obsRows');
+  const d=document.createElement('div');
+  d.style.cssText='display:flex;gap:7px;margin-bottom:7px;';
+  d.innerHTML=`<input class="fi obs-v" placeholder="Observación…" value="${val}" style="flex:1;">
+    <button class="btn btn-danger" style="font-size:11px;padding:5px 7px;" onclick="this.parentElement.remove()">✕</button>`;
+  c.appendChild(d);
+}
+function saveObs(){
+  pushUndo();
+  S.observations[S.activeDate]=[...document.querySelectorAll('.obs-v')].map(i=>i.value.trim()).filter(Boolean);
+  save(); closeModal('obsModal'); renderBoard(); refreshOutput();
+}
+
+// ═══════════════════════════════
+// WHATSAPP OUTPUT
+// ═══════════════════════════════
+function buildText(date){
+  date=date||S.activeDate;
+  let out='Buenos días,\nAsignación del día de hoy:\n';
+  SHIFT_DEFS.forEach(shift=>{
+    const duties=((S.duties[date]||{})[shift.id])||[];
+    if(!duties.length) return;
+    out+=`\n*${shift.label}*\n`;
+    duties.forEach(duty=>{
+      const m=S.team.find(t=>t.id===duty.agentId);
+      if(!m) return;
+      const mention = m.waName ? `@${m.waName}` : `@${m.name}`;
+      out+=`\n${mention}\n`;
+      if(duty.primaryPos) out+=`Pendiente primeras ops ${duty.primaryPos}\n`;
+      if(duty.specialTasks) duty.specialTasks.split(',').forEach(t=>{if(t.trim()) out+=t.trim()+'\n';});
+      if(duty.mealType&&duty.mealTime) out+=`${duty.mealType} ${duty.mealTime}\n`;
+      if(duty.radioNum) out+=`Radio ${duty.radioNum}\n`;
+      if(duty.afterMealPos) out+=`Luego del almuerzo cubre ${duty.afterMealPos}\n`;
+      (duty.covers||[]).forEach(c=>{
+        let l='Cubre';
+        if(c.who) l+=' cena de '+c.who;
+        if(c.time) l+=' a las '+c.time;
+        if(c.pos) l+=' '+c.pos;
+        out+=l+'\n';
+      });
+      if(duty.cierrePos) out+=`Cierre ${duty.cierrePos}\n`;
+      if(duty.extraNotes) out+=duty.extraNotes+'\n';
+    });
+  });
+  const supsToday=S.team.filter(m=>m.sup && resolvedShift(m,date)!==null);
+  if(supsToday.length){ out+='\n*Supervisores*\n'; supsToday.forEach(s=>{ const mention=s.waName?`@${s.waName}`:`@${s.name}`; out+=`${mention}\n`; }); }
+  const obs=S.observations[date]||[];
+  if(obs.length){ out+='\n*Observaciones:*\n'; obs.forEach(o=>out+=`• ${o}\n`); }
+  out+='\n*¡Excelente turno para todos!*';
+  return out;
+}
+
+function refreshOutput(){ document.getElementById('outBody').textContent=buildText(); }
+
+function doCopy(){
+  const text=buildText();
+  if(navigator.clipboard&&window.isSecureContext){
+    navigator.clipboard.writeText(text).then(()=>toast('📋 ¡Copiado!')).catch(()=>fallbackCopy(text));
+  } else fallbackCopy(text);
+}
+function fallbackCopy(text){
+  const ta=document.createElement('textarea');
+  ta.value=text; ta.style.cssText='position:fixed;left:-9999px;top:0;opacity:0;';
+  document.body.appendChild(ta); ta.focus(); ta.select();
+  try{ document.execCommand('copy'); toast('📋 ¡Copiado!'); }
+  catch(e){ toast('Copia manualmente el panel derecho','error'); }
+  document.body.removeChild(ta);
+}
+
+function saveDay(){ save(); toast('✅ Guardado'); }
+
+// ═══════════════════════════════
+// SCHEDULE EDITOR
+// ═══════════════════════════════
+const SCHED_VALS = ['A','T9','B','BC','C','D','L'];
+const SCHED_COLORS = {A:'#17c97a',T9:'#2d7aee',B:'#8b5cf6',BC:'#fb923c',C:'#e84545',D:'#0eb8c9',L:'#3d5470'};
+
+function openScheduleModal(){
+  const tbody = document.getElementById('scheduleBody');
+  tbody.innerHTML = S.team.map(m => {
+    const sched = m.schedule || ['L','L','L','L','L','L','L'];
+    const cells = sched.map((s,i) => {
+      const col = SCHED_COLORS[s] || 'var(--text3)';
+      return `<td style="padding:4px 3px;text-align:center;">
+        <select class="sched-sel" data-id="${m.id}" data-day="${i}"
+          style="background:${col}22;color:${col};border:1px solid ${col}66;border-radius:5px;padding:4px 2px;font-size:12px;font-weight:800;font-family:'IBM Plex Mono',monospace;width:52px;text-align:center;cursor:pointer;outline:none;"
+          onchange="onSchedChange(this)">
+          ${SCHED_VALS.map(v=>`<option value="${v}" ${v===s?'selected':''}>${v}</option>`).join('')}
+        </select>
+      </td>`;
+    }).join('');
+    return `<tr style="border-bottom:1px solid rgba(30,45,66,.4);">
+      <td style="padding:8px 10px;font-size:12px;font-weight:700;color:${m.sup?'var(--red)':'var(--text)'};">
+        ${m.sup?'⭐ ':''}${m.name}
+      </td>
+      ${cells}
+    </tr>`;
+  }).join('');
+  document.getElementById('scheduleModal').classList.add('open');
+}
+
+function onSchedChange(sel){
+  const col = SCHED_COLORS[sel.value] || 'var(--text3)';
+  sel.style.background = col+'22';
+  sel.style.color = col;
+  sel.style.borderColor = col+'66';
+}
+
+function saveSchedule(){
+  // Read all selects back into team schedules
+  document.querySelectorAll('.sched-sel').forEach(sel => {
+    const m = S.team.find(t=>t.id===sel.dataset.id);
+    if(!m) return;
+    if(!m.schedule) m.schedule = ['L','L','L','L','L','L','L'];
+    const day = parseInt(sel.dataset.day);
+    let val = sel.value;
+    // Normalize BC → B+C internally
+    if(val === 'BC') val = 'B+C';
+    m.schedule[day] = val;
+  });
+  save();
+  closeModal('scheduleModal');
+  renderTeamGrid();
+  toast('✅ Horario actualizado');
+}
+function renderTeamGrid(){
+  const DAYS=['L','M','X','J','V','S','D'];
+  const SC={A:'var(--green)',T9:'var(--accent)',B:'var(--purple)',C:'var(--red)',D:'var(--cyan)',L:'var(--text3)'};
+  document.getElementById('teamGrid').innerHTML=S.team.map(m=>{
+    const init=m.name.split(' ').map(p=>p[0]).join('').slice(0,2).toUpperCase();
+    const sched=(m.schedule||[]).map((s,i)=>`<span class="tc-day" style="color:${SC[s]||'var(--text2)'};">${DAYS[i]}:${s}</span>`).join('');
+    return `<div class="tc">
+      <div class="av" style="background:${m.color}22;color:${m.color};width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:800;flex-shrink:0;">${init}</div>
+      <div class="tc-info">
+        <div class="tc-name">${m.name}</div>
+        ${m.terminal?`<div style="font-size:10px;color:var(--text3);margin-top:2px;">Terminal ${m.terminal} fija</div>`:''}
+        ${m.waName
+          ?`<div style="font-size:10px;color:var(--green);margin-top:2px;">💬 @${m.waName}</div>`
+          :`<div style="font-size:10px;color:var(--amber);margin-top:2px;">💬 Sin nombre WA</div>`
+        }
+        ${m.sup
+          ?`<div style="font-size:10px;color:var(--red);margin-top:3px;font-weight:700;">⭐ Supervisor</div>
+           <div class="tc-sched">${sched}</div>`
+          :`<div class="tc-sched">${sched}</div>`
+        }
+      </div>
+      <div class="tc-acts">
+        <div class="ib" onclick="openMemberModal('${m.id}')">✏</div>
+        <div class="ib del" onclick="deleteMember('${m.id}')">✕</div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function openMemberModal(editId){
+  S._editId=editId||null;
+  const m=editId?S.team.find(t=>t.id===editId):null;
+  document.getElementById('memberModalTitle').textContent=m?'Editar Miembro':'Agregar Miembro';
+  document.getElementById('memName').value=m?.name||'';
+  document.getElementById('memWaName').value=m?.waName||'';
+  document.getElementById('memRole').value=m?.role||'';
+  document.getElementById('memColor').value=m?.color||'#2d7aee';
+  document.getElementById('memTerminal').value=m?.terminal||'';
+  document.getElementById('memIsSup').checked=m?.sup||false;
+  document.getElementById('memberModal').classList.add('open');
+}
+function saveMember(){
+  const name=document.getElementById('memName').value.trim();
+  if(!name){ toast('Ingresa un nombre','error'); return; }
+  const data={name,
+    waName:document.getElementById('memWaName').value.trim(),
+    role:document.getElementById('memRole').value.trim(),
+    color:document.getElementById('memColor').value,
+    terminal:document.getElementById('memTerminal').value,
+    sup:document.getElementById('memIsSup').checked};
+  if(S._editId){
+    const i=S.team.findIndex(m=>m.id===S._editId);
+    if(i>-1) S.team[i]={...S.team[i],...data};
+  } else S.team.push({id:'m'+Date.now(),schedule:[],...data});
+  save(); closeModal('memberModal'); renderTeamGrid(); toast('✅ Guardado');
+}
+function deleteMember(id){
+  showConfirm('¿Eliminar este miembro?', '', () => {
+    S.team=S.team.filter(m=>m.id!==id);
+    save(); renderTeamGrid(); toast('Eliminado');
+  });
+}
+
+// ═══════════════════════════════
+// OVERRIDES
+// ═══════════════════════════════
+function toggleOvCustom(){
+  document.getElementById('ovCustomGrp').style.display=
+    document.getElementById('ovShift').value==='custom'?'block':'none';
+}
+function openOverrideModal(mid,date){
+  document.getElementById('ovPerson').innerHTML=S.team.map(m=>`<option value="${m.id}">${m.name}</option>`).join('');
+  document.getElementById('ovDate').value=date||S.activeDate;
+  document.getElementById('ovShift').value='B';
+  document.getElementById('ovReason').value='';
+  document.getElementById('ovCustomGrp').style.display='none';
+  if(mid) document.getElementById('ovPerson').value=mid;
+  document.getElementById('overrideModal').classList.add('open');
+}
+function saveOverride(){
+  const mid=document.getElementById('ovPerson').value;
+  const date=document.getElementById('ovDate').value;
+  const raw=document.getElementById('ovShift').value;
+  const shift=raw==='custom'?document.getElementById('ovCustom').value.trim().toUpperCase():raw;
+  const reason=document.getElementById('ovReason').value.trim();
+  if(!mid||!date||!shift){ toast('Completa todos los campos','error'); return; }
+  if(!S.overrides) S.overrides={};
+  if(!S.overrides[mid]) S.overrides[mid]={};
+  S.overrides[mid][date]={shift,reason,ts:Date.now()};
+  save(); closeModal('overrideModal'); renderChanges(); renderBoard(); toast('✅ Override guardado');
+}
+function deleteOverride(mid,date){
+  showConfirm('¿Eliminar este override?', '', () => {
+    delete S.overrides[mid]?.[date];
+    save(); renderChanges(); renderBoard();
+  });
+}
+
+// ═══════════════════════════════
+// SWAPS
+// ═══════════════════════════════
+function openSwapModal(){
+  const opts=S.team.map(m=>`<option value="${m.id}">${m.name}</option>`).join('');
+  document.getElementById('swapA').innerHTML=opts;
+  document.getElementById('swapB').innerHTML=opts;
+  document.getElementById('swapDA').value=S.activeDate;
+  document.getElementById('swapDB').value=S.activeDate;
+  document.getElementById('swapNotes').value='';
+  document.getElementById('swapPending').checked=true;
+  document.getElementById('swapModal').classList.add('open');
+}
+function saveSwap(){
+  const pA=document.getElementById('swapA').value,dA=document.getElementById('swapDA').value;
+  const pB=document.getElementById('swapB').value,dB=document.getElementById('swapDB').value;
+  const notes=document.getElementById('swapNotes').value.trim();
+  const pending=document.getElementById('swapPending').checked;
+  if(!pA||!dA||!pB||!dB){ toast('Completa todos los campos','error'); return; }
+  if(pA===pB){ toast('Selecciona dos personas diferentes','error'); return; }
+  S.swaps.push({id:'sw'+Date.now(),personA:pA,dateA:dA,personB:pB,dateB:dB,notes,pending,ts:Date.now()});
+  save(); closeModal('swapModal'); renderChanges(); renderBoard(); toast('✅ Permuta registrada');
+}
+function deleteSwap(id){
+  showConfirm('¿Eliminar esta permuta?', '', () => {
+    S.swaps=S.swaps.filter(s=>s.id!==id);
+    save(); renderChanges(); renderBoard();
+  });
+}
+function toggleSwapPending(id){
+  const sw=S.swaps.find(s=>s.id===id);
+  if(sw){ sw.pending=!sw.pending; save(); renderChanges(); }
+}
+
+// ═══════════════════════════════
+// CHANGES PAGE
+// ═══════════════════════════════
+function renderChanges(){ renderOverrides(); renderSwaps(); }
+
+function renderOverrides(){
+  const rows=[];
+  for(const [mid,dates] of Object.entries(S.overrides||{})){
+    const m=S.team.find(t=>t.id===mid);
+    if(!m) continue;
+    for(const [date,ov] of Object.entries(dates)) rows.push({m,date,ov});
+  }
+  rows.sort((a,b)=>b.date.localeCompare(a.date));
+  const c=document.getElementById('overridesList');
+  if(!rows.length){ c.innerHTML=`<div style="color:var(--text3);font-size:12px;padding:12px;background:var(--s1);border:1px solid var(--border);border-radius:9px;">Sin overrides. Usa "+ Horas Extra / Cambio".</div>`; return; }
+  const SC=s=>({A:'var(--green)',T9:'var(--accent)',B:'var(--purple)',C:'var(--red)',D:'var(--cyan)',LIBRE:'var(--text3)'}[s]||'var(--amber)');
+  c.innerHTML=`<table class="ctable"><thead><tr><th>Persona</th><th>Fecha</th><th>Turno override</th><th>Motivo</th><th></th></tr></thead><tbody>
+    ${rows.map(({m,date,ov})=>{
+      const d=new Date(date+'T12:00:00').toLocaleDateString('es-DO',{weekday:'short',day:'numeric',month:'short'});
+      const base=(m.schedule||[])[dowIdx(date)]||'—';
+      return `<tr><td style="font-weight:700;">${m.name}</td>
+        <td style="font-family:'IBM Plex Mono',monospace;color:var(--text2);">${d} <span style="color:var(--text3);">(base:${base})</span></td>
+        <td><span style="font-size:11px;font-weight:800;padding:2px 8px;border-radius:4px;background:${SC(ov.shift)}22;color:${SC(ov.shift)};border:1px solid ${SC(ov.shift)}44;">${ov.shift}</span></td>
+        <td style="color:var(--text2);">${ov.reason||'—'}</td>
+        <td style="text-align:right;">
+          <button class="btn btn-outline" style="font-size:10px;padding:3px 8px;margin-right:3px;" onclick="openOverrideModal('${m.id}','${date}')">Editar</button>
+          <button class="btn btn-danger" style="font-size:10px;padding:3px 8px;" onclick="deleteOverride('${m.id}','${date}')">✕</button>
+        </td></tr>`;
+    }).join('')}</tbody></table>`;
+}
+
+function renderSwaps(){
+  const c=document.getElementById('swapsList');
+  const swaps=[...(S.swaps||[])].sort((a,b)=>b.ts-a.ts);
+  if(!swaps.length){ c.innerHTML=`<div style="color:var(--text3);font-size:12px;padding:12px;background:var(--s1);border:1px solid var(--border);border-radius:9px;">Sin permutas. Usa "⇄ Registrar Permuta".</div>`; return; }
+  c.innerHTML=swaps.map(sw=>{
+    const mA=S.team.find(t=>t.id===sw.personA),mB=S.team.find(t=>t.id===sw.personB);
+    const dA=new Date(sw.dateA+'T12:00:00').toLocaleDateString('es-DO',{weekday:'short',day:'numeric',month:'short'});
+    const dB=new Date(sw.dateB+'T12:00:00').toLocaleDateString('es-DO',{weekday:'short',day:'numeric',month:'short'});
+    return `<div class="swap-card" style="border-color:${sw.pending?'rgba(240,165,0,.3)':'rgba(23,201,122,.25)'};">
+      <div style="flex:1;">
+        <div style="font-size:13px;font-weight:700;">
+          <span style="color:${mA?.color||'var(--text)'};">${mA?.name||'?'}</span>
+          <span style="color:var(--text3);margin:0 5px;font-size:11px;font-family:'IBM Plex Mono',monospace;">cede ${dA} ⇄ ${dB} cede</span>
+          <span style="color:${mB?.color||'var(--text)'};">${mB?.name||'?'}</span>
+        </div>
+        ${sw.notes?`<div style="font-size:11px;color:var(--text3);margin-top:2px;">${sw.notes}</div>`:''}
+      </div>
+      <span style="font-size:10px;font-weight:700;padding:3px 9px;border-radius:16px;background:${sw.pending?'rgba(240,165,0,.12)':'rgba(23,201,122,.1)'};color:${sw.pending?'var(--amber)':'var(--green)'};border:1px solid ${sw.pending?'rgba(240,165,0,.3)':'rgba(23,201,122,.25)'};">${sw.pending?'⏳ Pendiente':'✅ Saldada'}</span>
+      <button class="btn btn-outline" style="font-size:10px;padding:3px 8px;" onclick="toggleSwapPending('${sw.id}')">${sw.pending?'Marcar saldada':'Marcar pendiente'}</button>
+      <button class="btn btn-danger" style="font-size:10px;padding:3px 8px;" onclick="deleteSwap('${sw.id}')">✕</button>
+    </div>`;
+  }).join('');
+}
+
+// ═══════════════════════════════
+// HISTORY
+// ═══════════════════════════════
+function renderHistory(){
+  const dates=Object.keys(S.duties).filter(d=>Object.values(S.duties[d]).some(a=>a.length>0)).sort().reverse();
+  const c=document.getElementById('historyList');
+  if(!dates.length){ c.innerHTML='<p style="color:var(--text3);font-size:13px;">Sin historial aún. Guarda con 💾.</p>'; return; }
+  c.innerHTML=dates.map(date=>{
+    const d=new Date(date+'T12:00:00');
+    const label=d.toLocaleDateString('es-DO',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
+    const total=SHIFT_DEFS.reduce((a,s)=>a+((S.duties[date]?.[s.id])||[]).length,0);
+    const text=buildText(date);
+    return `<div class="hcard">
+      <div class="hcard-head" onclick="this.nextSibling.classList.toggle('open')">
+        <span style="font-size:13px;font-weight:700;">${label}</span>
+        <span style="font-size:10px;color:var(--text3);font-family:'IBM Plex Mono',monospace;">${total} asignaciones ▾</span>
+      </div>
+      <div class="hcard-body">
+        <button class="btn btn-outline" style="font-size:10px;margin-bottom:9px;" onclick="loadDate('${date}')">↩ Cargar este día</button>
+        <div>${text.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')}</div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function loadDate(date){
+  showConfirm('¿Cargar el día '+date+'?', 'Se cambiará la fecha activa.', () => {
+    S.activeDate=date;
+    document.getElementById('dateInput').value=date;
+    updatePill(); save(); switchTab('board');
+  });
+}
+
+// ═══════════════════════════════
+// UTILS
+// ═══════════════════════════════
+function closeModal(id){ document.getElementById(id).classList.remove('open'); }
+
+function showConfirm(title, msg, onOk){
+  document.getElementById('confirmTitle').textContent = title;
+  document.getElementById('confirmMsg').textContent = msg;
+  const btn = document.getElementById('confirmOkBtn');
+  btn.onclick = () => { closeModal('confirmModal'); onOk(); };
+  document.getElementById('confirmModal').classList.add('open');
+}
+
+function toast(msg, type){
+  const t=document.getElementById('toast');
+  t.textContent=msg; t.className='toast show';
+  t.style.borderColor=type==='error'?'var(--red)':'var(--green)';
+  clearTimeout(t._t); t._t=setTimeout(()=>t.classList.remove('show'),2600);
+}
+
+// ═══════════════════════════════
+// INIT
+// ═══════════════════════════════
+// ═══════════════════════════════
+// FLIGHT LIST
+// ═══════════════════════════════
+let flightData = '';
+
+function openFlightModal(){
+  document.getElementById('flightTextInput').value = flightData;
+  document.getElementById('flightFileStatus').style.display = 'none';
+  onFlightTextChange();
+  document.getElementById('flightModal').classList.add('open');
+}
+
+function onFlightTextChange(){
+  const val = document.getElementById('flightTextInput').value;
+  const lines = val.split('\n').filter(l=>l.trim()).length;
+  document.getElementById('flightCharCount').textContent = val.length > 0 ? `${lines} líneas · ${val.length} caracteres` : '';
+}
+
+function updateFlightBtn(){
+  const btn = document.getElementById('flightBtn');
+  if(flightData){
+    btn.style.cssText += ';background:rgba(23,201,122,.15);border-color:rgba(23,201,122,.4);color:var(--green);';
+    btn.textContent = '✈️ Vuelos ✓';
+  } else {
+    btn.style.background=''; btn.style.borderColor=''; btn.style.color='';
+    btn.textContent = '✈️ Vuelos';
+  }
+}
+
+function setFlightStatus(msg, type){
+  const el = document.getElementById('flightFileStatus');
+  el.style.display = 'block';
+  el.textContent = msg;
+  el.style.background = type==='ok' ? 'rgba(23,201,122,.08)' : type==='err' ? 'rgba(232,69,69,.08)' : 'rgba(45,122,238,.08)';
+  el.style.border = '1px solid '+(type==='ok' ? 'rgba(23,201,122,.25)' : type==='err' ? 'rgba(232,69,69,.25)' : 'rgba(45,122,238,.25)');
+  el.style.color = type==='ok' ? 'var(--green)' : type==='err' ? 'var(--red)' : 'var(--text2)';
+}
+
+function handleFlightFileInput(e){
+  const file = e.target.files[0];
+  if(file) processFlightFile(file);
+}
+
+function handleFlightDrop(e){
+  e.preventDefault();
+  document.getElementById('flightDropZone').classList.remove('dz-over');
+  const file = e.dataTransfer.files[0];
+  if(file) processFlightFile(file);
+}
+
+async function processFlightFile(file){
+  const ext = file.name.split('.').pop().toLowerCase();
+  setFlightStatus(`Procesando ${file.name}…`, 'info');
+
+  try {
+    if(ext === 'csv'){
+      const text = await file.text();
+      document.getElementById('flightTextInput').value = text;
+      onFlightTextChange();
+      setFlightStatus(`✅ CSV cargado: ${file.name}`, 'ok');
+
+    } else if(ext === 'xlsx' || ext === 'xls'){
+      // Use SheetJS
+      const XLSX = window.XLSX;
+      if(!XLSX){ throw new Error('SheetJS no cargó. Pega el contenido manualmente.'); }
+      const buf = await file.arrayBuffer();
+      const wb = XLSX.read(buf, {type:'array'});
+      const ws = wb.Sheets[wb.SheetNames[0]];
+      const text = XLSX.utils.sheet_to_csv(ws);
+      document.getElementById('flightTextInput').value = text;
+      onFlightTextChange();
+      setFlightStatus(`✅ Excel cargado: ${file.name} (hoja: ${wb.SheetNames[0]})`, 'ok');
+
+    } else if(ext === 'pdf'){
+      setFlightStatus('Extrayendo texto del PDF…', 'info');
+      if(!window.pdfjsLib){ throw new Error('pdf.js no cargó. Copia el texto del PDF manualmente y pégalo abajo.'); }
+      const buf = await file.arrayBuffer();
+      const pdf = await pdfjsLib.getDocument({data: buf}).promise;
+      let allText = '';
+      for(let i = 1; i <= pdf.numPages; i++){
+        const page = await pdf.getPage(i);
+        const content = await page.getTextContent();
+        const pageText = content.items.map(item => item.str).join(' ');
+        allText += pageText + '\n';
+      }
+      if(!allText.trim()) throw new Error('No se pudo extraer texto del PDF. Intenta copiar el texto manualmente.');
+      document.getElementById('flightTextInput').value = allText.trim();
+      onFlightTextChange();
+      setFlightStatus(`✅ PDF procesado: ${file.name} (${pdf.numPages} página${pdf.numPages>1?'s':''})`, 'ok');
+
+    } else {
+      throw new Error('Formato no soportado. Usa .xlsx, .csv o .pdf');
+    }
+  } catch(err){
+    setFlightStatus('❌ ' + err.message, 'err');
+  }
+}
+
+function saveFlightData(){
+  flightData = document.getElementById('flightTextInput').value.trim();
+  updateFlightBtn();
+  closeModal('flightModal');
+  const lines = flightData.split('\n').filter(l=>l.trim()).length;
+  toast(flightData ? `✅ ${lines} líneas de vuelos guardadas` : 'Vuelos limpiados');
+}
+
+function clearFlightData(){
+  flightData = '';
+  document.getElementById('flightTextInput').value = '';
+  document.getElementById('flightFileStatus').style.display = 'none';
+  document.getElementById('flightCharCount').textContent = '';
+  updateFlightBtn();
+  toast('Datos de vuelos limpiados');
+}
+
+// ═══════════════════════════════
+// ═══════════════════════════════
+let aiDraft = null;
+
+function setAI(pct, msg){
+  document.getElementById('aiBar').style.width = pct+'%';
+  document.getElementById('aiMsg').textContent = msg;
+}
+
+async function autoGenerate(){
+  closeModal('aiReview');
+  document.getElementById('aiLoading').classList.add('open');
+  setAI(5, 'Leyendo el roster de hoy…');
+
+  const date = S.activeDate;
+  const d = new Date(date+'T12:00:00');
+  const dow = ['Lunes','Martes','Miércoles','Jueves','Viernes','Sábado','Domingo'][dowIdx(date)];
+  const dateLabel = d.toLocaleDateString('es-DO',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
+
+  const TIMES = {A:'08:00-17:00',T9:'09:00-18:00',B:'11:00-20:00',C:'15:00-00:00',D:'23:00-08:00','A+B':'08:00-20:00','B+C':'11:00-00:00','A+C':'08:00-00:00','T9+C':'09:00-00:00'};
+
+  const onShift = membersOnShift(date);
+  const rosterLines = Object.entries(onShift)
+    .filter(([,ms])=>ms.length)
+    .map(([sh,ms])=>`  Turno ${sh} (${TIMES[sh]||sh}): ${ms.map(m=>m.name+(m.terminal?' [Terminal fija '+m.terminal+']':'')).join(', ')}`)
+    .join('\n') || '  (Sin nadie programado)';
+
+  const supsToday = S.team.filter(m=>m.sup && resolvedShift(m,date)!==null).map(m=>m.name).join(', ') || 'Ninguno';
+
+  // ── Pre-process flight data ──────────────────────────────
+  // If there are flights, summarize them first so the main prompt stays small
+  let flightSummary = '';
+  if(flightData && flightData.trim()){
+    setAI(15, 'Procesando lista de vuelos…');
+    try {
+      const flightRes = await fetch('https://api.anthropic.com/v1/messages', {
+        method:'POST',
+        headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({
+          model:'claude-sonnet-4-20250514',
+          max_tokens:800,
+          messages:[{role:'user', content:
+            `Tengo esta lista de vuelos del día en un aeropuerto:\n\n${flightData.slice(0,4000)}\n\n` +
+            `Resúmela en máximo 15 líneas así: "POS X: vuelo AA123 09:15 ARR, vuelo UA456 12:00 DEP". ` +
+            `Agrupa por posición/gate. Solo las posiciones con vuelos. Formato conciso.`
+          }]
+        })
+      });
+      const flightJson = await flightRes.json();
+      flightSummary = (flightJson.content||[]).map(b=>b.text||'').join('').trim();
+    } catch(e){
+      // If flight summarization fails, just use raw (truncated)
+      flightSummary = flightData.slice(0, 800);
+    }
+  }
+
+  setAI(35, 'Preparando asignación…');
+
+  const flightContext = flightSummary
+    ? `\nVUELOS POR POSICIÓN HOY (úsalos para asignar según actividad real):\n${flightSummary}\n\nAsigna personas a posiciones con más vuelos en su turno. Posiciones sin vuelos pueden quedar de apoyo.`
+    : '';
+
+  const prompt = `Eres el asistente del supervisor de un equipo de soporte de líneas aéreas. Genera la asignación para ${dateLabel} (${dow}).
+
+EQUIPO EN TURNO HOY:
+${rosterLines}
+
+SUPERVISORES (no asignar posiciones, van al final):
+${supsToday}
+
+TERMINALES Y POSICIONES:
+- Terminal A: Posiciones 1–11 y N1–N5
+- Terminal B oeste: 20,22,24,26 (par) | 21,23,25 (impar) | N6–N13
+- Terminal B2 este: 27–37
+
+TERMINALES FIJAS (NUNCA violar):
+- Arlene Mercedes Rijo → Terminal A únicamente
+- Cándido Santana Collado → Terminal A únicamente
+- Yeidry Hernández → Terminal B únicamente
+- Alexandra Delgado Torres → Terminal B únicamente
+- Sachariel Márquez → Terminal B únicamente
+
+POSICIONES POR TURNO:
+- Turno A y T9: posición inicial + posición distinta después del almuerzo
+- Turno B: llegan, almuerzan, luego una posición (no hay pre-almuerzo)
+- Turno BC: combinación B+C, posición al llegar y cierre al final
+- Turno C: posición al llegar + posición distinta después de cena
+- Turno D: una posición nocturna
+
+COMIDAS FIJAS:
+- A/T9: Almuerzo 13:00 | B: Almuerzo 11:30 o Cena 19:00 (escalonar) | BC: Cena 17:00–17:45 | C: Cena 17:00 | D: sin comida
+
+RADIO: radioNum siempre "" (el supervisor lo asigna manualmente)
+CIERRE: asignar a agentes BC o C para wrap-up final
+${flightContext}
+
+RESPONDE SOLO JSON válido:
+{"shifts":[{"shiftId":"A","agents":[{"name":"Nombre exacto","primaryPos":"9/11","radioNum":"","specialTasks":"","mealType":"Almuerzo","mealTime":"13:00","afterMealPos":"N4/N5","covers":[{"who":"Emil","pos":"5/6","time":"17:00"}],"cierrePos":"","extraNotes":""}]}]}`;
+
+  setAI(55, 'Generando con IA…');
+
+  try {
+    const res = await fetch('https://api.anthropic.com/v1/messages', {
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({
+        model:'claude-sonnet-4-20250514',
+        max_tokens:4000,
+        messages:[{role:'user', content:prompt}]
+      })
+    });
+
+    setAI(80, 'Procesando respuesta…');
+
+    if(!res.ok){
+      const errText = await res.text();
+      throw new Error('HTTP '+res.status+': '+errText.slice(0,200));
+    }
+
+    const data = await res.json();
+    if(data.error){ throw new Error(data.error.message||JSON.stringify(data.error)); }
+
+    const raw = (data.content||[]).map(b=>b.text||'').join('');
+    setAI(92, 'Validando borrador…');
+
+    if(!raw){ throw new Error('La API devolvió respuesta vacía. Intenta de nuevo.'); }
+
+    let parsed;
+    try {
+      let clean = raw.replace(/```json\s*/gi,'').replace(/```\s*/g,'').trim();
+      const start = clean.indexOf('{');
+      const end = clean.lastIndexOf('}');
+      if(start === -1 || end === -1){
+        console.error('No JSON found in:', raw);
+        throw new Error('Sin JSON en respuesta');
+      }
+      parsed = JSON.parse(clean.slice(start, end+1));
+    } catch(e){
+      console.error('Parse error:', e.message, '\nRaw:', raw.slice(0,500));
+      throw new Error('Error al parsear respuesta: '+e.message);
+    }
+
+    aiDraft = parsed;
+    setAI(100, '¡Listo!');
+    setTimeout(()=>{ closeModal('aiLoading'); showDraftPreview(parsed); }, 350);
+
+  } catch(err) {
+    closeModal('aiLoading');
+    toast('❌ '+(err.message||'Error — intenta de nuevo'), 'error');
+  }
+}
+
+function showDraftPreview(parsed){
+  let preview='';
+  (parsed.shifts||[]).forEach(shift=>{
+    if(!shift.agents?.length) return;
+    preview+=`━━━ Turno ${shift.shiftId} ━━━\n\n`;
+    shift.agents.forEach(a=>{
+      preview+=`@${a.name}\n`;
+      if(a.primaryPos) preview+=`Pendiente primeras ops ${a.primaryPos}\n`;
+      if(a.specialTasks) a.specialTasks.split(',').forEach(t=>{if(t.trim()) preview+=t.trim()+'\n';});
+      if(a.mealType&&a.mealTime) preview+=`${a.mealType} ${a.mealTime}\n`;
+      if(a.afterMealPos) preview+=`Luego del almuerzo cubre ${a.afterMealPos}\n`;
+      (a.covers||[]).forEach(c=>{
+        let l='Cubre';
+        if(c.who) l+=' cena de '+c.who;
+        if(c.time) l+=' a las '+c.time;
+        if(c.pos) l+=' '+c.pos;
+        preview+=l+'\n';
+      });
+      if(a.cierrePos) preview+=`Cierre ${a.cierrePos}\n`;
+      if(a.extraNotes) preview+=a.extraNotes+'\n';
+      preview+='\n';
+    });
+  });
+  document.getElementById('aiPreview').textContent = preview.trim();
+  document.getElementById('aiReview').classList.add('open');
+}
+
+function applyDraft(){
+  if(!aiDraft?.shifts) return;
+  pushUndo();
+  const date = S.activeDate;
+  if(!S.duties[date]) S.duties[date]={};
+  // Clear today's assignments
+  SHIFT_DEFS.forEach(s=>{ S.duties[date][s.id]=[]; });
+
+  (aiDraft.shifts||[]).forEach(shift=>{
+    if(!S.duties[date][shift.shiftId]) S.duties[date][shift.shiftId]=[];
+    (shift.agents||[]).forEach(agent=>{
+      // Flexible name matching
+      const m = S.team.find(t=>
+        t.name.toLowerCase()===agent.name.toLowerCase() ||
+        t.name.toLowerCase().startsWith(agent.name.split(' ')[0].toLowerCase()) ||
+        agent.name.toLowerCase().startsWith(t.name.split(' ')[0].toLowerCase())
+      );
+      if(!m) return;
+      S.duties[date][shift.shiftId].push({
+        agentId:m.id,
+        primaryPos:agent.primaryPos||'',
+        radioNum:'',
+        specialTasks:agent.specialTasks||'',
+        mealType:agent.mealType||'',
+        mealTime:agent.mealTime||'',
+        afterMealPos:agent.afterMealPos||'',
+        covers:agent.covers||[],
+        cierrePos:agent.cierrePos||'',
+        extraNotes:agent.extraNotes||'',
+      });
+    });
+  });
+
+  save();
+  closeModal('aiReview');
+  renderBoard();
+  refreshOutput();
+  toast('✅ Borrador aplicado — revisa y ajusta lo necesario');
+}
+
+// ═══════════════════════════════
+load(); initDate(); renderBoard(); refreshOutput(); _updateBtns();
+</script>
+</body>
+</html>
