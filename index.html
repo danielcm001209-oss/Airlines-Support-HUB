@@ -198,6 +198,7 @@ header{background:var(--s1);border-bottom:1px solid var(--border);padding:0 16px
   </div>
   <div class="hactions">
     <button class="btn btn-outline" onclick="window.print()">🖨</button>
+    <button class="btn btn-outline" onclick="configApiKey()" title="Configurar API Key" id="apiKeyBtn">🔑</button>
     <button class="btn btn-outline" id="flightBtn" onclick="openFlightModal()" title="Cargar lista de vuelos">✈️ Vuelos</button>
     <button class="btn btn-outline" id="undoBtn" onclick="undo()" title="Deshacer" style="opacity:0.35;" disabled>↩</button>
     <button class="btn btn-outline" id="redoBtn" onclick="redo()" title="Rehacer" style="opacity:0.35;" disabled>↪</button>
@@ -210,6 +211,7 @@ header{background:var(--s1);border-bottom:1px solid var(--border);padding:0 16px
 
 <div class="tabs">
   <div class="tab active" onclick="switchTab('board')">📋 Asignaciones</div>
+  <div class="tab" onclick="switchTab('airlines')">✈️ Aerolíneas</div>
   <div class="tab" onclick="switchTab('team')">👥 Equipo</div>
   <div class="tab" onclick="switchTab('changes')">🔄 Cambios</div>
   <div class="tab" onclick="switchTab('history')">📅 Historial</div>
@@ -244,12 +246,45 @@ header{background:var(--s1);border-bottom:1px solid var(--border);padding:0 16px
   </div>
 </div>
 
-<!-- TEAM -->
+<!-- AIRLINES PAGE -->
+<div class="page" id="page-airlines">
+  <div class="full-page">
+    <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;margin-bottom:6px;">
+      <div>
+        <h2 style="font-size:19px;font-weight:900;">Asignación de Aerolíneas</h2>
+        <p style="font-size:12px;color:var(--text3);margin-top:3px;">Asigna qué aerolíneas atiende cada persona. La app sugerirá posiciones basándose en esto.</p>
+      </div>
+      <div style="display:flex;gap:7px;">
+        <button class="btn btn-outline" onclick="addAirlineRow()">+ Aerolínea</button>
+        <button class="btn btn-primary" onclick="saveAirlines()">💾 Guardar</button>
+      </div>
+    </div>
+
+    <!-- Airline → positions mapping -->
+    <div style="background:var(--s1);border:1px solid var(--border);border-radius:10px;padding:14px;margin-bottom:16px;">
+      <div style="font-size:10px;font-weight:800;letter-spacing:1px;color:var(--text3);text-transform:uppercase;margin-bottom:10px;">Aerolíneas y sus posiciones habituales</div>
+      <div id="airlinePosList"></div>
+      <button class="btn btn-outline" style="font-size:11px;margin-top:6px;" onclick="addAirlinePosRow()">+ Agregar aerolínea</button>
+    </div>
+
+    <!-- Person → airline assignment -->
+    <div style="background:var(--s1);border:1px solid var(--border);border-radius:10px;padding:14px;">
+      <div style="font-size:10px;font-weight:800;letter-spacing:1px;color:var(--text3);text-transform:uppercase;margin-bottom:10px;">Persona → Aerolínea asignada</div>
+      <div id="personAirlineList"></div>
+    </div>
+
+    <!-- Position limit warning -->
+    <div style="margin-top:12px;padding:10px 14px;background:rgba(240,165,0,.07);border:1px solid rgba(240,165,0,.2);border-radius:8px;font-size:12px;color:var(--amber);">
+      ⚠️ Regla: Una persona no puede tener más de 3 posiciones sin un vehículo (TTP119 o CGP17).
+    </div>
+  </div>
+</div>
 <div class="page" id="page-team">
   <div class="full-page">
     <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;">
       <h2 style="font-size:19px;font-weight:900;">Equipo</h2>
       <div style="display:flex;gap:7px;">
+        <button class="btn btn-outline" onclick="exportScheduleExcel()" title="Exportar horario a Excel">📊 Exportar Excel</button>
         <button class="btn btn-outline" onclick="openScheduleModal()" title="Actualizar el horario mensual del equipo">📅 Actualizar Horario</button>
         <button class="btn btn-primary" onclick="openMemberModal()">+ Agregar</button>
       </div>
@@ -298,7 +333,7 @@ header{background:var(--s1);border-bottom:1px solid var(--border);padding:0 16px
   <div class="frow" style="align-items:flex-end;">
     <div class="form-group" style="flex:1;">
       <label class="fl">Agente</label>
-      <select class="fs" id="agentSel" onchange="onAgentChange()"></select>
+      <select class="fs" id="agentSel" onchange="onAgentChange();showAirlineSuggestions(this.value)"></select>
     </div>
     <div class="form-group" style="flex:0 0 195px;">
       <label class="fl">Horas extra <span style="color:var(--text3);font-weight:400;text-transform:none;letter-spacing:0;">— turno adicional</span></label>
@@ -311,6 +346,12 @@ header{background:var(--s1);border-bottom:1px solid var(--border);padding:0 16px
   </div>
   <!-- Extra shift result badge -->
   <div id="extraShiftBadge" style="display:none;margin-bottom:10px;padding:7px 12px;background:rgba(240,165,0,.1);border:1px solid rgba(240,165,0,.3);border-radius:7px;font-size:12px;font-weight:700;color:var(--amber);"></div>
+  <!-- Airline suggestion -->
+  <div id="airlineSuggestionBanner" style="display:none;margin-bottom:10px;padding:8px 12px;background:rgba(45,122,238,.08);border:1px solid rgba(45,122,238,.25);border-radius:7px;font-size:12px;color:var(--accent);">
+    <span style="font-weight:700;">✈️ Posiciones sugeridas por aerolínea:</span>
+    <span id="airlineSuggestionText" style="margin-left:6px;font-family:'IBM Plex Mono',monospace;font-weight:700;"></span>
+    <button onclick="applyAirlineSuggestion()" class="btn btn-outline" style="font-size:11px;padding:3px 8px;margin-left:8px;border-color:var(--accent);color:var(--accent);">Aplicar ↓</button>
+  </div>
 
   <!-- PRIMARY POSITIONS -->
   <div class="divider"><span id="primaryLabel">Posición inicial (primeras ops)</span></div>
@@ -648,6 +689,24 @@ header{background:var(--s1);border-bottom:1px solid var(--border);padding:0 16px
 
 <style>@keyframes spin{to{transform:rotate(360deg)}}</style>
 
+<!-- HISTORY VIEW MODAL -->
+<div class="overlay" id="historyViewModal" style="z-index:450;">
+  <div class="modal" style="width:700px;max-width:98vw;max-height:92vh;overflow-y:auto;">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;flex-wrap:wrap;gap:8px;">
+      <div>
+        <div class="modal-title" style="margin:0;">📅 Asignación del día</div>
+        <div id="historyViewDate" style="font-size:13px;color:var(--text3);margin-top:3px;"></div>
+      </div>
+      <div style="display:flex;gap:7px;">
+        <button class="btn btn-outline" id="historyViewCopyBtn">📋 Copiar WA</button>
+        <button class="btn btn-primary" id="historyViewLoadBtn">↩ Cargar este día</button>
+        <button onclick="closeModal('historyViewModal')" class="btn btn-outline">✕ Cerrar</button>
+      </div>
+    </div>
+    <div id="historyViewBody"></div>
+  </div>
+</div>
+
 <!-- CONFIRM MODAL -->
 <div class="overlay" id="confirmModal" style="z-index:600;">
   <div class="modal" style="max-width:360px;text-align:center;">
@@ -676,7 +735,7 @@ const POS = {
 // All positions flat for cierre picker
 const ALL_POS = [...POS.TA,...POS.TB,...POS.TB2,...POS.N];
 
-const SPECIAL_TASKS = ['TTP119 (vehículo)','CGP17 (vehículo)','Cobus','Arreglo hojas C/D'];
+const SPECIAL_TASKS = ['TTP119','CGP17','Arreglo de hojas C/D+Cobus'];
 
 const SHIFT_DEFS = [
   {id:'A',   label:'Turno A',   time:'08:00–17:00', color:'#17c97a', bg:'rgba(23,201,122,.1)'},
@@ -700,7 +759,12 @@ const MEAL_DEFAULTS = {
 // ═══════════════════════════════
 // STATE
 // ═══════════════════════════════
-let S = { team:[], duties:{}, observations:{}, overrides:{}, swaps:[], activeDate:todayStr() };
+let S = { team:[], duties:{}, observations:{}, overrides:{}, swaps:[], activeDate:todayStr(),
+  // airlines[name] = {positions:['3','4'], color:'#xxx'}
+  airlines:{},
+  // personAirlines[memberId] = [airlineName, ...]
+  personAirlines:{}
+};
 let modalShift=null, modalEditIdx=null;
 
 // Position picker state
@@ -854,11 +918,12 @@ function updatePill(){
 // TABS
 // ═══════════════════════════════
 function switchTab(tab){
-  const tabs=['board','team','changes','history'];
+  const tabs=['board','airlines','team','changes','history'];
   document.querySelectorAll('.tab').forEach((t,i)=>t.classList.toggle('active',tabs[i]===tab));
   document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
   document.getElementById('page-'+tab).classList.add('active');
   if(tab==='board'){renderBoard();refreshOutput();}
+  if(tab==='airlines') renderAirlinesPage();
   if(tab==='team') renderTeamGrid();
   if(tab==='changes') renderChanges();
   if(tab==='history') renderHistory();
@@ -945,6 +1010,9 @@ function renderCard(duty, shift, idx){
   if(!m) return '';
   const init=m.name.split(' ').map(p=>p[0]).join('').slice(0,2).toUpperCase();
   let rows='';
+  // Check position limit
+  const limitWarn = checkPositionLimit(duty);
+  if(limitWarn) rows+=`<div style="font-size:10px;color:var(--red);margin-bottom:4px;font-weight:700;">⚠️ Máx 3 pos sin vehículo</div>`;
   if(duty.primaryPos) rows+=dr('Pendiente',`<span class="bp">${duty.primaryPos}</span>`);
   if(duty.specialTasks) duty.specialTasks.split(',').filter(t=>t.trim()).forEach(t=>rows+=dr('Tarea',`<span class="bt">${t.trim()}</span>`));
   if(duty.mealType&&duty.mealTime) rows+=dr(duty.mealType,`<span class="bm">${duty.mealTime}</span>`);
@@ -1212,6 +1280,9 @@ function openAssignModal(shiftId, editIdx, preselect){
     if(meal){ document.getElementById('mealType').value=meal.type; document.getElementById('mealTime').value=meal.time; }
   }
 
+  // Show airline suggestions for the selected agent
+  showAirlineSuggestions(sel.value);
+
   refreshPosBtns();
   document.getElementById('assignModal').classList.add('open');
 }
@@ -1235,17 +1306,43 @@ function parseRangeToPositions(rangeStr){
 
 function addCoverRow(data){
   const c=document.getElementById('coverRows');
-  const first=c.children.length===0;
   const agentOpts=S.team.filter(m=>!m.sup).map(m=>`<option value="${m.name}"${data?.who===m.name?' selected':''}>${m.name}</option>`).join('');
   const div=document.createElement('div');
   div.className='cover-row';
   div.innerHTML=`
-    <select class="cover-person-sel" style="flex:1;">${agentOpts}</select>
+    <select class="cover-person-sel" style="flex:1;" onchange="autoFillCoverPos(this)">${agentOpts}</select>
     <input class="fi c-time" placeholder="Hora ej: 17:00" value="${data?.time||''}" style="flex:0 0 100px;font-size:12px;padding:5px 8px;">
-    <input class="fi c-pos" placeholder="Pos ej: 5/6" value="${data?.pos||''}" style="flex:0 0 90px;font-size:12px;padding:5px 8px;">
+    <input class="fi c-pos" placeholder="Auto / manual" value="${data?.pos||''}" style="flex:0 0 110px;font-size:12px;padding:5px 8px;" title="Se rellena automáticamente según la asignación de esa persona">
     <button class="btn btn-danger" style="font-size:11px;padding:5px 8px;" onclick="this.parentElement.remove()">✕</button>
   `;
   c.appendChild(div);
+  // Auto-fill on initial render if person already selected
+  if(!data?.pos){
+    autoFillCoverPos(div.querySelector('.cover-person-sel'));
+  }
+}
+
+function autoFillCoverPos(sel){
+  const name = sel.value;
+  if(!name) return;
+  const posInput = sel.parentElement.querySelector('.c-pos');
+  // Find this person's duty in today's assignments
+  const member = S.team.find(m=>m.name===name);
+  if(!member) return;
+  let foundPos = '';
+  for(const shiftId of Object.keys(S.duties[S.activeDate]||{})){
+    const duty = (S.duties[S.activeDate][shiftId]||[]).find(d=>d.agentId===member.id);
+    if(duty){
+      // Use primaryPos as the position they cover during meal
+      foundPos = duty.primaryPos || duty.afterMealPos || '';
+      break;
+    }
+  }
+  if(foundPos){
+    posInput.value = foundPos;
+    posInput.style.borderColor = 'var(--green)';
+    posInput.title = 'Auto-completado desde asignación. Puedes editarlo manualmente.';
+  }
 }
 
 function saveAssign(){
@@ -1646,18 +1743,112 @@ function renderHistory(){
     const d=new Date(date+'T12:00:00');
     const label=d.toLocaleDateString('es-DO',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
     const total=SHIFT_DEFS.reduce((a,s)=>a+((S.duties[date]?.[s.id])||[]).length,0);
-    const text=buildText(date);
     return `<div class="hcard">
-      <div class="hcard-head" onclick="this.nextSibling.classList.toggle('open')">
-        <span style="font-size:13px;font-weight:700;">${label}</span>
-        <span style="font-size:10px;color:var(--text3);font-family:'IBM Plex Mono',monospace;">${total} asignaciones ▾</span>
-      </div>
-      <div class="hcard-body">
-        <button class="btn btn-outline" style="font-size:10px;margin-bottom:9px;" onclick="loadDate('${date}')">↩ Cargar este día</button>
-        <div>${text.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')}</div>
+      <div class="hcard-head">
+        <div>
+          <div style="font-size:13px;font-weight:700;">${label}</div>
+          <div style="font-size:11px;color:var(--text3);font-family:'IBM Plex Mono',monospace;margin-top:2px;">${total} agente${total!==1?'s':''} asignado${total!==1?'s':''}</div>
+        </div>
+        <div style="display:flex;gap:6px;">
+          <button class="btn btn-outline" style="font-size:11px;padding:5px 10px;" onclick="openHistoryView('${date}')">👁 Ver</button>
+          <button class="btn btn-outline" style="font-size:11px;padding:5px 10px;" onclick="copyHistoryText('${date}')">📋 Copiar</button>
+          <button class="btn btn-primary" style="font-size:11px;padding:5px 10px;" onclick="loadDate('${date}')">↩ Cargar</button>
+        </div>
       </div>
     </div>`;
   }).join('');
+}
+
+function copyHistoryText(date){
+  const text = buildText(date);
+  if(navigator.clipboard && window.isSecureContext){
+    navigator.clipboard.writeText(text).then(()=>toast('📋 ¡Copiado!'));
+  } else {
+    const ta=document.createElement('textarea');
+    ta.value=text; ta.style.cssText='position:fixed;left:-9999px;top:0;opacity:0;';
+    document.body.appendChild(ta); ta.focus(); ta.select();
+    try{ document.execCommand('copy'); toast('📋 ¡Copiado!'); }catch(e){ toast('Error al copiar','error'); }
+    document.body.removeChild(ta);
+  }
+}
+
+function openHistoryView(date){
+  const d = new Date(date+'T12:00:00');
+  const label = d.toLocaleDateString('es-DO',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
+  document.getElementById('historyViewDate').textContent = label;
+
+  // Build visual board for this date
+  const sups = S.team.filter(m => m.sup && resolvedShift(m, date) !== null);
+  let html = '';
+
+  // Supervisors bar
+  if(sups.length){
+    html += `<div class="sup-bar" style="margin-bottom:12px;">
+      <span class="sup-lbl">Supervisores</span>
+      ${sups.map(s=>`<span class="sup-chip">${s.name}</span>`).join('')}
+    </div>`;
+  }
+
+  // Shift blocks
+  let anyShift = false;
+  SHIFT_DEFS.forEach(shift=>{
+    const duties = ((S.duties[date]||{})[shift.id])||[];
+    if(!duties.length) return;
+    anyShift = true;
+    html += `<div class="shift-block" style="margin-bottom:12px;">
+      <div class="shift-head">
+        <span class="shift-tag" style="background:${shift.bg};color:${shift.color};border:1px solid ${shift.color}44;">${shift.label}</span>
+        <span class="shift-time">${shift.time}</span>
+        <span class="shift-count">${duties.length} agente${duties.length!==1?'s':''}</span>
+      </div>
+      <div class="shift-body">
+        <div class="agents-grid">
+          ${duties.map(duty => renderCardReadonly(duty)).join('')}
+        </div>
+      </div>
+    </div>`;
+  });
+
+  if(!anyShift) html = '<p style="color:var(--text3);font-size:13px;">Sin asignaciones registradas para este día.</p>';
+
+  // Observations
+  const obs = S.observations[date]||[];
+  if(obs.length){
+    html += `<div class="obs-sec">
+      <div style="font-size:10px;font-weight:800;letter-spacing:1px;color:var(--text3);text-transform:uppercase;margin-bottom:7px;">Observaciones</div>
+      ${obs.map(o=>`<div class="obs-item"><span>${o}</span></div>`).join('')}
+    </div>`;
+  }
+
+  document.getElementById('historyViewBody').innerHTML = html;
+  document.getElementById('historyViewModal').classList.add('open');
+  document.getElementById('historyViewCopyBtn').onclick = ()=>copyHistoryText(date);
+  document.getElementById('historyViewLoadBtn').onclick = ()=>{ closeModal('historyViewModal'); loadDate(date); };
+}
+
+function renderCardReadonly(duty){
+  const m = S.team.find(t=>t.id===duty.agentId);
+  if(!m) return '';
+  const init = m.name.split(' ').map(p=>p[0]).join('').slice(0,2).toUpperCase();
+  let rows = '';
+  if(duty.primaryPos) rows+=dr('Pendiente',`<span class="bp">${duty.primaryPos}</span>`);
+  if(duty.specialTasks) duty.specialTasks.split(',').filter(t=>t.trim()).forEach(t=>rows+=dr('Tarea',`<span class="bt">${t.trim()}</span>`));
+  if(duty.mealType&&duty.mealTime) rows+=dr(duty.mealType,`<span class="bm">${duty.mealTime}</span>`);
+  if(duty.radioNum) rows+=dr('Radio',`<span style="color:var(--cyan);font-family:'IBM Plex Mono',monospace;">📻 ${duty.radioNum}</span>`);
+  if(duty.afterMealPos) rows+=dr('Post-comida',`<span class="bp">${duty.afterMealPos}</span>`);
+  (duty.covers||[]).forEach(c=>{if(c.who||c.pos) rows+=dr('Cubre',`<span class="bc">${c.who?'Cena '+c.who:''}${c.time?' a las '+c.time:''}${c.pos?' '+c.pos:''}</span>`);});
+  if(duty.cierrePos) rows+=dr('Cierre',`<span class="bp">${duty.cierrePos}</span>`);
+  if(duty.extraNotes) rows+=dr('Nota',`<span style="color:var(--text2);">${duty.extraNotes}</span>`);
+  return `<div class="agent-card">
+    <div class="atop">
+      <div class="av" style="background:${m.color}22;color:${m.color};">${init}</div>
+      <div>
+        <div class="aname">${m.name}</div>
+        ${m.terminal?`<div class="aterm">Terminal ${m.terminal}</div>`:''}
+      </div>
+    </div>
+    ${rows?`<div class="drows">${rows}</div>`:''}
+  </div>`;
 }
 
 function loadDate(date){
@@ -1688,12 +1879,271 @@ function toast(msg, type){
   clearTimeout(t._t); t._t=setTimeout(()=>t.classList.remove('show'),2600);
 }
 
+function showAirlineSuggestions(agentId){
+  const banner = document.getElementById('airlineSuggestionBanner');
+  const text = document.getElementById('airlineSuggestionText');
+  if(!agentId || !banner){ if(banner) banner.style.display='none'; return; }
+  const member = S.team.find(m=>m.id===agentId);
+  if(!member){ banner.style.display='none'; return; }
+  const suggestions = getPositionSuggestions(agentId);
+  if(!suggestions.length){ banner.style.display='none'; return; }
+  // Check position limit
+  const count = suggestions.length;
+  const limitNote = count > 3 ? ` ⚠️ más de 3 — asignar TTP119/CGP17` : '';
+  text.textContent = suggestions.join(', ') + limitNote;
+  banner.style.display='block';
+}
+
+function applyAirlineSuggestion(){
+  const agentId = document.getElementById('agentSel').value;
+  if(!agentId) return;
+  const suggestions = getPositionSuggestions(agentId);
+  if(!suggestions.length) return;
+  // Split into primary (first half) and after-meal (second half) if more than 1
+  if(suggestions.length <= 3){
+    primSel = suggestions.filter(p => POS.TA.includes(p)||POS.TB.includes(p)||POS.TB2.includes(p)||POS.N.includes(p));
+    afterSel = [];
+  } else {
+    const mid = Math.ceil(suggestions.length/2);
+    primSel = suggestions.slice(0,mid);
+    afterSel = suggestions.slice(mid);
+  }
+  refreshPosBtns();
+  toast('✅ Posiciones aplicadas');
+}
+
 // ═══════════════════════════════
-// INIT
+// AIRLINES
+// ═══════════════════════════════
+const AIRLINE_COLORS = ['#2d7aee','#17c97a','#f0a500','#e84545','#8b5cf6','#0eb8c9','#ec4899','#f87171','#34d399','#fb923c','#a78bfa','#38bdf8'];
+
+function renderAirlinesPage(){
+  renderAirlinePosMap();
+  renderPersonAirlines();
+}
+
+function renderAirlinePosMap(){
+  const c = document.getElementById('airlinePosList');
+  const airlines = S.airlines||{};
+  if(!Object.keys(airlines).length){
+    c.innerHTML = `<div style="color:var(--text3);font-size:12px;margin-bottom:8px;">Sin aerolíneas registradas. Agrega una abajo.</div>`;
+    return;
+  }
+  c.innerHTML = Object.entries(airlines).map(([name,info])=>`
+    <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;flex-wrap:wrap;">
+      <span style="background:${info.color}22;color:${info.color};border:1px solid ${info.color}44;border-radius:5px;padding:3px 10px;font-size:12px;font-weight:700;min-width:130px;">${name}</span>
+      <span style="font-size:11px;color:var(--text3);">Posiciones habituales:</span>
+      <input class="fi" value="${(info.positions||[]).join(', ')}" placeholder="ej: 3, 4, 5"
+        style="flex:1;min-width:150px;font-size:12px;padding:5px 9px;font-family:'IBM Plex Mono',monospace;"
+        onchange="updateAirlinePos('${name}',this.value)">
+      <button class="btn btn-danger" style="font-size:11px;padding:4px 8px;" onclick="deleteAirline('${name}')">✕</button>
+    </div>`).join('');
+}
+
+function renderPersonAirlines(){
+  const c = document.getElementById('personAirlineList');
+  const airlineNames = Object.keys(S.airlines||{});
+  if(!airlineNames.length){
+    c.innerHTML = `<div style="color:var(--text3);font-size:12px;">Primero agrega aerolíneas arriba.</div>`;
+    return;
+  }
+  c.innerHTML = S.team.filter(m=>!m.sup).map(m=>{
+    const assigned = (S.personAirlines||{})[m.id]||[];
+    const init = m.name.split(' ').map(p=>p[0]).join('').slice(0,2).toUpperCase();
+    const chips = airlineNames.map(a=>{
+      const sel = assigned.includes(a);
+      const col = (S.airlines[a]||{}).color||'var(--text2)';
+      return `<span onclick="togglePersonAirline('${m.id}','${a}')"
+        style="cursor:pointer;padding:3px 10px;border-radius:16px;font-size:11px;font-weight:700;border:1px solid ${sel?col+'88':'var(--border2)'};background:${sel?col+'22':'transparent'};color:${sel?col:'var(--text3)'};">${a}</span>`;
+    }).join('');
+    return `<div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid rgba(30,45,66,.4);flex-wrap:wrap;">
+      <div style="display:flex;align-items:center;gap:7px;min-width:160px;">
+        <div style="width:28px;height:28px;border-radius:50%;background:${m.color}22;color:${m.color};display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:800;">${init}</div>
+        <span style="font-size:12px;font-weight:700;">${m.name}</span>
+      </div>
+      <div style="display:flex;flex-wrap:wrap;gap:5px;">${chips}</div>
+    </div>`;
+  }).join('');
+}
+
+function addAirlinePosRow(){
+  const name = prompt('Nombre de la aerolínea (ej: Air Transat, Copa, American):');
+  if(!name || !name.trim()) return;
+  const n = name.trim();
+  if(S.airlines[n]){ toast('Ya existe','error'); return; }
+  const colorIdx = Object.keys(S.airlines).length % AIRLINE_COLORS.length;
+  if(!S.airlines) S.airlines={};
+  S.airlines[n] = { positions:[], color: AIRLINE_COLORS[colorIdx] };
+  save();
+  renderAirlinePosMap();
+  renderPersonAirlines();
+}
+
+function updateAirlinePos(name, val){
+  if(!S.airlines[name]) return;
+  S.airlines[name].positions = val.split(',').map(p=>p.trim()).filter(Boolean);
+  save();
+}
+
+function deleteAirline(name){
+  delete S.airlines[name];
+  // Remove from person assignments
+  Object.keys(S.personAirlines||{}).forEach(id=>{
+    S.personAirlines[id] = (S.personAirlines[id]||[]).filter(a=>a!==name);
+  });
+  save();
+  renderAirlinesPage();
+}
+
+function togglePersonAirline(memberId, airline){
+  if(!S.personAirlines) S.personAirlines={};
+  if(!S.personAirlines[memberId]) S.personAirlines[memberId]=[];
+  const arr = S.personAirlines[memberId];
+  const idx = arr.indexOf(airline);
+  if(idx>-1) arr.splice(idx,1); else arr.push(airline);
+  save();
+  renderPersonAirlines();
+}
+
+function saveAirlines(){
+  save();
+  toast('✅ Aerolíneas guardadas');
+}
+
+// Suggest positions based on airline assignments
+function getPositionSuggestions(memberId){
+  const memberAirlines = (S.personAirlines||{})[memberId]||[];
+  if(!memberAirlines.length) return [];
+  const suggested = [];
+  memberAirlines.forEach(a=>{
+    const info = S.airlines[a];
+    if(info && info.positions) suggested.push(...info.positions);
+  });
+  return [...new Set(suggested)];
+}
+
+// Count positions in a range string (e.g. "3/5" = 3 positions)
+function countPositions(posStr){
+  if(!posStr) return 0;
+  let total = 0;
+  posStr.split(',').forEach(part=>{
+    part = part.trim();
+    if(part.includes('/')){
+      const [a,b] = part.split('/');
+      const isN = a.startsWith('N');
+      const start = parseInt(isN ? a.slice(1) : a);
+      const end = parseInt(isN ? b.replace('N','') : b);
+      total += (end - start + 1);
+    } else if(part) total += 1;
+  });
+  return total;
+}
+
+function checkPositionLimit(duty){
+  const hasVehicle = duty.specialTasks && (duty.specialTasks.includes('TTP119') || duty.specialTasks.includes('CGP17'));
+  if(hasVehicle) return null; // no limit with vehicle
+  const primary = countPositions(duty.primaryPos);
+  const after = countPositions(duty.afterMealPos);
+  const total = primary + after;
+  if(total > 3) return `⚠️ ${S.team.find(m=>m.id===duty.agentId)?.name||'Agente'} tiene ${total} posiciones — máximo 3 sin vehículo (TTP119/CGP17)`;
+  return null;
+}
+
+// ═══════════════════════════════
+// EXPORT SCHEDULE EXCEL
+// ═══════════════════════════════
+function exportScheduleExcel(){
+  const XLSX = window.XLSX;
+  if(!XLSX){ toast('SheetJS no disponible','error'); return; }
+
+  const DAYS = ['LUNES','MARTES','MIERCOLES','JUEVES','VIERNES','SÁBADO','DOMINGO'];
+  const wb = XLSX.utils.book_new();
+
+  // Build data rows
+  const headers = ['NOMBRE','HABILITACIÓN', ...DAYS];
+  const rows = [headers];
+
+  S.team.forEach(m=>{
+    // Normalize schedule: B+C → BC for display
+    const sched = (m.schedule||['L','L','L','L','L','L','L']).map(s=>s==='B+C'?'BC':s);
+    rows.push([m.name, m.role||'', ...sched]);
+  });
+
+  // Add shift legend
+  rows.push([]);
+  rows.push(['LEYENDA']);
+  rows.push(['TURNOS','','A','08:00 - 17:00']);
+  rows.push(['','','T9','09:00 - 18:00']);
+  rows.push(['','','B','11:00 - 20:00']);
+  rows.push(['','','BC','11:00 - 00:00']);
+  rows.push(['','','C','15:00 - 00:00']);
+  rows.push(['','','D','23:00 - 08:00']);
+  rows.push(['','','L','LIBRE']);
+
+  const ws = XLSX.utils.aoa_to_sheet(rows);
+
+  // Column widths
+  ws['!cols'] = [
+    {wch:28},{wch:24},
+    {wch:9},{wch:9},{wch:9},{wch:9},{wch:9},{wch:9},{wch:9}
+  ];
+
+  XLSX.utils.book_append_sheet(wb, ws, 'Horario');
+  XLSX.writeFile(wb, `Horario_Airlines_Support_HUB.xlsx`);
+  toast('✅ Excel exportado');
+}
+
 // ═══════════════════════════════
 // ═══════════════════════════════
-// FLIGHT LIST
 // ═══════════════════════════════
+// API KEY MANAGEMENT
+// ═══════════════════════════════
+function getApiKey(){
+  return localStorage.getItem('airops_apikey') || '';
+}
+
+function ensureApiKey(){
+  let key = getApiKey();
+  if(!key){
+    key = prompt('Ingresa tu API key de Anthropic (console.anthropic.com):\n\nEmpieza con sk-ant-... Se guarda solo en tu navegador.');
+    if(!key) return null;
+    localStorage.setItem('airops_apikey', key.trim());
+    toast('✅ API key guardada');
+  }
+  return key;
+}
+
+function apiHeaders(){
+  const key = getApiKey();
+  return {
+    'Content-Type': 'application/json',
+    'x-api-key': key,
+    'anthropic-version': '2023-06-01',
+    'anthropic-dangerous-direct-browser-access': 'true'
+  };
+}
+
+function configApiKey(){
+  const current = getApiKey();
+  const msg = current
+    ? `API key actual: ${current.slice(0,14)}...\n\nIngresa una nueva (o deja vacío para borrarla):`
+    : 'Ingresa tu API key de Anthropic (console.anthropic.com)\nEmpieza con sk-ant-...';
+  const key = prompt(msg);
+  if(key === null) return;
+  if(!key.trim()){ localStorage.removeItem('airops_apikey'); toast('API key eliminada'); updateApiKeyBtn(); return; }
+  localStorage.setItem('airops_apikey', key.trim());
+  updateApiKeyBtn();
+  toast('✅ API key guardada');
+}
+
+function updateApiKeyBtn(){
+  const btn = document.getElementById('apiKeyBtn');
+  if(!btn) return;
+  const has = !!getApiKey();
+  btn.textContent = has ? '🔑✓' : '🔑';
+  btn.style.color = has ? 'var(--green)' : '';
+  btn.style.borderColor = has ? 'rgba(23,201,122,.4)' : '';
+}
 let flightData = '';
 
 function openFlightModal(){
@@ -1816,6 +2266,13 @@ function setAI(pct, msg){
 }
 
 async function autoGenerate(){
+  // Check API key first
+  if(!getApiKey()){
+    const key = prompt('Para usar Auto-generar necesitas una API key de Anthropic.\n\nObtén una gratis en console.anthropic.com\nEmpieza con sk-ant-...');
+    if(!key) return;
+    localStorage.setItem('airops_apikey', key.trim());
+    updateApiKeyBtn();
+  }
   closeModal('aiReview');
   document.getElementById('aiLoading').classList.add('open');
   setAI(5, 'Leyendo el roster de hoy…');
@@ -1843,7 +2300,7 @@ async function autoGenerate(){
     try {
       const flightRes = await fetch('https://api.anthropic.com/v1/messages', {
         method:'POST',
-        headers:{'Content-Type':'application/json'},
+        headers:apiHeaders(),
         body: JSON.stringify({
           model:'claude-sonnet-4-20250514',
           max_tokens:800,
@@ -1910,7 +2367,7 @@ RESPONDE SOLO JSON válido:
   try {
     const res = await fetch('https://api.anthropic.com/v1/messages', {
       method:'POST',
-      headers:{'Content-Type':'application/json'},
+      headers:apiHeaders(),
       body: JSON.stringify({
         model:'claude-sonnet-4-20250514',
         max_tokens:4000,
@@ -2026,7 +2483,7 @@ function applyDraft(){
 }
 
 // ═══════════════════════════════
-load(); initDate(); renderBoard(); refreshOutput(); _updateBtns();
+load(); initDate(); renderBoard(); refreshOutput(); _updateBtns(); updateApiKeyBtn();
 </script>
 </body>
 </html>
