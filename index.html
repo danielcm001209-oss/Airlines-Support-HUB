@@ -254,11 +254,9 @@ header{background:var(--s1);border-bottom:1px solid var(--border);padding:0 16px
         <h2 style="font-size:19px;font-weight:900;">Asignación de Aerolíneas</h2>
         <p style="font-size:12px;color:var(--text3);margin-top:3px;">Asigna qué aerolíneas atiende cada persona. La app sugerirá posiciones basándose en esto.</p>
       </div>
-      <div style="display:flex;gap:7px;flex-wrap:wrap;">
-        <label class="btn btn-outline" style="cursor:pointer;margin:0;">
-          📂 Subir archivo
-          <input type="file" accept=".xlsx,.xls,.csv,.pdf" style="display:none;" onchange="importAirlinesFile(this.files[0])">
-        </label>
+      <div style="display:flex;gap:7px;flex-wrap:wrap;align-items:center;">
+        <button class="btn btn-outline" onclick="document.getElementById('airlinesFileIn').click()">📂 Subir archivo</button>
+        <input type="file" id="airlinesFileIn" accept=".xlsx,.xls" style="display:none;" onchange="importAirlinesFile(this.files[0])">
         <button class="btn btn-outline" onclick="addAirlinePosRow()">+ Agregar manual</button>
         <button class="btn btn-primary" onclick="saveAirlines()">💾 Guardar</button>
       </div>
@@ -297,10 +295,8 @@ header{background:var(--s1);border-bottom:1px solid var(--border);padding:0 16px
       <div style="display:flex;gap:7px;flex-wrap:wrap;">
         <button class="btn btn-outline" onclick="exportScheduleExcel()">📊 Exportar Excel</button>
         <button class="btn btn-outline" onclick="openScheduleModal()">📅 Editar Horario</button>
-        <label class="btn btn-outline" style="cursor:pointer;margin:0;">
-          📂 Subir Horario
-          <input type="file" accept=".xlsx,.xls,.pdf" style="display:none;" onchange="importScheduleFile(this.files[0])">
-        </label>
+        <button class="btn btn-outline" onclick="document.getElementById('scheduleFileIn').click()">📂 Subir Horario</button>
+        <input type="file" id="scheduleFileIn" accept=".xlsx,.xls,.pdf" style="display:none;" onchange="importScheduleFile(this.files[0])">
         <button class="btn btn-primary" onclick="openMemberModal()">+ Agregar</button>
       </div>
     </div>
@@ -774,7 +770,114 @@ function saveDay(){ _persist(); toast('✅ Guardado'); }
 function load(){
   try{ const r=localStorage.getItem('airops4'); if(r) Object.assign(S, JSON.parse(r)); }catch(e){}
   if(!S.team.length) seedTeam();
+  else migrateMissingData();
   S.team.forEach(m=>{ if(!m.waName) m.waName=m.name.split(' ')[0]; });
+}
+
+// Add missing team members, airlines and assignments without wiping existing data
+function migrateMissingData(){
+  const latestRoster = [
+    {name:'Alexandra Delgado Torres', waName:'Alexandra', sup:false, color:'#ec4899', terminal:'B', schedule:['L','T9','A','T9','T9','T9','L']},
+    {name:'Arlene Mercedes Rijo',      waName:'Arlene',    sup:false, color:'#0eb8c9', terminal:'A', schedule:['L','T9','T9','T9','A','A','L']},
+    {name:'Sachariel Márquez',         waName:'Sachariel', sup:false, color:'#17c97a', terminal:'B', schedule:['L','C','C','B','B','B','L']},
+    {name:'Cándido Santana Collado',   waName:'Candido',   sup:false, color:'#a3e635', terminal:'A', schedule:['L','C','C','B','B','B','L']},
+    {name:'Yeidry Hernández',          waName:'Yeidry',    sup:false, color:'#2d7aee', terminal:'B', schedule:['L','T9','A','T9','T9','T9','L']},
+    {name:'Dalvin Cipriam',            waName:'Dalvin',    sup:false, color:'#8b5cf6', terminal:'',  schedule:['L','L','C','C','C','C','C']},
+    {name:'Angel Rijo de Jesús',       waName:'Angel',     sup:false, color:'#fb923c', terminal:'',  schedule:['A','L','L','C','B','B','A']},
+    {name:'Sheridam Peña',             waName:'Sheridam',  sup:false, color:'#f0a500', terminal:'',  schedule:['B','L','L','B','B','B','B']},
+    {name:'Iván Josep Rivas',          waName:'Ivan',      sup:false, color:'#38bdf8', terminal:'',  schedule:['A','L','L','B','B','B','A']},
+    {name:'Hilda Sánchez',             waName:'Hilda',     sup:false, color:'#f472b6', terminal:'',  schedule:['B','L','L','B','B','B','C']},
+    {name:'Emil Nathanael Sánchez',    waName:'Emil',      sup:false, color:'#34d399', terminal:'',  schedule:['B','L','L','B','B','B','B']},
+    {name:'Madelin María Delgado',     waName:'Madelin',   sup:false, color:'#fbbf24', terminal:'',  schedule:['B','A','L','L','C','B','B']},
+    {name:'José Misael Berroa',        waName:'Misael',    sup:false, color:'#60a5fa', terminal:'',  schedule:['C','B','L','L','C','B','B']},
+    {name:'Arismendy Marte',           waName:'Arismendy', sup:false, color:'#c084fc', terminal:'',  schedule:['C','B','L','L','C','B','B']},
+    {name:'Fernando Beltre de la Rosa',waName:'Fernando',  sup:false, color:'#f87171', terminal:'',  schedule:['D','D','L','L','D','D','D']},
+    {name:'Alan Rafael Paulino',       waName:'Alan',      sup:false, color:'#4ade80', terminal:'',  schedule:['A','L','L','C','T9','T9','T9']},
+    {name:'Katrini Peguero Sánchez',   waName:'Katrini',   sup:false, color:'#fb923c', terminal:'',  schedule:['B','C','B','L','L','C','B']},
+    {name:'Hendrix Marte',             waName:'Hendrix',   sup:false, color:'#a78bfa', terminal:'',  schedule:['B','B','B','L','L','B','B']},
+    {name:'Esmerling Guillermo',       waName:'Esmerling', sup:false, color:'#22d3ee', terminal:'',  schedule:['A','A','B','L','L','B','B']},
+    {name:'Kenia Candelaria',          waName:'Kenia',     sup:false, color:'#e879f9', terminal:'',  schedule:['B','B','B','L','L','C','C']},
+    {name:'Daniel Castro Morillo',     waName:'Daniel',    sup:true,  color:'#e84545', terminal:'',  schedule:['B','B','C','L','L','C','B']},
+    {name:'Jhonatan Pérez Acosta',     waName:'Jhonatan',  sup:true,  color:'#e84545', terminal:'',  schedule:['A','A','A','A','L','L','A']},
+    {name:'Andy Polanco Guerrero',     waName:'Andy',      sup:true,  color:'#e84545', terminal:'',  schedule:['L','B','B','C','B','B','L']},
+    {name:'Angelini Sosa Abreu',       waName:'Angelini',  sup:true,  color:'#e84545', terminal:'',  schedule:['C','C','L','L','C','C','C']},
+  ];
+
+  // Add missing members
+  let nextId = Math.max(0, ...S.team.map(m=>parseInt(m.id.replace('m',''))||0)) + 1;
+  latestRoster.forEach(r=>{
+    const exists = S.team.find(m=>m.name.toLowerCase().split(' ')[0] === r.name.toLowerCase().split(' ')[0]);
+    if(!exists){
+      S.team.push({id:'m'+nextId++, role:'', ...r});
+    }
+  });
+
+  // Fix members with empty schedule
+  S.team.forEach(m=>{
+    if(!m.schedule || !m.schedule.length){
+      const match = latestRoster.find(r=>r.name.toLowerCase().split(' ')[0] === m.name.toLowerCase().split(' ')[0]);
+      m.schedule = match ? match.schedule : ['L','L','L','L','L','L','L'];
+    }
+  });
+
+  // Seed airlines if missing
+  if(!S.airlines || !Object.keys(S.airlines).length){
+    seedAirlines();
+  }
+  // Seed person→airline if missing
+  if(!S.personAirlines || !Object.keys(S.personAirlines).length){
+    seedPersonAirlines();
+  }
+  save();
+}
+
+function seedAirlines(){
+  const allAirlines = [
+    'Southwest Airlines','British Airways','Air France','Copa Airlines','Delta','Air Transat',
+    'Air Century','Air Europa','Edelweiss Air','Breeze','Condor','Frontier Airlines',
+    'United','Lot Polish','TUI','Aeromexico','World2Fly','Spirit Airlines',
+    'Aerolineas Argentinas','JetBlue','Avelo','Air Canada','WestJet','Avianca',
+    'Discover Airlines','Sky Airlines Peru','JetSmart','Gol','Iberojet','Global X',
+    'Air Caraibes','Flair Airlines','Wingo','Latam','Make Up','Sky High',
+    'AllegiantAir','Sun Country'
+  ];
+  if(!S.airlines) S.airlines = {};
+  allAirlines.forEach((name,i)=>{
+    if(!S.airlines[name]) S.airlines[name] = { positions:[], color: AIRLINE_COLORS[i % AIRLINE_COLORS.length] };
+  });
+}
+
+function seedPersonAirlines(){
+  const assignments = {
+    'Arismendy Marte':           ['Southwest Airlines','Air Century'],
+    'Iván Josep Rivas':          ['British Airways'],
+    'Sachariel Márquez':         ['Air France','Air Europa'],
+    'Yeidry Hernández':          ['Copa Airlines'],
+    'Dalvin Cipriam':            ['Delta','Edelweiss Air'],
+    'Arlene Mercedes Rijo':      ['Air Transat','Breeze'],
+    'Fernando Beltre de la Rosa':['Condor','World2Fly'],
+    'José Misael Berroa':        ['Frontier Airlines','Spirit Airlines'],
+    'Alexandra Delgado Torres':  ['United','Aerolineas Argentinas'],
+    'Hendrix Marte':             ['Lot Polish','JetBlue'],
+    'Angel Rijo de Jesús':       ['TUI','Avelo'],
+    'Alan Rafael Paulino':       ['Aeromexico'],
+    'Cándido Santana Collado':   ['Air Canada','Gol'],
+    'Emil Nathanael Sánchez':    ['WestJet','Iberojet'],
+    'Sheridam Peña':             ['Avianca','Global X'],
+    'Esmerling Guillermo':       ['Discover Airlines','Air Caraibes'],
+    'Hilda Sánchez':             ['Sky Airlines Peru','Flair Airlines'],
+    'Madelin María Delgado':     ['JetSmart','Wingo'],
+    'Katrini Peguero Sánchez':   ['Latam','Sky High'],
+    'Kenia Candelaria':          ['Make Up','AllegiantAir','Sun Country'],
+  };
+  if(!S.personAirlines) S.personAirlines = {};
+  S.team.forEach(member=>{
+    if(S.personAirlines[member.id] && S.personAirlines[member.id].length) return; // already set
+    const key = Object.keys(assignments).find(k=>
+      member.name.toLowerCase().split(' ')[0] === k.toLowerCase().split(' ')[0]
+    );
+    if(key) S.personAirlines[member.id] = assignments[key];
+  });
 }
 
 function seedTeam(){
@@ -805,57 +908,8 @@ function seedTeam(){
     {name:'Angelini Sosa Abreu',       waName:'Angelini',  sup:true,  color:'#e84545', terminal:'',  schedule:['C','C','L','L','C','C','C']},
   ];
   S.team = m.map((t,i)=>({id:'m'+i, role:'', ...t}));
-
-  // Seed airlines and person→airline assignments from ASIGNACION AEROLINEAS sheet
-  if(!Object.keys(S.airlines||{}).length){
-    // All airlines with colors
-    const allAirlines = [
-      'Southwest Airlines','British Airways','Air France','Copa Airlines','Delta','Air Transat',
-      'Air Century','Air Europa','Edelweiss Air','Breeze','Condor','Frontier Airlines',
-      'United','Lot Polish','TUI','Aeromexico','World2Fly','Spirit Airlines',
-      'Aerolineas Argentinas','JetBlue','Avelo','Air Canada','WestJet','Avianca',
-      'Discover Airlines','Sky Airlines Peru','JetSmart','Gol','Iberojet','Global X',
-      'Air Caraibes','Flair Airlines','Wingo','Latam','Make Up','Sky High',
-      'AllegiantAir','Sun Country'
-    ];
-    S.airlines = {};
-    allAirlines.forEach((name,i)=>{
-      S.airlines[name] = { positions:[], color: AIRLINE_COLORS[i % AIRLINE_COLORS.length] };
-    });
-
-    // Person → airline mapping (from Excel ASIGNACION AEROLINEAS sheet)
-    const assignments = {
-      'Arismendy Marte':           ['Southwest Airlines','Air Century'],
-      'Iván Josep Rivas':          ['British Airways'],
-      'Sachariel Márquez':         ['Air France','Air Europa'],
-      'Yeidry Hernández':          ['Copa Airlines'],
-      'Dalvin Cipriam':            ['Delta','Edelweiss Air'],
-      'Arlene Mercedes Rijo':      ['Air Transat','Breeze'],
-      'Fernando Beltre de la Rosa':['Condor','World2Fly'],
-      'José Misael Berroa':        ['Frontier Airlines','Spirit Airlines'],
-      'Alexandra Delgado Torres':  ['United','Aerolineas Argentinas'],
-      'Hendrix Marte':             ['Lot Polish','JetBlue'],
-      'Angel Rijo de Jesús':       ['TUI','Avelo'],
-      'Alan Rafael Paulino':       ['Aeromexico'],
-      'Cándido Santana Collado':   ['Air Canada','Gol'],
-      'Emil Nathanael Sánchez':    ['WestJet','Iberojet'],
-      'Sheridam Peña':             ['Avianca','Global X'],
-      'Esmerling Guillermo':       ['Discover Airlines','Air Caraibes'],
-      'Hilda Sánchez':             ['Sky Airlines Peru','Flair Airlines'],
-      'Madelin María Delgado':     ['JetSmart','Wingo'],
-      'Katrini Peguero Sánchez':   ['Latam','Sky High'],
-      'Kenia Candelaria':          ['Make Up','AllegiantAir','Sun Country'],
-    };
-
-    if(!S.personAirlines) S.personAirlines = {};
-    S.team.forEach(member=>{
-      const key = Object.keys(assignments).find(k=>
-        member.name.toLowerCase().includes(k.toLowerCase().split(' ')[0]) ||
-        k.toLowerCase().includes(member.name.toLowerCase().split(' ')[0])
-      );
-      if(key) S.personAirlines[member.id] = assignments[key];
-    });
-  }
+  seedAirlines();
+  seedPersonAirlines();
 }
 
 // ═══════════════════════════════
@@ -1719,17 +1773,22 @@ const SCHED_COLORS = {A:'#17c97a',T9:'#2d7aee',B:'#8b5cf6',BC:'#fb923c',C:'#e845
 function openScheduleModal(){
   const tbody = document.getElementById('scheduleBody');
   tbody.innerHTML = S.team.map(m => {
-    const sched = m.schedule || ['L','L','L','L','L','L','L'];
+    // Ensure 7 days, normalize B+C → BC for display
+    let sched = (m.schedule || []).map(s => s === 'B+C' ? 'BC' : s);
+    while(sched.length < 7) sched.push('L');
+    sched = sched.slice(0, 7);
+
     const cells = sched.map((s,i) => {
-      const col = SCHED_COLORS[s] || 'var(--text3)';
+      const col = SCHED_COLORS[s] || SCHED_COLORS['L'];
       return `<td style="padding:4px 3px;text-align:center;">
         <select class="sched-sel" data-id="${m.id}" data-day="${i}"
           style="background:${col}22;color:${col};border:1px solid ${col}66;border-radius:5px;padding:4px 2px;font-size:12px;font-weight:800;font-family:'IBM Plex Mono',monospace;width:52px;text-align:center;cursor:pointer;outline:none;"
           onchange="onSchedChange(this)">
-          ${SCHED_VALS.map(v=>`<option value="${v}" ${v===s?'selected':''}>${v}</option>`).join('')}
+          ${SCHED_VALS.map(v=>`<option value="${v}"${v===s?' selected':''}>${v}</option>`).join('')}
         </select>
       </td>`;
     }).join('');
+
     return `<tr style="border-bottom:1px solid rgba(30,45,66,.4);">
       <td style="padding:8px 10px;font-size:12px;font-weight:700;color:${m.sup?'var(--red)':'var(--text)'};">
         ${m.sup?'⭐ ':''}${m.name}
@@ -1748,20 +1807,19 @@ function onSchedChange(sel){
 }
 
 function saveSchedule(){
-  // Read all selects back into team schedules
   document.querySelectorAll('.sched-sel').forEach(sel => {
     const m = S.team.find(t=>t.id===sel.dataset.id);
     if(!m) return;
-    if(!m.schedule) m.schedule = ['L','L','L','L','L','L','L'];
+    if(!m.schedule || m.schedule.length < 7) m.schedule = ['L','L','L','L','L','L','L'];
     const day = parseInt(sel.dataset.day);
-    let val = sel.value;
-    // Normalize BC → B+C internally
-    if(val === 'BC') val = 'B+C';
-    m.schedule[day] = val;
+    if(isNaN(day) || day < 0 || day > 6) return;
+    // Store BC as B+C internally
+    m.schedule[day] = sel.value === 'BC' ? 'B+C' : sel.value;
   });
   save();
   closeModal('scheduleModal');
   renderTeamGrid();
+  renderBoard();
   toast('✅ Horario actualizado');
 }
 function renderTeamGrid(){
@@ -2673,24 +2731,37 @@ function updateApiKeyBtn(){
 
 async function callGemini(promptText, maxTokens){
   const key = getApiKey();
-  const res = await fetch(
-    `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${key}`,
-    {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        contents: [{ parts: [{ text: promptText }] }],
-        generationConfig: { maxOutputTokens: maxTokens || 4000, temperature: 0.2 }
-      })
+  if(!key) throw new Error('No hay API key configurada. Toca 🔑 para agregarla.');
+
+  const controller = new AbortController();
+  const timeout = setTimeout(()=>controller.abort(), 30000); // 30 second timeout
+
+  try {
+    const res = await fetch(
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${key}`,
+      {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        signal: controller.signal,
+        body: JSON.stringify({
+          contents: [{ parts: [{ text: promptText }] }],
+          generationConfig: { maxOutputTokens: maxTokens || 4000, temperature: 0.2 }
+        })
+      }
+    );
+    clearTimeout(timeout);
+    if(!res.ok){
+      const err = await res.text();
+      throw new Error('Gemini error '+res.status+': '+err.slice(0,200));
     }
-  );
-  if(!res.ok){
-    const err = await res.text();
-    throw new Error('Gemini error '+res.status+': '+err.slice(0,200));
+    const data = await res.json();
+    if(data.error) throw new Error(data.error.message);
+    return data.candidates?.[0]?.content?.parts?.[0]?.text || '';
+  } catch(e) {
+    clearTimeout(timeout);
+    if(e.name === 'AbortError') throw new Error('Tiempo de espera agotado (30s). Verifica tu conexión.');
+    throw e;
   }
-  const data = await res.json();
-  if(data.error) throw new Error(data.error.message);
-  return data.candidates?.[0]?.content?.parts?.[0]?.text || '';
 }
 
 function openFlightModal(){
