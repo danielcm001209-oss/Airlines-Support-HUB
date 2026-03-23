@@ -556,14 +556,13 @@ header{background:var(--s1);border-bottom:1px solid var(--border);padding:0 16px
     </div>
     <p style="font-size:12px;color:var(--text3);margin-bottom:14px;">Sube o pega los vuelos del día. La IA usará esta info para asignar personas según la actividad real por posición.</p>
 
-    <!-- Upload area — native file input, works on Android Chrome -->
+    <!-- Upload area -->
     <div style="border:2px dashed var(--border2);border-radius:10px;padding:20px 16px;text-align:center;margin-bottom:14px;">
       <div style="font-size:22px;margin-bottom:6px;">📂</div>
       <div style="font-size:13px;font-weight:700;margin-bottom:3px;">Selecciona un archivo</div>
       <div style="font-size:11px;color:var(--text3);margin-bottom:14px;">Excel (.xlsx .csv) · PDF</div>
-      <input type="file" id="flightFileInput" accept=".xlsx,.xls,.csv,.pdf"
-        style="display:block;width:100%;font-size:14px;color:var(--text);background:var(--s1);border:1px solid var(--border2);border-radius:7px;padding:10px;cursor:pointer;"
-        onchange="handleFlightFileInput(event)">
+      <button class="btn btn-outline" style="width:100%;" onclick="document.getElementById('flightFileInput').click()">Seleccionar archivo</button>
+      <input type="file" id="flightFileInput" accept=".xlsx,.xls,.csv,.pdf" style="display:none;" onchange="handleFlightFileInput(event)">
     </div>
 
     <!-- File status -->
@@ -594,9 +593,10 @@ header{background:var(--s1);border-bottom:1px solid var(--border);padding:0 16px
     <div style="font-size:32px;margin-bottom:12px;animation:spin 2s linear infinite;display:inline-block;">✨</div>
     <div style="font-size:15px;font-weight:800;margin-bottom:6px;">Generando asignación…</div>
     <div style="font-size:12px;color:var(--text3);margin-bottom:16px;" id="aiMsg">Leyendo el roster de hoy…</div>
-    <div style="height:4px;background:var(--border);border-radius:2px;overflow:hidden;">
+    <div style="height:4px;background:var(--border);border-radius:2px;overflow:hidden;margin-bottom:16px;">
       <div id="aiBar" style="height:100%;width:0%;background:linear-gradient(90deg,#2d7aee,#8b5cf6);border-radius:2px;transition:width .4s ease;"></div>
     </div>
+    <button class="btn btn-outline" style="font-size:11px;" onclick="closeModal('aiLoading');toast('Generación cancelada');">Cancelar</button>
   </div>
 </div>
 
@@ -2731,35 +2731,45 @@ function updateApiKeyBtn(){
 
 async function callGemini(promptText, maxTokens){
   const key = getApiKey();
-  if(!key) throw new Error('No hay API key configurada. Toca 🔑 para agregarla.');
+  if(!key) throw new Error('No hay API key. Toca 🔑 para agregarla.');
 
   const controller = new AbortController();
-  const timeout = setTimeout(()=>controller.abort(), 30000); // 30 second timeout
+  const timeout = setTimeout(()=>controller.abort(), 45000);
 
   try {
-    const res = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${key}`,
-      {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        signal: controller.signal,
-        body: JSON.stringify({
-          contents: [{ parts: [{ text: promptText }] }],
-          generationConfig: { maxOutputTokens: maxTokens || 4000, temperature: 0.2 }
-        })
-      }
-    );
+    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=${key}`;
+    const res = await fetch(url, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      signal: controller.signal,
+      body: JSON.stringify({
+        contents: [{ role: 'user', parts: [{ text: promptText }] }],
+        generationConfig: {
+          maxOutputTokens: maxTokens || 4000,
+          temperature: 0.2,
+          responseMimeType: 'text/plain'
+        }
+      })
+    });
     clearTimeout(timeout);
+
     if(!res.ok){
-      const err = await res.text();
-      throw new Error('Gemini error '+res.status+': '+err.slice(0,200));
+      const errBody = await res.text();
+      let msg = `HTTP ${res.status}`;
+      try { const j = JSON.parse(errBody); msg = j.error?.message || msg; } catch(e){}
+      throw new Error(msg);
     }
+
     const data = await res.json();
-    if(data.error) throw new Error(data.error.message);
-    return data.candidates?.[0]?.content?.parts?.[0]?.text || '';
-  } catch(e) {
+    if(data.error) throw new Error(data.error.message || JSON.stringify(data.error));
+
+    const text = data.candidates?.[0]?.content?.parts?.[0]?.text;
+    if(!text) throw new Error('Respuesta vacía de Gemini');
+    return text;
+
+  } catch(e){
     clearTimeout(timeout);
-    if(e.name === 'AbortError') throw new Error('Tiempo de espera agotado (30s). Verifica tu conexión.');
+    if(e.name === 'AbortError') throw new Error('Tiempo de espera agotado. Verifica tu conexión.');
     throw e;
   }
 }
