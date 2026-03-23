@@ -254,17 +254,28 @@ header{background:var(--s1);border-bottom:1px solid var(--border);padding:0 16px
         <h2 style="font-size:19px;font-weight:900;">Asignación de Aerolíneas</h2>
         <p style="font-size:12px;color:var(--text3);margin-top:3px;">Asigna qué aerolíneas atiende cada persona. La app sugerirá posiciones basándose en esto.</p>
       </div>
-      <div style="display:flex;gap:7px;">
-        <button class="btn btn-outline" onclick="addAirlineRow()">+ Aerolínea</button>
+      <div style="display:flex;gap:7px;flex-wrap:wrap;">
+        <label class="btn btn-outline" style="cursor:pointer;margin:0;">
+          📂 Subir archivo
+          <input type="file" accept=".xlsx,.xls,.csv,.pdf" style="display:none;" onchange="importAirlinesFile(this.files[0])">
+        </label>
+        <button class="btn btn-outline" onclick="addAirlinePosRow()">+ Agregar manual</button>
         <button class="btn btn-primary" onclick="saveAirlines()">💾 Guardar</button>
       </div>
     </div>
 
-    <!-- Airline → positions mapping -->
+    <!-- Airline definitions -->
     <div style="background:var(--s1);border:1px solid var(--border);border-radius:10px;padding:14px;margin-bottom:16px;">
-      <div style="font-size:10px;font-weight:800;letter-spacing:1px;color:var(--text3);text-transform:uppercase;margin-bottom:10px;">Aerolíneas y sus posiciones habituales</div>
+      <div style="font-size:10px;font-weight:800;letter-spacing:1px;color:var(--text3);text-transform:uppercase;margin-bottom:6px;">Aerolíneas registradas</div>
+      <p style="font-size:12px;color:var(--text3);margin-bottom:10px;">Las posiciones se leen automáticamente de la lista de vuelos del día. Aquí solo defines los colores y registras las aerolíneas.</p>
       <div id="airlinePosList"></div>
       <button class="btn btn-outline" style="font-size:11px;margin-top:6px;" onclick="addAirlinePosRow()">+ Agregar aerolínea</button>
+    </div>
+
+    <!-- Flight list positions preview -->
+    <div id="flightPosPreview" style="background:var(--s1);border:1px solid var(--border);border-radius:10px;padding:14px;margin-bottom:16px;display:none;">
+      <div style="font-size:10px;font-weight:800;letter-spacing:1px;color:var(--green);text-transform:uppercase;margin-bottom:10px;">✈️ Posiciones detectadas en la lista de vuelos de hoy</div>
+      <div id="flightPosMap" style="display:flex;flex-wrap:wrap;gap:6px;"></div>
     </div>
 
     <!-- Person → airline assignment -->
@@ -283,9 +294,13 @@ header{background:var(--s1);border-bottom:1px solid var(--border);padding:0 16px
   <div class="full-page">
     <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;">
       <h2 style="font-size:19px;font-weight:900;">Equipo</h2>
-      <div style="display:flex;gap:7px;">
-        <button class="btn btn-outline" onclick="exportScheduleExcel()" title="Exportar horario a Excel">📊 Exportar Excel</button>
-        <button class="btn btn-outline" onclick="openScheduleModal()" title="Actualizar el horario mensual del equipo">📅 Actualizar Horario</button>
+      <div style="display:flex;gap:7px;flex-wrap:wrap;">
+        <button class="btn btn-outline" onclick="exportScheduleExcel()">📊 Exportar Excel</button>
+        <button class="btn btn-outline" onclick="openScheduleModal()">📅 Editar Horario</button>
+        <label class="btn btn-outline" style="cursor:pointer;margin:0;">
+          📂 Subir Horario
+          <input type="file" accept=".xlsx,.xls,.pdf" style="display:none;" onchange="importScheduleFile(this.files[0])">
+        </label>
         <button class="btn btn-primary" onclick="openMemberModal()">+ Agregar</button>
       </div>
     </div>
@@ -336,69 +351,26 @@ header{background:var(--s1);border-bottom:1px solid var(--border);padding:0 16px
       <select class="fs" id="agentSel" onchange="onAgentChange();showAirlineSuggestions(this.value)"></select>
     </div>
     <div class="form-group" style="flex:0 0 195px;">
-      <label class="fl">Horas extra <span style="color:var(--text3);font-weight:400;text-transform:none;letter-spacing:0;">— turno adicional</span></label>
+      <label class="fl">Horas extra</label>
       <select class="fs" id="extraShiftSel" onchange="onExtraShiftChange()">
         <option value="">Sin horas extra</option>
-        <option value="B">+ Turno B → queda en A+B</option>
-        <option value="C">+ Turno C → queda en A+C / T9+C / B+C</option>
+        <option value="B">+ Turno B → A+B</option>
+        <option value="C">+ Turno C → BC / A+C / T9+C</option>
       </select>
     </div>
   </div>
-  <!-- Extra shift result badge -->
   <div id="extraShiftBadge" style="display:none;margin-bottom:10px;padding:7px 12px;background:rgba(240,165,0,.1);border:1px solid rgba(240,165,0,.3);border-radius:7px;font-size:12px;font-weight:700;color:var(--amber);"></div>
-  <!-- Airline suggestion -->
   <div id="airlineSuggestionBanner" style="display:none;margin-bottom:10px;padding:8px 12px;background:rgba(45,122,238,.08);border:1px solid rgba(45,122,238,.25);border-radius:7px;font-size:12px;color:var(--accent);">
-    <span style="font-weight:700;">✈️ Posiciones sugeridas por aerolínea:</span>
+    <span style="font-weight:700;">✈️ Posiciones sugeridas:</span>
     <span id="airlineSuggestionText" style="margin-left:6px;font-family:'IBM Plex Mono',monospace;font-weight:700;"></span>
     <button onclick="applyAirlineSuggestion()" class="btn btn-outline" style="font-size:11px;padding:3px 8px;margin-left:8px;border-color:var(--accent);color:var(--accent);">Aplicar ↓</button>
   </div>
 
-  <!-- PRIMARY POSITIONS -->
-  <div class="divider"><span id="primaryLabel">Posición inicial (primeras ops)</span></div>
-  <div id="primaryPicker">
-    <div class="pos-section">
-      <div class="pos-section-label">Terminal A</div>
-      <div class="pos-buttons" id="btnTA"></div>
-    </div>
-    <div class="pos-section">
-      <div class="pos-section-label">Terminal B</div>
-      <div class="pos-buttons" id="btnTB"></div>
-    </div>
-    <div class="pos-section">
-      <div class="pos-section-label">Terminal B2</div>
-      <div class="pos-buttons" id="btnTB2"></div>
-    </div>
-    <div class="pos-section" style="background:rgba(14,184,201,.05);border-color:rgba(14,184,201,.2);">
-      <div class="pos-section-label" style="color:var(--cyan);">N Positions</div>
-      <div class="pos-buttons" id="btnN"></div>
-    </div>
-    <div style="display:flex;align-items:center;gap:8px;margin-top:2px;">
-      <span style="font-size:11px;color:var(--text3);">Seleccionado:</span>
-      <span class="pos-range-display" id="primaryDisplay">—</span>
-      <button class="btn btn-outline" style="font-size:11px;padding:3px 9px;" onclick="clearPrimary()">Limpiar</button>
-    </div>
-  </div>
+  <!-- SHIFT INFO BADGE -->
+  <div id="shiftRulesBadge" style="margin-bottom:12px;padding:8px 12px;border-radius:7px;font-size:11px;color:var(--text2);background:var(--s1);border:1px solid var(--border);"></div>
 
-  <!-- SPECIAL TASKS -->
-  <div class="divider"><span>Tareas / Vehículos</span></div>
-  <div class="task-buttons" id="taskBtns"></div>
-
-  <!-- MEAL -->
-  <div class="divider"><span>Comida</span></div>
-  <div class="frow">
-    <div class="form-group">
-      <label class="fl">Tipo</label>
-      <select class="fs" id="mealType">
-        <option value="">Ninguna</option>
-        <option value="Almuerzo">Almuerzo</option>
-        <option value="Cena">Cena</option>
-      </select>
-    </div>
-    <div class="form-group" style="flex:0 0 105px;">
-      <label class="fl">Hora</label>
-      <input class="fi" id="mealTime" placeholder="13:00">
-    </div>
-  </div>
+  <!-- DYNAMIC SECTIONS — built by buildModalSections() -->
+  <div id="modalSections"></div>
 
   <!-- RADIO -->
   <div class="form-group">
@@ -406,50 +378,14 @@ header{background:var(--s1);border-bottom:1px solid var(--border);padding:0 16px
     <input class="fi" id="radioNum" type="number" placeholder="ej: 10" style="max-width:100px;">
   </div>
 
-  <!-- POST-MEAL POSITIONS — shown only for A, T9, C -->
-  <div id="afterMealSection">
-    <div class="divider"><span id="afterLabel">Posición después de comida</span></div>
-    <div>
-      <div class="pos-section">
-        <div class="pos-section-label">Terminal A</div>
-        <div class="pos-buttons" id="btnTA2"></div>
-      </div>
-      <div class="pos-section">
-        <div class="pos-section-label">Terminal B</div>
-        <div class="pos-buttons" id="btnTB22"></div>
-      </div>
-      <div class="pos-section">
-        <div class="pos-section-label">Terminal B2</div>
-        <div class="pos-buttons" id="btnTB222"></div>
-      </div>
-      <div class="pos-section" style="background:rgba(14,184,201,.05);border-color:rgba(14,184,201,.2);">
-        <div class="pos-section-label" style="color:var(--cyan);">N Positions</div>
-        <div class="pos-buttons" id="btnN2"></div>
-      </div>
-      <div style="display:flex;align-items:center;gap:8px;margin-top:2px;">
-        <span style="font-size:11px;color:var(--text3);">Seleccionado:</span>
-        <span class="pos-range-display" id="afterDisplay">—</span>
-        <button class="btn btn-outline" style="font-size:11px;padding:3px 9px;" onclick="clearAfter()">Limpiar</button>
-      </div>
-    </div>
-  </div>
+  <!-- SPECIAL TASKS -->
+  <div class="divider"><span>Tareas / Vehículos</span></div>
+  <div class="task-buttons" id="taskBtns"></div>
 
   <!-- COVERS -->
-  <div class="divider"><span>Coberturas de comida</span></div>
+  <div class="divider"><span>Coberturas</span></div>
   <div id="coverRows"></div>
   <button class="btn btn-outline" style="font-size:11px;margin-bottom:10px;" onclick="addCoverRow()">+ Agregar cobertura</button>
-
-  <!-- CIERRE -->
-  <div class="divider"><span>Cierre</span></div>
-  <div class="pos-section" style="margin-bottom:6px;">
-    <div class="pos-buttons" id="btnCierre"></div>
-  </div>
-  <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;">
-    <span style="font-size:11px;color:var(--text3);">Seleccionado:</span>
-    <span class="pos-range-display" id="cierreDisplay">—</span>
-    <input class="fi" id="cierreNote" placeholder="ej: OPS ARAJET" style="flex:1;font-size:12px;padding:5px 9px;">
-    <button class="btn btn-outline" style="font-size:11px;padding:3px 9px;" onclick="clearCierre()">Limpiar</button>
-  </div>
 
   <!-- EXTRA NOTES -->
   <div class="form-group">
@@ -1009,18 +945,21 @@ function renderCard(duty, shift, idx){
   const m=S.team.find(t=>t.id===duty.agentId);
   if(!m) return '';
   const init=m.name.split(' ').map(p=>p[0]).join('').slice(0,2).toUpperCase();
+  const rules = getShiftRules(shift.id);
   let rows='';
-  // Check position limit
   const limitWarn = checkPositionLimit(duty);
   if(limitWarn) rows+=`<div style="font-size:10px;color:var(--red);margin-bottom:4px;font-weight:700;">⚠️ Máx 3 pos sin vehículo</div>`;
-  if(duty.primaryPos) rows+=dr('Pendiente',`<span class="bp">${duty.primaryPos}</span>`);
+  if(duty.primaryPos)   rows+=dr('Primeras ops',`<span class="bp">${duty.primaryPos}</span>`);
   if(duty.specialTasks) duty.specialTasks.split(',').filter(t=>t.trim()).forEach(t=>rows+=dr('Tarea',`<span class="bt">${t.trim()}</span>`));
   if(duty.mealType&&duty.mealTime) rows+=dr(duty.mealType,`<span class="bm">${duty.mealTime}</span>`);
-  if(duty.radioNum) rows+=dr('Radio',`<span style="color:var(--cyan);font-family:'IBM Plex Mono',monospace;">📻 ${duty.radioNum}</span>`);
-  if(duty.afterMealPos) rows+=dr('Post-comida',`<span class="bp">${duty.afterMealPos}</span>`);
+  if(duty.radioNum)     rows+=dr('Radio',`<span style="color:var(--cyan);font-family:'IBM Plex Mono',monospace;">📻 ${duty.radioNum}</span>`);
+  if(duty.coverPos)     rows+=dr('Cubre pos',`<span class="bp">${duty.coverPos}</span>`);
+  if(duty.afterMealPos) rows+=dr('Post-almuerzo',`<span class="bp">${duty.afterMealPos}</span>`);
+  if(duty.cenaTime)     rows+=dr('Cena',`<span class="bm">${duty.cenaTime}</span>${rules.cenaDur?` <span style="font-size:10px;color:var(--text3);">(${rules.cenaDur}min)</span>`:''}`);
   (duty.covers||[]).forEach(c=>{if(c.who||c.pos) rows+=dr('Cubre',`<span class="bc">${c.who?'Cena '+c.who:''}${c.time?' a las '+c.time:''}${c.pos?' '+c.pos:''}</span>`);});
-  if(duty.cierrePos) rows+=dr('Cierre',`<span class="bp">${duty.cierrePos}</span>`);
-  if(duty.extraNotes) rows+=dr('Nota',`<span style="color:var(--text2);">${duty.extraNotes}</span>`);
+  if(duty.cierrePos)    rows+=dr('Cierre',`<span class="bp">${duty.cierrePos}</span>`);
+  if(duty.extraNotes)   rows+=dr('Nota',`<span style="color:var(--text2);">${duty.extraNotes}</span>`);
+  if(rules.noAssign)    rows+=`<div style="font-size:11px;color:var(--text3);font-style:italic;">Turno D — guardia nocturna</div>`;
 
   return `<div class="agent-card">
     <div class="atop">
@@ -1143,72 +1082,296 @@ function getSelectedTasks(){
 // ASSIGN MODAL
 // ═══════════════════════════════
 
-// Shifts where post-meal position makes sense
-const SHIFTS_WITH_AFTER = ['A','T9','C','A+B','A+C','T9+C','B+C'];
-// Shifts where B arrives, eats, then starts working (no pre-meal position)
-const SHIFTS_B_STYLE = ['B'];
+// ═══════════════════════════════
+// SHIFT RULES
+// ═══════════════════════════════
+// Per-shift rules:
+// A:   primeras ops + almuerzo (1hr, default 13:00) + post-almuerzo pos
+// T9:  almuerzo (1hr, default 13:00) + post-almuerzo pos (no primeras ops)
+// B:   almuerzo primero (default 11:30) + cubre posiciones + cena 19:00
+// BC:  almuerzo a llegada + posiciones + cena 17:00-18:00 (45min) + cierre
+// C:   a llegada cubre pos + cena 17:00-18:00 (1hr) + cierre
+// D:   solo nombre, sin asignación
 
-let currentModalShift = null; // track effective shift for UI decisions
+const SHIFT_RULES = {
+  // primerasOps: shows "Primeras Ops" position picker
+  // hasAfterMeal: shows post-lunch position picker  
+  // hasCoverPos: shows "Cubre posiciones X" picker
+  // hasCena: shows dinner time input
+  // cenaDur: dinner duration in minutes (null = 60)
+  // hasCierre: shows closing position picker
+  // noAssign: no positions at all (Turno D)
+  A: {
+    label:'Turno A — 08:00 a 17:00',
+    primerasOps:true, hasAfterMeal:true, hasCoverPos:false,
+    meals:[{type:'Almuerzo',time:'13:00',dur:60,label:'Almuerzo (1 hora)'}],
+    hasCena:false, hasCierre:false
+  },
+  T9: {
+    label:'Turno T9 — 09:00 a 18:00',
+    primerasOps:true, hasAfterMeal:true, hasCoverPos:false,
+    meals:[{type:'Almuerzo',time:'13:00',dur:60,label:'Almuerzo (1 hora)'}],
+    hasCena:false, hasCierre:false
+  },
+  B: {
+    label:'Turno B — 11:00 a 20:00',
+    primerasOps:false, hasAfterMeal:false, hasCoverPos:true,
+    meals:[{type:'Almuerzo',time:'11:30',dur:null,label:'Almuerzo (antes de entrar a rampa)'}],
+    hasCena:true, cenaDefault:'19:00', cenaDur:null, hasCierre:false
+  },
+  'B+C': {
+    label:'Turno BC — 11:00 a 00:00',
+    primerasOps:false, hasAfterMeal:false, hasCoverPos:true,
+    meals:[{type:'Almuerzo',time:'11:30',dur:null,label:'Almuerzo (a la llegada)'}],
+    hasCena:true, cenaDefault:'17:00', cenaDur:45, hasCierre:true
+  },
+  C: {
+    label:'Turno C — 15:00 a 00:00',
+    primerasOps:false, hasAfterMeal:false, hasCoverPos:true,
+    meals:[],
+    hasCena:true, cenaDefault:'17:00', cenaDur:60, hasCierre:true
+  },
+  D: {
+    label:'Turno D — 23:00 a 08:00',
+    primerasOps:false, hasAfterMeal:false, hasCoverPos:false,
+    meals:[], hasCena:false, hasCierre:false, noAssign:true
+  },
+  'A+B': {
+    label:'Extra A→B — 08:00 a 20:00',
+    primerasOps:true, hasAfterMeal:true, hasCoverPos:true,
+    meals:[{type:'Almuerzo',time:'13:00',dur:60,label:'Almuerzo (1 hora)'}],
+    hasCena:true, cenaDefault:'19:00', cenaDur:null, hasCierre:false
+  },
+  'A+C': {
+    label:'Extra A→C — 08:00 a 00:00',
+    primerasOps:true, hasAfterMeal:true, hasCoverPos:true,
+    meals:[{type:'Almuerzo',time:'13:00',dur:60,label:'Almuerzo (1 hora)'}],
+    hasCena:true, cenaDefault:'17:00', cenaDur:60, hasCierre:true
+  },
+  'T9+C': {
+    label:'Extra T9→C — 09:00 a 00:00',
+    primerasOps:true, hasAfterMeal:true, hasCoverPos:true,
+    meals:[{type:'Almuerzo',time:'13:00',dur:60,label:'Almuerzo (1 hora)'}],
+    hasCena:true, cenaDefault:'17:00', cenaDur:60, hasCierre:true
+  },
+};
 
-function shiftHasAfterMeal(shiftId){
-  return SHIFTS_WITH_AFTER.includes(shiftId);
+function getShiftRules(shiftId){ return SHIFT_RULES[shiftId] || SHIFT_RULES['A']; }
+
+let currentModalShift = null;
+
+function buildModalSections(shiftId, savedDuty){
+  const rules = getShiftRules(shiftId);
+  const c = document.getElementById('modalSections');
+  c.innerHTML = '';
+
+  // Shift info badge
+  const badge = document.getElementById('shiftRulesBadge');
+  badge.textContent = rules.label;
+
+  if(rules.noAssign){
+    c.innerHTML = `<div style="padding:16px;text-align:center;color:var(--text3);font-size:13px;">Turno D — Solo se registra quién está de guardia nocturna. Sin asignación de posiciones.</div>`;
+    return;
+  }
+
+  let html = '';
+
+  // 1. PRIMERAS OPS — only Turno A
+  if(rules.primerasOps){
+    html += `<div class="divider"><span>Primeras Ops — Posición inicial</span></div>`;
+    html += posPicker('primSel','prim');
+  }
+
+  // 2. MEALS
+  rules.meals.forEach((meal, i) => {
+    html += `<div class="divider"><span>${meal.label}</span></div>`;
+    html += `<div class="frow">
+      <div class="form-group"><label class="fl">Tipo</label>
+        <select class="fs" id="mealType${i}">
+          <option value="Almuerzo"${meal.type==='Almuerzo'?' selected':''}>Almuerzo</option>
+          <option value="Cena"${meal.type==='Cena'?' selected':''}>Cena</option>
+        </select>
+      </div>
+      <div class="form-group" style="flex:0 0 105px;"><label class="fl">Hora</label>
+        <input class="fi" id="mealTime${i}" value="${savedDuty?.mealTime||meal.time}" placeholder="${meal.time}">
+      </div>
+      ${meal.dur ? `<div class="form-group" style="flex:0 0 80px;"><label class="fl">Duración</label>
+        <div style="font-size:12px;color:var(--text3);padding-top:10px;">${meal.dur} min</div></div>` : ''}
+    </div>`;
+  });
+
+  // 3. COVER POSITIONS
+  if(rules.hasCoverPos){
+    const label = shiftId==='C'     ? 'A su llegada cubre posiciones' :
+                  shiftId==='B+C'   ? 'Cubre posiciones (después de almorzar)' :
+                  shiftId==='B'     ? 'Cubre posiciones (después de almorzar)' :
+                  shiftId==='A+B'   ? 'Cubre posiciones (turno B)' :
+                  shiftId==='A+C'   ? 'A su llegada cubre posiciones' :
+                  shiftId==='T9+C'  ? 'A su llegada cubre posiciones' : 'Cubre posiciones';
+    html += `<div class="divider"><span>${label}</span></div>`;
+    html += posPicker('coverPosSel','coverpos');
+  }
+
+  // 4. POST-MEAL POSITIONS (A, T9 style)
+  if(rules.hasAfterMeal){
+    html += `<div class="divider"><span>Posición después de almuerzo</span></div>`;
+    html += posPicker('afterSel','after');
+  }
+
+  // 5. CENA
+  if(rules.hasCena){
+    const dur = rules.cenaDur || 60;
+    const durLabel = dur === 45 ? '45 min' : '1 hora';
+    const defaultTime = rules.cenaDefault || '17:00';
+    html += `<div class="divider"><span>Cena (${durLabel})</span></div>`;
+    html += `<div class="frow" style="align-items:center;">
+      <div class="form-group" style="flex:0 0 130px;"><label class="fl">Hora de cena</label>
+        <select class="fs" id="cenaTime" onchange="updateCenaReturn(${dur})">
+          <option value="17:00"${(savedDuty?.cenaTime||defaultTime)==='17:00'?' selected':''}>17:00</option>
+          <option value="17:30"${(savedDuty?.cenaTime||defaultTime)==='17:30'?' selected':''}>17:30</option>
+          <option value="18:00"${(savedDuty?.cenaTime||defaultTime)==='18:00'?' selected':''}>18:00</option>
+          <option value="18:30"${(savedDuty?.cenaTime||defaultTime)==='18:30'?' selected':''}>18:30</option>
+          <option value="19:00"${(savedDuty?.cenaTime||defaultTime)==='19:00'?' selected':''}>19:00</option>
+        </select>
+      </div>
+      <div id="cenaReturn" style="font-size:11px;color:var(--text3);padding-top:18px;margin-left:8px;"></div>
+    </div>`;
+  }
+
+  // 6. CIERRE
+  if(rules.hasCierre){
+    html += `<div class="divider"><span>Cierre</span></div>`;
+    html += posPicker('cierreSel','cierre');
+    html += `<div style="display:flex;align-items:center;gap:8px;margin-top:4px;margin-bottom:6px;">
+      <input class="fi" id="cierreNote" placeholder="ej: OPS ARAJET" style="flex:1;font-size:12px;padding:5px 9px;">
+    </div>`;
+  }
+
+  c.innerHTML = html;
+
+  // Build position button pickers
+  if(rules.primerasOps) buildPickerBtns('prim', primSel);
+  if(rules.hasCoverPos) buildPickerBtns('coverpos', coverPosSel);
+  if(rules.hasAfterMeal) buildPickerBtns('after', afterSel);
+  if(rules.hasCierre) buildPickerBtns('cierre', cierreSel);
+
+  // Show cena return time
+  if(rules.hasCena) updateCenaReturn(rules.cenaDur||60);
+
+  // Restore saved values
+  if(savedDuty){
+    if(rules.primerasOps && savedDuty.primaryPos) { primSel=parseRangeToPositions(savedDuty.primaryPos); buildPickerBtns('prim',primSel); }
+    if(rules.hasCoverPos && savedDuty.coverPos) { coverPosSel=parseRangeToPositions(savedDuty.coverPos); buildPickerBtns('coverpos',coverPosSel); }
+    if(rules.hasAfterMeal && savedDuty.afterMealPos) { afterSel=parseRangeToPositions(savedDuty.afterMealPos); buildPickerBtns('after',afterSel); }
+    if(rules.hasCierre && savedDuty.cierrePos) {
+      cierreSel=parseRangeToPositions(savedDuty.cierrePos.split(' - ')[0]);
+      buildPickerBtns('cierre',cierreSel);
+      const note = savedDuty.cierrePos.includes(' - ') ? savedDuty.cierrePos.split(' - ').slice(1).join(' - ') : '';
+      const cn = document.getElementById('cierreNote');
+      if(cn) cn.value = note;
+    }
+    // Restore meal time
+    const mt0 = document.getElementById('mealTime0');
+    if(mt0 && savedDuty.mealTime) mt0.value = savedDuty.mealTime;
+    const ct = document.getElementById('cenaTime');
+    if(ct && savedDuty.cenaTime) ct.value = savedDuty.cenaTime;
+  }
 }
 
-function updateAfterMealVisibility(shiftId){
-  const show = shiftHasAfterMeal(shiftId);
-  document.getElementById('afterMealSection').style.display = show ? '' : 'none';
-  if(!show){ afterSel=[]; updateDisplay('afterDisplay', afterSel); }
-  // For B: rename primary label to "Posición al llegar / después de almuerzo"
-  const isBStyle = SHIFTS_B_STYLE.includes(shiftId) || shiftId==='B+C';
-  document.getElementById('primaryLabel').textContent = isBStyle
-    ? 'Posición (entra, almuerza, y cubre estas posiciones)'
-    : 'Posición inicial (primeras ops)';
-  if(shiftId==='C'||shiftId==='B+C'){
-    document.getElementById('afterLabel').textContent = 'Posición después de cena';
-  } else {
-    document.getElementById('afterLabel').textContent = 'Posición después de almuerzo';
+function updateCenaReturn(dur){
+  const sel = document.getElementById('cenaTime');
+  const ret = document.getElementById('cenaReturn');
+  if(!sel||!ret) return;
+  const returnTime = addMinutes(sel.value, dur||60);
+  ret.textContent = `→ Regresa a las ${returnTime}`;
+}
+
+function addMinutes(timeStr, mins){
+  if(!timeStr || !timeStr.includes(':')) return '';
+  const [h,m] = timeStr.split(':').map(Number);
+  const total = h*60 + m + mins;
+  return String(Math.floor(total/60)%24).padStart(2,'0') + ':' + String(total%60).padStart(2,'0');
+}
+
+function posPicker(selVar, prefix){
+  return `<div style="display:flex;flex-direction:column;gap:6px;margin-bottom:4px;">
+    <div class="pos-section"><div class="pos-section-label">Terminal A</div><div class="pos-buttons" id="btn_${prefix}_TA"></div></div>
+    <div class="pos-section"><div class="pos-section-label">Terminal B</div><div class="pos-buttons" id="btn_${prefix}_TB"></div></div>
+    <div class="pos-section"><div class="pos-section-label">Terminal B2</div><div class="pos-buttons" id="btn_${prefix}_TB2"></div></div>
+    <div class="pos-section" style="background:rgba(14,184,201,.05);border-color:rgba(14,184,201,.2);"><div class="pos-section-label" style="color:var(--cyan);">N</div><div class="pos-buttons" id="btn_${prefix}_N"></div></div>
+    <div style="display:flex;align-items:center;gap:8px;margin-top:2px;">
+      <span style="font-size:11px;color:var(--text3);">Seleccionado:</span>
+      <span class="pos-range-display" id="disp_${prefix}">—</span>
+      <button class="btn btn-outline" style="font-size:11px;padding:3px 9px;" onclick="clearPickerSel('${selVar}','${prefix}')">Limpiar</button>
+    </div>
+  </div>`;
+}
+
+function buildPickerBtns(prefix, selArr){
+  const groups = { TA:POS.TA, TB:POS.TB, TB2:POS.TB2, N:POS.N };
+  for(const [grp, positions] of Object.entries(groups)){
+    const el = document.getElementById(`btn_${prefix}_${grp}`);
+    if(!el) continue;
+    el.innerHTML = positions.map(p=>`<button class="pos-btn${selArr.includes(p)?' sel':''}" onclick="togglePickerPos('${prefix}','${p}')">${p}</button>`).join('');
   }
+  const disp = document.getElementById(`disp_${prefix}`);
+  if(disp) disp.textContent = posToRange(selArr)||'—';
+}
+
+// Picker state — one array per picker type
+let primSel=[], coverPosSel=[], afterSel=[], cierreSel=[];
+
+function togglePickerPos(prefix, p){
+  const map = {prim:'primSel', coverpos:'coverPosSel', after:'afterSel', cierre:'cierreSel'};
+  const varName = map[prefix];
+  if(!varName) return;
+  const arr = window[varName] || eval(varName);
+  const selArr = getPickerArr(prefix);
+  const i = selArr.indexOf(p);
+  if(i>-1) selArr.splice(i,1); else selArr.push(p);
+  buildPickerBtns(prefix, selArr);
+}
+
+function getPickerArr(prefix){
+  if(prefix==='prim') return primSel;
+  if(prefix==='coverpos') return coverPosSel;
+  if(prefix==='after') return afterSel;
+  if(prefix==='cierre') return cierreSel;
+  return [];
+}
+
+function clearPickerSel(selVar, prefix){
+  if(selVar==='primSel') primSel=[];
+  else if(selVar==='coverPosSel') coverPosSel=[];
+  else if(selVar==='afterSel') afterSel=[];
+  else if(selVar==='cierreSel') cierreSel=[];
+  buildPickerBtns(prefix, []);
 }
 
 function computeExtraShift(baseShift, extraShift){
   if(!extraShift) return baseShift;
-  const combos = {
-    'A+B':'A+B', 'T9+B':'A+B', // T9+B not real, map to closest
-    'A+C':'A+C', 'T9+C':'T9+C', 'B+C':'B+C',
-  };
+  const combos = {'A+B':'A+B','T9+B':'A+B','A+C':'A+C','T9+C':'T9+C','B+C':'B+C'};
   return combos[baseShift+'+'+extraShift] || (baseShift+'+'+extraShift);
 }
 
-function onAgentChange(){
-  // Re-evaluate extra shift options based on agent's base shift
-  onExtraShiftChange();
-}
+function onAgentChange(){ onExtraShiftChange(); }
 
 function onExtraShiftChange(){
-  const agentId = document.getElementById('agentSel').value;
   const extra = document.getElementById('extraShiftSel').value;
   const badge = document.getElementById('extraShiftBadge');
   const baseShift = modalShift;
-
   if(extra){
     const combined = computeExtraShift(baseShift, extra);
     const def = SHIFT_DEFS.find(s=>s.id===combined) || {label:'Extra '+baseShift+'→'+extra, time:'', color:'var(--amber)'};
     badge.style.display='';
     badge.innerHTML=`✦ Horas extra — quedará en <span style="color:${def.color};">${def.label} (${def.time||combined})</span>`;
     currentModalShift = combined;
-    updateAfterMealVisibility(combined);
-    // Update meal defaults for combined shift
-    const meal = MEAL_DEFAULTS[combined] || MEAL_DEFAULTS[baseShift];
-    if(meal && !document.getElementById('mealTime').value){
-      document.getElementById('mealType').value=meal.type;
-      document.getElementById('mealTime').value=meal.time;
-    }
   } else {
     badge.style.display='none';
     currentModalShift = baseShift;
-    updateAfterMealVisibility(baseShift);
   }
-  refreshPosBtns();
+  primSel=[]; coverPosSel=[]; afterSel=[]; cierreSel=[];
+  buildModalSections(currentModalShift, null);
 }
 
 function openAssignModal(shiftId, editIdx, preselect){
@@ -1240,50 +1403,39 @@ function openAssignModal(shiftId, editIdx, preselect){
     sel.appendChild(g);
   }
 
-  // Reset
-  primSel=[]; afterSel=[]; cierreSel=[];
-  document.getElementById('mealType').value='';
-  document.getElementById('mealTime').value='';
+  // Reset state
+  primSel=[]; coverPosSel=[]; afterSel=[]; cierreSel=[];
   document.getElementById('radioNum').value='';
   document.getElementById('extraNotes').value='';
-  document.getElementById('cierreNote').value='';
   document.getElementById('coverRows').innerHTML='';
   document.getElementById('extraShiftSel').value='';
   document.getElementById('extraShiftBadge').style.display='none';
   buildTaskBtns([]);
 
-  // Show/hide after-meal section based on shift
-  updateAfterMealVisibility(shiftId);
-
+  // Get saved duty if editing
+  let savedDuty = null;
   if(editIdx!==null){
-    const d=getDuties(shiftId)[editIdx];
-    if(d){
-      sel.value=d.agentId;
-      if(d.primaryPos&&d.primaryPos!=='—') primSel=parseRangeToPositions(d.primaryPos);
-      if(d.afterMealPos&&d.afterMealPos!=='—') afterSel=parseRangeToPositions(d.afterMealPos);
-      if(d.cierrePos) cierreSel=parseRangeToPositions(d.cierrePos.split(' - ')[0]);
-      document.getElementById('cierreNote').value=d.cierrePos?.includes(' - ')?d.cierrePos.split(' - ').slice(1).join(' - '):'';
-      document.getElementById('mealType').value=d.mealType||'';
-      document.getElementById('mealTime').value=d.mealTime||'';
-      document.getElementById('radioNum').value=d.radioNum||'';
-      document.getElementById('extraNotes').value=d.extraNotes||'';
-      const tasks=(d.specialTasks||'').split(',').map(t=>t.trim()).filter(Boolean);
+    savedDuty = getDuties(shiftId)[editIdx] || null;
+    if(savedDuty){
+      sel.value=savedDuty.agentId;
+      document.getElementById('radioNum').value=savedDuty.radioNum||'';
+      document.getElementById('extraNotes').value=savedDuty.extraNotes||'';
+      const tasks=(savedDuty.specialTasks||'').split(',').map(t=>t.trim()).filter(Boolean);
       buildTaskBtns(tasks.filter(t=>SPECIAL_TASKS.includes(t)));
-      (d.covers||[]).forEach(c=>addCoverRow(c));
+      (savedDuty.covers||[]).forEach(c=>addCoverRow(c));
     }
-    document.getElementById('assignTitle').textContent='Editar — '+(S.team.find(t=>t.id===getDuties(shiftId)[editIdx]?.agentId)?.name||'');
+    document.getElementById('assignTitle').textContent='Editar — '+(S.team.find(t=>t.id===savedDuty?.agentId)?.name||'');
   } else {
     document.getElementById('assignTitle').textContent='Asignar — Turno '+shiftId;
     if(preselect) sel.value=preselect;
     else if(scheduled.length) sel.value=scheduled[0].id;
-    const meal=MEAL_DEFAULTS[shiftId];
-    if(meal){ document.getElementById('mealType').value=meal.type; document.getElementById('mealTime').value=meal.time; }
   }
 
-  // Show airline suggestions for the selected agent
-  showAirlineSuggestions(sel.value);
+  // Build dynamic sections for this shift
+  buildModalSections(shiftId, savedDuty);
 
-  refreshPosBtns();
+  // Show airline suggestions
+  showAirlineSuggestions(sel.value);
   document.getElementById('assignModal').classList.add('open');
 }
 
@@ -1349,15 +1501,26 @@ function saveAssign(){
   const agentId=document.getElementById('agentSel').value;
   if(!agentId){ toast('Selecciona un agente','error'); return; }
 
-  // Determine effective shift (may be combined if extra hours selected)
   const extra=document.getElementById('extraShiftSel').value;
   const effectiveShift = extra ? computeExtraShift(modalShift, extra) : modalShift;
+  const rules = getShiftRules(effectiveShift);
 
-  const primaryPos=posToRange(primSel)==='—'?'':posToRange(primSel);
-  const afterMealPos=shiftHasAfterMeal(effectiveShift)?(posToRange(afterSel)==='—'?'':posToRange(afterSel)):'';
-  const cierreRange=posToRange(cierreSel)==='—'?'':posToRange(cierreSel);
-  const cierreNote=document.getElementById('cierreNote').value.trim();
-  const cierrePos=cierreRange+(cierreNote?' - '+cierreNote:'');
+  // Collect positions from pickers
+  const primaryPos  = rules.primerasOps  ? (posToRange(primSel)||'')     : '';
+  const coverPos    = rules.hasCoverPos  ? (posToRange(coverPosSel)||'') : '';
+  const afterMealPos= rules.hasAfterMeal ? (posToRange(afterSel)||'')    : '';
+  const cierreRange = rules.hasCierre    ? (posToRange(cierreSel)||'')   : '';
+  const cierreNoteEl= document.getElementById('cierreNote');
+  const cierreNote  = cierreNoteEl ? cierreNoteEl.value.trim() : '';
+  const cierrePos   = cierreRange + (cierreNote?' - '+cierreNote:'');
+
+  // Collect meal times
+  const mealTime0El = document.getElementById('mealTime0');
+  const mealTime    = mealTime0El ? mealTime0El.value.trim() : '';
+  const mealType0El = document.getElementById('mealType0');
+  const mealType    = mealType0El ? mealType0El.value : (rules.meals[0]?.type||'');
+  const cenaTimeEl  = document.getElementById('cenaTime');
+  const cenaTime    = cenaTimeEl ? cenaTimeEl.value.trim() : '';
 
   const covers=[...document.querySelectorAll('#coverRows .cover-row')].map(row=>({
     who:row.querySelector('.cover-person-sel').value.trim(),
@@ -1368,10 +1531,12 @@ function saveAssign(){
   const duty={
     agentId,
     primaryPos,
+    coverPos,
     radioNum:document.getElementById('radioNum').value.trim(),
     specialTasks:getSelectedTasks(),
-    mealType:document.getElementById('mealType').value,
-    mealTime:document.getElementById('mealTime').value.trim(),
+    mealType,
+    mealTime,
+    cenaTime,
     afterMealPos,
     covers,
     cierrePos,
@@ -1379,22 +1544,17 @@ function saveAssign(){
   };
 
   if(!S.duties[S.activeDate]) S.duties[S.activeDate]={};
-
-  // snapshot before mutating
   pushUndo();
 
-  // If extra shift: remove from original shift slot and place in combined shift
   if(extra && modalEditIdx!==null){
     S.duties[S.activeDate][modalShift]?.splice(modalEditIdx,1);
   } else if(extra){
-    // Make sure we're not duplicating — remove from base shift if already there
     const base = S.duties[S.activeDate][modalShift]||[];
     const existingIdx = base.findIndex(d=>d.agentId===agentId);
     if(existingIdx>-1) base.splice(existingIdx,1);
   }
 
   if(!S.duties[S.activeDate][effectiveShift]) S.duties[S.activeDate][effectiveShift]=[];
-
   if(!extra && modalEditIdx!==null) S.duties[S.activeDate][effectiveShift][modalEditIdx]=duty;
   else S.duties[S.activeDate][effectiveShift].push(duty);
 
@@ -1443,16 +1603,23 @@ function buildText(date){
     const duties=((S.duties[date]||{})[shift.id])||[];
     if(!duties.length) return;
     out+=`\n*${shift.label}*\n`;
+    const rules = getShiftRules(shift.id);
     duties.forEach(duty=>{
       const m=S.team.find(t=>t.id===duty.agentId);
       if(!m) return;
       const mention = m.waName ? `@${m.waName}` : `@${m.name}`;
       out+=`\n${mention}\n`;
+      if(rules.noAssign) return; // Turno D — just the name
       if(duty.primaryPos) out+=`Pendiente primeras ops ${duty.primaryPos}\n`;
       if(duty.specialTasks) duty.specialTasks.split(',').forEach(t=>{if(t.trim()) out+=t.trim()+'\n';});
       if(duty.mealType&&duty.mealTime) out+=`${duty.mealType} ${duty.mealTime}\n`;
       if(duty.radioNum) out+=`Radio ${duty.radioNum}\n`;
+      if(duty.coverPos) out+=`Cubre posiciones ${duty.coverPos}\n`;
       if(duty.afterMealPos) out+=`Luego del almuerzo cubre ${duty.afterMealPos}\n`;
+      if(duty.cenaTime){
+        const dur = rules.cenaDur ? ` (${rules.cenaDur} min)` : '';
+        out+=`Cena ${duty.cenaTime}${dur}\n`;
+      }
       (duty.covers||[]).forEach(c=>{
         let l='Cubre';
         if(c.who) l+=' cena de '+c.who;
@@ -1885,12 +2052,17 @@ function showAirlineSuggestions(agentId){
   if(!agentId || !banner){ if(banner) banner.style.display='none'; return; }
   const member = S.team.find(m=>m.id===agentId);
   if(!member){ banner.style.display='none'; return; }
+
+  const memberAirlines = (S.personAirlines||{})[agentId]||[];
+  if(!memberAirlines.length){ banner.style.display='none'; return; }
+
   const suggestions = getPositionSuggestions(agentId);
   if(!suggestions.length){ banner.style.display='none'; return; }
-  // Check position limit
+
   const count = suggestions.length;
-  const limitNote = count > 3 ? ` ⚠️ más de 3 — asignar TTP119/CGP17` : '';
-  text.textContent = suggestions.join(', ') + limitNote;
+  const limitNote = count > 3 ? ' ⚠️ +3 pos → asignar TTP119/CGP17' : '';
+  const source = (flightData && parseFlightList(flightData).length) ? '(de lista de vuelos hoy)' : '(estático)';
+  text.textContent = suggestions.join(', ') + limitNote + ' ' + source;
   banner.style.display='block';
 }
 
@@ -1920,23 +2092,58 @@ const AIRLINE_COLORS = ['#2d7aee','#17c97a','#f0a500','#e84545','#8b5cf6','#0eb8
 function renderAirlinesPage(){
   renderAirlinePosMap();
   renderPersonAirlines();
+  renderFlightPosPreview();
+}
+
+function renderFlightPosPreview(){
+  const preview = document.getElementById('flightPosPreview');
+  const map = document.getElementById('flightPosMap');
+  if(!flightData || !flightData.trim()){ preview.style.display='none'; return; }
+
+  const flights = parseFlightList(flightData);
+  if(!flights.length){ preview.style.display='none'; return; }
+
+  // Group by position
+  const byPos = {};
+  flights.forEach(f=>{
+    if(!byPos[f.pos]) byPos[f.pos]=new Set();
+    byPos[f.pos].add(f.airline);
+  });
+
+  // Sort positions
+  const sorted = Object.entries(byPos).sort((a,b)=>{
+    const na = parseInt(a[0].replace(/\D/g,''));
+    const nb = parseInt(b[0].replace(/\D/g,''));
+    return na - nb;
+  });
+
+  map.innerHTML = sorted.map(([pos, airlines])=>{
+    const airlineList = [...airlines].join(', ');
+    // Find matching color from S.airlines
+    const firstMatch = [...airlines].find(a => S.airlines?.[a]);
+    const col = firstMatch ? (S.airlines[firstMatch].color||'var(--accent)') : 'var(--text3)';
+    return `<div style="background:${col}15;border:1px solid ${col}44;border-radius:7px;padding:5px 10px;font-size:11px;">
+      <span style="font-family:'IBM Plex Mono',monospace;font-weight:800;color:${col};">POS ${pos}</span>
+      <span style="color:var(--text3);margin-left:5px;">${airlineList}</span>
+    </div>`;
+  }).join('');
+
+  preview.style.display='block';
 }
 
 function renderAirlinePosMap(){
   const c = document.getElementById('airlinePosList');
   const airlines = S.airlines||{};
   if(!Object.keys(airlines).length){
-    c.innerHTML = `<div style="color:var(--text3);font-size:12px;margin-bottom:8px;">Sin aerolíneas registradas. Agrega una abajo.</div>`;
+    c.innerHTML = `<div style="color:var(--text3);font-size:12px;margin-bottom:8px;">Sin aerolíneas. Agrega una abajo.</div>`;
     return;
   }
   c.innerHTML = Object.entries(airlines).map(([name,info])=>`
-    <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;flex-wrap:wrap;">
-      <span style="background:${info.color}22;color:${info.color};border:1px solid ${info.color}44;border-radius:5px;padding:3px 10px;font-size:12px;font-weight:700;min-width:130px;">${name}</span>
-      <span style="font-size:11px;color:var(--text3);">Posiciones habituales:</span>
-      <input class="fi" value="${(info.positions||[]).join(', ')}" placeholder="ej: 3, 4, 5"
-        style="flex:1;min-width:150px;font-size:12px;padding:5px 9px;font-family:'IBM Plex Mono',monospace;"
-        onchange="updateAirlinePos('${name}',this.value)">
-      <button class="btn btn-danger" style="font-size:11px;padding:4px 8px;" onclick="deleteAirline('${name}')">✕</button>
+    <div style="display:flex;align-items:center;gap:8px;margin-bottom:7px;flex-wrap:wrap;">
+      <span style="background:${info.color}22;color:${info.color};border:1px solid ${info.color}44;border-radius:5px;padding:3px 12px;font-size:12px;font-weight:700;">${name}</span>
+      <input type="color" value="${info.color}" style="width:32px;height:28px;padding:2px;border:1px solid var(--border2);border-radius:5px;background:var(--s1);cursor:pointer;"
+        onchange="S.airlines['${name}'].color=this.value;save();renderAirlinesPage();">
+      <button class="btn btn-danger" style="font-size:11px;padding:3px 8px;" onclick="deleteAirline('${name}')">✕</button>
     </div>`).join('');
 }
 
@@ -2011,12 +2218,122 @@ function saveAirlines(){
 }
 
 // Suggest positions based on airline assignments
+// Parse the flight list text into structured data
+// Returns [{airline, pos, sta, std}]
+function parseFlightList(text){
+  if(!text) return [];
+  const flights = [];
+  const lines = text.split('\n');
+
+  for(const line of lines){
+    if(!line.trim()) continue;
+
+    // Match patterns like "Air Transat ... P7 ... 09:20" from the PDF format
+    // The key columns we need: airline name and POS
+    // POS appears as B20, B21, P7, N4, etc.
+    const posMatch = line.match(/\b([BPN]\d{1,2}[A-Z]?|\d{1,2})\b/g);
+    if(!posMatch) continue;
+
+    // Try to extract airline name — it's usually a recognizable word sequence
+    // Look for known airline keywords
+    const airlineKeywords = {
+      'Air Transat': ['transat','TSC','TS/'],
+      'JetBlue': ['jetblue','JBU','B6/'],
+      'American Airlines': ['american','AAL','AA/'],
+      'Copa Airlines': ['copa','CMP','CM/'],
+      'Westjet': ['westjet','WJA','WS/'],
+      'United Airlines': ['united','UAL','UA/'],
+      'Delta Airlines': ['delta','DAL','DL/'],
+      'Air Canada': ['air canada','ACA','AC/'],
+      'Arajet': ['arajet','DWI','DM/'],
+      'Avianca': ['avianca','AVA','AV/'],
+      'Southwest': ['southwest','SWA','WN/'],
+      'Spirit Airlines': ['spirit','NKS','NK/'],
+      'Frontier': ['frontier','FFT','F9/'],
+      'Flair Airlines': ['flair','FLE','F8/'],
+      'Sun Country': ['sun country','SCX','SY/'],
+      'Aeromexico': ['aeromexico','AMX','AM/'],
+      'Aerolineas Argentinas': ['argentinas','ARG','AR/'],
+      'Lan Peru': ['lan peru','LPE','LA/LPE'],
+      'Lan Chile': ['lan chile','LAN','LA/LAN'],
+      'Wingo': ['wingo','RPB','P5/'],
+      'Condor': ['condor','CFG','DE/'],
+      'Tui Airways': ['tui','TOM','BY/'],
+      'Jetsmart': ['jetsmart','JEC','JA/'],
+      'Rutaca': ['rutaca','RUC','5R/'],
+      'Air Europa': ['europa','AEA','UX/'],
+      'Gol': ['gol','GLO','G3/'],
+      'Sky Airline': ['sky airline','SKX','H2/'],
+      'Air Caraibes': ['caraibes','FWI','TX/'],
+      'Edelweiss': ['edelweiss','EDW','WK/'],
+      'World2fly': ['world2fly','WPT','3P/'],
+      'Aeroregional': ['aeroregional','RER','RE/'],
+    };
+
+    let foundAirline = null;
+    const lineLower = line.toLowerCase();
+    for(const [name, keywords] of Object.entries(airlineKeywords)){
+      if(keywords.some(k => lineLower.includes(k.toLowerCase()))){
+        foundAirline = name;
+        break;
+      }
+    }
+    if(!foundAirline) continue;
+
+    // Extract POS — look for B##, P##, N## patterns
+    const posPattern = /\b([BPN]\d{1,2}[A-Z]?)\b/g;
+    const positions = [];
+    let m;
+    while((m = posPattern.exec(line)) !== null){
+      const p = m[1].replace(/[A-Z]$/,''); // normalize P8A → P8
+      // Convert P positions to our numbering
+      if(p.startsWith('P')){
+        const num = parseInt(p.slice(1));
+        if(num >= 1 && num <= 11) positions.push(String(num));
+      } else if(p.startsWith('B')){
+        const num = parseInt(p.slice(1));
+        if(num >= 20 && num <= 37) positions.push(String(num));
+      } else if(p.startsWith('N')){
+        const num = parseInt(p.slice(1));
+        if(num >= 1 && num <= 13) positions.push('N'+num);
+      }
+    }
+
+    // Extract time (STA) — first time-like pattern HH:MM
+    const timeMatch = line.match(/\b(\d{1,2}:\d{2})\b/);
+    const sta = timeMatch ? timeMatch[1] : '';
+
+    positions.forEach(pos => {
+      flights.push({ airline: foundAirline, pos, sta });
+    });
+  }
+
+  return flights;
+}
+
+// Get unique positions for a member based on their airline assignments and today's flight list
 function getPositionSuggestions(memberId){
   const memberAirlines = (S.personAirlines||{})[memberId]||[];
   if(!memberAirlines.length) return [];
+
+  // If we have a flight list, use it to find actual positions for today
+  if(flightData && flightData.trim()){
+    const flights = parseFlightList(flightData);
+    if(flights.length){
+      const suggested = new Set();
+      flights.forEach(f => {
+        if(memberAirlines.some(a => a.toLowerCase() === f.airline.toLowerCase())){
+          if(f.pos) suggested.add(f.pos);
+        }
+      });
+      if(suggested.size) return [...suggested];
+    }
+  }
+
+  // Fallback: use static airline positions if defined
   const suggested = [];
   memberAirlines.forEach(a=>{
-    const info = S.airlines[a];
+    const info = (S.airlines||{})[a];
     if(info && info.positions) suggested.push(...info.positions);
   });
   return [...new Set(suggested)];
@@ -2050,7 +2367,127 @@ function checkPositionLimit(duty){
 }
 
 // ═══════════════════════════════
-// EXPORT SCHEDULE EXCEL
+// FILE IMPORTS
+// ═══════════════════════════════
+async function importScheduleFile(file){
+  if(!file) return;
+  const ext = file.name.split('.').pop().toLowerCase();
+  toast('Procesando horario…');
+  try {
+    let text = '';
+    if(ext==='csv'){
+      text = await file.text();
+    } else if(ext==='xlsx'||ext==='xls'){
+      const XLSX = window.XLSX;
+      if(!XLSX) throw new Error('SheetJS no disponible');
+      const buf = await file.arrayBuffer();
+      const wb = XLSX.read(buf,{type:'array'});
+      const ws = wb.Sheets[wb.SheetNames[0]];
+      text = XLSX.utils.sheet_to_csv(ws);
+    } else if(ext==='pdf'){
+      toast('Extrayendo texto del PDF…');
+      if(!window.pdfjsLib) throw new Error('pdf.js no disponible');
+      const buf = await file.arrayBuffer();
+      const pdf = await pdfjsLib.getDocument({data:buf}).promise;
+      let t='';
+      for(let i=1;i<=pdf.numPages;i++){
+        const pg = await pdf.getPage(i);
+        const c = await pg.getTextContent();
+        t += c.items.map(i=>i.str).join(' ')+'\n';
+      }
+      text = t;
+    }
+    // Parse schedule from text
+    const rows = text.split('\n').filter(l=>l.trim());
+    const DAYS = ['L','M','X','J','V','S','D'];
+    const VALID = new Set(['A','T9','B','BC','B+C','C','D','L']);
+    let updated = 0;
+    rows.forEach(row=>{
+      const cols = row.split(/[,\t;]+/).map(c=>c.trim());
+      if(cols.length < 3) return;
+      const name = cols[0];
+      const member = S.team.find(m=>m.name.toLowerCase().includes(name.toLowerCase().split(' ')[0]) || name.toLowerCase().includes(m.name.toLowerCase().split(' ')[0]));
+      if(!member) return;
+      // Find 7 shift values in the row
+      const shifts = [];
+      for(let i=1;i<cols.length;i++){
+        const v = cols[i].toUpperCase().trim();
+        if(VALID.has(v)||v==='LIBRE') shifts.push(v==='LIBRE'?'L':v==='BC'?'B+C':v);
+        if(shifts.length===7) break;
+      }
+      if(shifts.length===7){ member.schedule=shifts; updated++; }
+    });
+    save(); renderTeamGrid(); openScheduleModal();
+    toast(`✅ Horario importado — ${updated} personas actualizadas`);
+  } catch(e){
+    toast('❌ Error: '+e.message,'error');
+  }
+}
+
+async function importAirlinesFile(file){
+  if(!file) return;
+  const ext = file.name.split('.').pop().toLowerCase();
+  toast('Procesando aerolíneas…');
+  try {
+    let text = '';
+    if(ext==='csv'){
+      text = await file.text();
+    } else if(ext==='xlsx'||ext==='xls'){
+      const XLSX = window.XLSX;
+      if(!XLSX) throw new Error('SheetJS no disponible');
+      const buf = await file.arrayBuffer();
+      const wb = XLSX.read(buf,{type:'array'});
+      const ws = wb.Sheets[wb.SheetNames[0]];
+      text = XLSX.utils.sheet_to_csv(ws);
+    } else if(ext==='pdf'){
+      if(!window.pdfjsLib) throw new Error('pdf.js no disponible');
+      const buf = await file.arrayBuffer();
+      const pdf = await pdfjsLib.getDocument({data:buf}).promise;
+      let t='';
+      for(let i=1;i<=pdf.numPages;i++){
+        const pg = await pdf.getPage(i);
+        const c = await pg.getTextContent();
+        t += c.items.map(i=>i.str).join(' ')+'\n';
+      }
+      text = t;
+    }
+    // Parse: each row = Person, Airline (or Airline, Person)
+    const rows = text.split('\n').filter(l=>l.trim());
+    if(!S.personAirlines) S.personAirlines={};
+    if(!S.airlines) S.airlines={};
+    let updated = 0;
+    rows.forEach(row=>{
+      const cols = row.split(/[,\t;]+/).map(c=>c.trim()).filter(Boolean);
+      if(cols.length < 2) return;
+      // Try to match a team member in any column
+      let member=null, airlineName='';
+      for(const col of cols){
+        const m = S.team.find(t=>
+          t.name.toLowerCase().includes(col.toLowerCase().split(' ')[0]) ||
+          col.toLowerCase().includes(t.name.toLowerCase().split(' ')[0])
+        );
+        if(m){ member=m; airlineName=cols.filter(c=>c!==col).join(', '); break; }
+      }
+      if(!member||!airlineName) return;
+      // Register airline if new
+      airlineName.split(',').map(a=>a.trim()).filter(Boolean).forEach(a=>{
+        if(!S.airlines[a]){
+          const idx = Object.keys(S.airlines).length % AIRLINE_COLORS.length;
+          S.airlines[a] = { positions:[], color:AIRLINE_COLORS[idx] };
+        }
+        if(!S.personAirlines[member.id]) S.personAirlines[member.id]=[];
+        if(!S.personAirlines[member.id].includes(a)){
+          S.personAirlines[member.id].push(a);
+          updated++;
+        }
+      });
+    });
+    save(); renderAirlinesPage();
+    toast(`✅ ${updated} asignaciones importadas`);
+  } catch(e){
+    toast('❌ Error: '+e.message,'error');
+  }
+}
 // ═══════════════════════════════
 function exportScheduleExcel(){
   const XLSX = window.XLSX;
@@ -2099,15 +2536,15 @@ function exportScheduleExcel(){
 // API KEY MANAGEMENT
 // ═══════════════════════════════
 function getApiKey(){
-  return localStorage.getItem('airops_apikey') || '';
+  return localStorage.getItem('airops_gemini_key') || '';
 }
 
 function ensureApiKey(){
   let key = getApiKey();
   if(!key){
-    key = prompt('Ingresa tu API key de Anthropic (console.anthropic.com):\n\nEmpieza con sk-ant-... Se guarda solo en tu navegador.');
+    key = prompt('Ingresa tu API key de Google Gemini (aistudio.google.com):\n\nEmpieza con AIza... Se guarda solo en tu navegador.');
     if(!key) return null;
-    localStorage.setItem('airops_apikey', key.trim());
+    localStorage.setItem('airops_gemini_key', key.trim());
     toast('✅ API key guardada');
   }
   return key;
@@ -2127,11 +2564,11 @@ function configApiKey(){
   const current = getApiKey();
   const msg = current
     ? `API key actual: ${current.slice(0,14)}...\n\nIngresa una nueva (o deja vacío para borrarla):`
-    : 'Ingresa tu API key de Anthropic (console.anthropic.com)\nEmpieza con sk-ant-...';
+    : 'Ingresa tu API key de Google Gemini (aistudio.google.com)\nEmpieza con AIza...';
   const key = prompt(msg);
   if(key === null) return;
-  if(!key.trim()){ localStorage.removeItem('airops_apikey'); toast('API key eliminada'); updateApiKeyBtn(); return; }
-  localStorage.setItem('airops_apikey', key.trim());
+  if(!key.trim()){ localStorage.removeItem('airops_gemini_key'); toast('API key eliminada'); updateApiKeyBtn(); return; }
+  localStorage.setItem('airops_gemini_key', key.trim());
   updateApiKeyBtn();
   toast('✅ API key guardada');
 }
@@ -2144,7 +2581,28 @@ function updateApiKeyBtn(){
   btn.style.color = has ? 'var(--green)' : '';
   btn.style.borderColor = has ? 'rgba(23,201,122,.4)' : '';
 }
-let flightData = '';
+
+async function callGemini(promptText, maxTokens){
+  const key = getApiKey();
+  const res = await fetch(
+    `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${key}`,
+    {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        contents: [{ parts: [{ text: promptText }] }],
+        generationConfig: { maxOutputTokens: maxTokens || 4000, temperature: 0.2 }
+      })
+    }
+  );
+  if(!res.ok){
+    const err = await res.text();
+    throw new Error('Gemini error '+res.status+': '+err.slice(0,200));
+  }
+  const data = await res.json();
+  if(data.error) throw new Error(data.error.message);
+  return data.candidates?.[0]?.content?.parts?.[0]?.text || '';
+}
 
 function openFlightModal(){
   document.getElementById('flightTextInput').value = flightData;
@@ -2268,9 +2726,9 @@ function setAI(pct, msg){
 async function autoGenerate(){
   // Check API key first
   if(!getApiKey()){
-    const key = prompt('Para usar Auto-generar necesitas una API key de Anthropic.\n\nObtén una gratis en console.anthropic.com\nEmpieza con sk-ant-...');
+    const key = prompt('Para Auto-generar necesitas una API key de Google Gemini (gratis).\n\nObtén una en aistudio.google.com → Get API key\nEmpieza con AIza...');
     if(!key) return;
-    localStorage.setItem('airops_apikey', key.trim());
+    localStorage.setItem('airops_gemini_key', key.trim());
     updateApiKeyBtn();
   }
   closeModal('aiReview');
@@ -2293,28 +2751,17 @@ async function autoGenerate(){
   const supsToday = S.team.filter(m=>m.sup && resolvedShift(m,date)!==null).map(m=>m.name).join(', ') || 'Ninguno';
 
   // ── Pre-process flight data ──────────────────────────────
-  // If there are flights, summarize them first so the main prompt stays small
   let flightSummary = '';
   if(flightData && flightData.trim()){
     setAI(15, 'Procesando lista de vuelos…');
     try {
-      const flightRes = await fetch('https://api.anthropic.com/v1/messages', {
-        method:'POST',
-        headers:apiHeaders(),
-        body: JSON.stringify({
-          model:'claude-sonnet-4-20250514',
-          max_tokens:800,
-          messages:[{role:'user', content:
-            `Tengo esta lista de vuelos del día en un aeropuerto:\n\n${flightData.slice(0,4000)}\n\n` +
-            `Resúmela en máximo 15 líneas así: "POS X: vuelo AA123 09:15 ARR, vuelo UA456 12:00 DEP". ` +
-            `Agrupa por posición/gate. Solo las posiciones con vuelos. Formato conciso.`
-          }]
-        })
-      });
-      const flightJson = await flightRes.json();
-      flightSummary = (flightJson.content||[]).map(b=>b.text||'').join('').trim();
+      flightSummary = await callGemini(
+        `Tengo esta lista de vuelos del día en un aeropuerto:\n\n${flightData.slice(0,4000)}\n\n` +
+        `Resúmela en máximo 15 líneas así: "POS X: vuelo AA123 09:15 ARR, vuelo UA456 12:00 DEP". ` +
+        `Agrupa por posición/gate. Solo las posiciones con vuelos. Formato conciso.`,
+        800
+      );
     } catch(e){
-      // If flight summarization fails, just use raw (truncated)
       flightSummary = flightData.slice(0, 800);
     }
   }
@@ -2365,30 +2812,10 @@ RESPONDE SOLO JSON válido:
   setAI(55, 'Generando con IA…');
 
   try {
-    const res = await fetch('https://api.anthropic.com/v1/messages', {
-      method:'POST',
-      headers:apiHeaders(),
-      body: JSON.stringify({
-        model:'claude-sonnet-4-20250514',
-        max_tokens:4000,
-        messages:[{role:'user', content:prompt}]
-      })
-    });
+    const raw = await callGemini(prompt, 4000);
+    setAI(85, 'Procesando respuesta…');
 
-    setAI(80, 'Procesando respuesta…');
-
-    if(!res.ok){
-      const errText = await res.text();
-      throw new Error('HTTP '+res.status+': '+errText.slice(0,200));
-    }
-
-    const data = await res.json();
-    if(data.error){ throw new Error(data.error.message||JSON.stringify(data.error)); }
-
-    const raw = (data.content||[]).map(b=>b.text||'').join('');
-    setAI(92, 'Validando borrador…');
-
-    if(!raw){ throw new Error('La API devolvió respuesta vacía. Intenta de nuevo.'); }
+    if(!raw){ throw new Error('Respuesta vacía. Intenta de nuevo.'); }
 
     let parsed;
     try {
