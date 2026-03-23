@@ -786,9 +786,9 @@ function seedTeam(){
     {name:'Yeidry Hernández',          waName:'Yeidry',    sup:false, color:'#2d7aee', terminal:'B', schedule:['L','T9','A','T9','T9','T9','L']},
     {name:'Dalvin Cipriam',            waName:'Dalvin',    sup:false, color:'#8b5cf6', terminal:'',  schedule:['L','L','C','C','C','C','C']},
     {name:'Angel Rijo de Jesús',       waName:'Angel',     sup:false, color:'#fb923c', terminal:'',  schedule:['A','L','L','C','B','B','A']},
-    {name:'Sheridam Peña',            waName:'Sheridam',  sup:false, color:'#f0a500', terminal:'',  schedule:['B','L','L','B','B','B','B']},
+    {name:'Sheridam Peña',             waName:'Sheridam',  sup:false, color:'#f0a500', terminal:'',  schedule:['B','L','L','B','B','B','B']},
     {name:'Iván Josep Rivas',          waName:'Ivan',      sup:false, color:'#38bdf8', terminal:'',  schedule:['A','L','L','B','B','B','A']},
-    {name:'Hilda Sánchez',            waName:'Hilda',     sup:false, color:'#f472b6', terminal:'',  schedule:['B','L','L','B','B','B','C']},
+    {name:'Hilda Sánchez',             waName:'Hilda',     sup:false, color:'#f472b6', terminal:'',  schedule:['B','L','L','B','B','B','C']},
     {name:'Emil Nathanael Sánchez',    waName:'Emil',      sup:false, color:'#34d399', terminal:'',  schedule:['B','L','L','B','B','B','B']},
     {name:'Madelin María Delgado',     waName:'Madelin',   sup:false, color:'#fbbf24', terminal:'',  schedule:['B','A','L','L','C','B','B']},
     {name:'José Misael Berroa',        waName:'Misael',    sup:false, color:'#60a5fa', terminal:'',  schedule:['C','B','L','L','C','B','B']},
@@ -796,6 +796,7 @@ function seedTeam(){
     {name:'Fernando Beltre de la Rosa',waName:'Fernando',  sup:false, color:'#f87171', terminal:'',  schedule:['D','D','L','L','D','D','D']},
     {name:'Alan Rafael Paulino',       waName:'Alan',      sup:false, color:'#4ade80', terminal:'',  schedule:['A','L','L','C','T9','T9','T9']},
     {name:'Katrini Peguero Sánchez',   waName:'Katrini',   sup:false, color:'#fb923c', terminal:'',  schedule:['B','C','B','L','L','C','B']},
+    {name:'Hendrix Marte',             waName:'Hendrix',   sup:false, color:'#a78bfa', terminal:'',  schedule:['B','B','B','L','L','B','B']},
     {name:'Esmerling Guillermo',       waName:'Esmerling', sup:false, color:'#22d3ee', terminal:'',  schedule:['A','A','B','L','L','B','B']},
     {name:'Kenia Candelaria',          waName:'Kenia',     sup:false, color:'#e879f9', terminal:'',  schedule:['B','B','B','L','L','C','C']},
     {name:'Daniel Castro Morillo',     waName:'Daniel',    sup:true,  color:'#e84545', terminal:'',  schedule:['B','B','C','L','L','C','B']},
@@ -804,6 +805,57 @@ function seedTeam(){
     {name:'Angelini Sosa Abreu',       waName:'Angelini',  sup:true,  color:'#e84545', terminal:'',  schedule:['C','C','L','L','C','C','C']},
   ];
   S.team = m.map((t,i)=>({id:'m'+i, role:'', ...t}));
+
+  // Seed airlines and person→airline assignments from ASIGNACION AEROLINEAS sheet
+  if(!Object.keys(S.airlines||{}).length){
+    // All airlines with colors
+    const allAirlines = [
+      'Southwest Airlines','British Airways','Air France','Copa Airlines','Delta','Air Transat',
+      'Air Century','Air Europa','Edelweiss Air','Breeze','Condor','Frontier Airlines',
+      'United','Lot Polish','TUI','Aeromexico','World2Fly','Spirit Airlines',
+      'Aerolineas Argentinas','JetBlue','Avelo','Air Canada','WestJet','Avianca',
+      'Discover Airlines','Sky Airlines Peru','JetSmart','Gol','Iberojet','Global X',
+      'Air Caraibes','Flair Airlines','Wingo','Latam','Make Up','Sky High',
+      'AllegiantAir','Sun Country'
+    ];
+    S.airlines = {};
+    allAirlines.forEach((name,i)=>{
+      S.airlines[name] = { positions:[], color: AIRLINE_COLORS[i % AIRLINE_COLORS.length] };
+    });
+
+    // Person → airline mapping (from Excel ASIGNACION AEROLINEAS sheet)
+    const assignments = {
+      'Arismendy Marte':           ['Southwest Airlines','Air Century'],
+      'Iván Josep Rivas':          ['British Airways'],
+      'Sachariel Márquez':         ['Air France','Air Europa'],
+      'Yeidry Hernández':          ['Copa Airlines'],
+      'Dalvin Cipriam':            ['Delta','Edelweiss Air'],
+      'Arlene Mercedes Rijo':      ['Air Transat','Breeze'],
+      'Fernando Beltre de la Rosa':['Condor','World2Fly'],
+      'José Misael Berroa':        ['Frontier Airlines','Spirit Airlines'],
+      'Alexandra Delgado Torres':  ['United','Aerolineas Argentinas'],
+      'Hendrix Marte':             ['Lot Polish','JetBlue'],
+      'Angel Rijo de Jesús':       ['TUI','Avelo'],
+      'Alan Rafael Paulino':       ['Aeromexico'],
+      'Cándido Santana Collado':   ['Air Canada','Gol'],
+      'Emil Nathanael Sánchez':    ['WestJet','Iberojet'],
+      'Sheridam Peña':             ['Avianca','Global X'],
+      'Esmerling Guillermo':       ['Discover Airlines','Air Caraibes'],
+      'Hilda Sánchez':             ['Sky Airlines Peru','Flair Airlines'],
+      'Madelin María Delgado':     ['JetSmart','Wingo'],
+      'Katrini Peguero Sánchez':   ['Latam','Sky High'],
+      'Kenia Candelaria':          ['Make Up','AllegiantAir','Sun Country'],
+    };
+
+    if(!S.personAirlines) S.personAirlines = {};
+    S.team.forEach(member=>{
+      const key = Object.keys(assignments).find(k=>
+        member.name.toLowerCase().includes(k.toLowerCase().split(' ')[0]) ||
+        k.toLowerCase().includes(member.name.toLowerCase().split(' ')[0])
+      );
+      if(key) S.personAirlines[member.id] = assignments[key];
+    });
+  }
 }
 
 // ═══════════════════════════════
@@ -1765,7 +1817,7 @@ function saveMember(){
   if(S._editId){
     const i=S.team.findIndex(m=>m.id===S._editId);
     if(i>-1) S.team[i]={...S.team[i],...data};
-  } else S.team.push({id:'m'+Date.now(),schedule:[],...data});
+  } else S.team.push({id:'m'+Date.now(), schedule:['L','L','L','L','L','L','L'], ...data});
   save(); closeModal('memberModal'); renderTeamGrid(); toast('✅ Guardado');
 }
 function deleteMember(id){
@@ -2374,18 +2426,18 @@ async function importScheduleFile(file){
   const ext = file.name.split('.').pop().toLowerCase();
   toast('Procesando horario…');
   try {
-    let text = '';
-    if(ext==='csv'){
-      text = await file.text();
-    } else if(ext==='xlsx'||ext==='xls'){
+    let rows = [];
+
+    if(ext==='xlsx'||ext==='xls'){
       const XLSX = window.XLSX;
       if(!XLSX) throw new Error('SheetJS no disponible');
       const buf = await file.arrayBuffer();
       const wb = XLSX.read(buf,{type:'array'});
+      // Try first sheet
       const ws = wb.Sheets[wb.SheetNames[0]];
-      text = XLSX.utils.sheet_to_csv(ws);
+      // Get as array of arrays for precise column access
+      rows = XLSX.utils.sheet_to_json(ws, {header:1, defval:''});
     } else if(ext==='pdf'){
-      toast('Extrayendo texto del PDF…');
       if(!window.pdfjsLib) throw new Error('pdf.js no disponible');
       const buf = await file.arrayBuffer();
       const pdf = await pdfjsLib.getDocument({data:buf}).promise;
@@ -2393,32 +2445,55 @@ async function importScheduleFile(file){
       for(let i=1;i<=pdf.numPages;i++){
         const pg = await pdf.getPage(i);
         const c = await pg.getTextContent();
-        t += c.items.map(i=>i.str).join(' ')+'\n';
+        t += c.items.map(x=>x.str).join(' ')+'\n';
       }
-      text = t;
+      // Convert text to pseudo-rows
+      rows = t.split('\n').map(l=>l.split(/\s{2,}|\t/));
     }
-    // Parse schedule from text
-    const rows = text.split('\n').filter(l=>l.trim());
-    const DAYS = ['L','M','X','J','V','S','D'];
-    const VALID = new Set(['A','T9','B','BC','B+C','C','D','L']);
+
+    const VALID_SHIFTS = new Set(['A','T9','B','BC','C','D','L','LIBRE']);
+    const DAYS_COUNT = 7;
     let updated = 0;
-    rows.forEach(row=>{
-      const cols = row.split(/[,\t;]+/).map(c=>c.trim());
-      if(cols.length < 3) return;
-      const name = cols[0];
-      const member = S.team.find(m=>m.name.toLowerCase().includes(name.toLowerCase().split(' ')[0]) || name.toLowerCase().includes(m.name.toLowerCase().split(' ')[0]));
+
+    rows.forEach(cols=>{
+      if(!cols || cols.length < 3) return;
+      // Col 0 = NAME, Col 1 = HABILITACIÓN (skip), Col 2..8 = days
+      const rawName = String(cols[0]).trim();
+      if(!rawName || rawName.length < 3) return;
+
+      // Match to team member by first name or last name
+      const nameLower = rawName.toLowerCase();
+      const member = S.team.find(m=>{
+        const mLower = m.name.toLowerCase();
+        const parts = nameLower.split(/\s+/);
+        return parts.some(p => p.length > 2 && mLower.includes(p)) ||
+               m.name.toLowerCase().split(/\s+/).some(p => p.length > 2 && nameLower.includes(p));
+      });
       if(!member) return;
-      // Find 7 shift values in the row
+
+      // Find 7 shift values starting from col 2
       const shifts = [];
-      for(let i=1;i<cols.length;i++){
-        const v = cols[i].toUpperCase().trim();
-        if(VALID.has(v)||v==='LIBRE') shifts.push(v==='LIBRE'?'L':v==='BC'?'B+C':v);
-        if(shifts.length===7) break;
+      for(let i = 2; i < cols.length && shifts.length < DAYS_COUNT; i++){
+        const v = String(cols[i]).toUpperCase().trim().replace(/\s+/,'');
+        if(v === 'LIBRE' || v === 'L') shifts.push('L');
+        else if(v === 'BC') shifts.push('B+C');
+        else if(VALID_SHIFTS.has(v) && v !== 'LIBRE') shifts.push(v);
       }
-      if(shifts.length===7){ member.schedule=shifts; updated++; }
+
+      if(shifts.length === DAYS_COUNT){
+        member.schedule = shifts;
+        updated++;
+      }
     });
-    save(); renderTeamGrid(); openScheduleModal();
-    toast(`✅ Horario importado — ${updated} personas actualizadas`);
+
+    save(); renderTeamGrid();
+    if(updated > 0){
+      toast(`✅ ${updated} horarios actualizados`);
+      openScheduleModal(); // open to verify
+    } else {
+      toast('⚠️ No se pudo leer el horario. Abre "Editar Horario" para hacerlo manual.', 'error');
+      openScheduleModal();
+    }
   } catch(e){
     toast('❌ Error: '+e.message,'error');
   }
@@ -2429,59 +2504,73 @@ async function importAirlinesFile(file){
   const ext = file.name.split('.').pop().toLowerCase();
   toast('Procesando aerolíneas…');
   try {
-    let text = '';
-    if(ext==='csv'){
-      text = await file.text();
-    } else if(ext==='xlsx'||ext==='xls'){
+    let rowData = [];
+    if(ext==='xlsx'||ext==='xls'){
       const XLSX = window.XLSX;
       if(!XLSX) throw new Error('SheetJS no disponible');
       const buf = await file.arrayBuffer();
       const wb = XLSX.read(buf,{type:'array'});
-      const ws = wb.Sheets[wb.SheetNames[0]];
-      text = XLSX.utils.sheet_to_csv(ws);
-    } else if(ext==='pdf'){
-      if(!window.pdfjsLib) throw new Error('pdf.js no disponible');
-      const buf = await file.arrayBuffer();
-      const pdf = await pdfjsLib.getDocument({data:buf}).promise;
-      let t='';
-      for(let i=1;i<=pdf.numPages;i++){
-        const pg = await pdf.getPage(i);
-        const c = await pg.getTextContent();
-        t += c.items.map(i=>i.str).join(' ')+'\n';
-      }
-      text = t;
+      // Try to find the airlines sheet
+      const sheetName = wb.SheetNames.find(n=>n.toLowerCase().includes('aerolinea')||n.toLowerCase().includes('airline')) || wb.SheetNames[0];
+      const ws = wb.Sheets[sheetName];
+      rowData = XLSX.utils.sheet_to_json(ws,{header:1,defval:''});
+    } else if(ext==='pdf'||ext==='csv'){
+      toast('Para aerolíneas usa el archivo Excel (.xlsx)', 'error');
+      return;
     }
-    // Parse: each row = Person, Airline (or Airline, Person)
-    const rows = text.split('\n').filter(l=>l.trim());
-    if(!S.personAirlines) S.personAirlines={};
-    if(!S.airlines) S.airlines={};
+
+    if(!rowData.length) throw new Error('Archivo vacío');
+
+    // Parse structure: person rows alternating with airline rows
+    // Detect person rows vs airline rows by content
+    const knownAirlines = new Set(Object.keys(S.airlines||{}).map(a=>a.toLowerCase()));
+
+    let currentPeople = [];
     let updated = 0;
-    rows.forEach(row=>{
-      const cols = row.split(/[,\t;]+/).map(c=>c.trim()).filter(Boolean);
-      if(cols.length < 2) return;
-      // Try to match a team member in any column
-      let member=null, airlineName='';
-      for(const col of cols){
-        const m = S.team.find(t=>
-          t.name.toLowerCase().includes(col.toLowerCase().split(' ')[0]) ||
-          col.toLowerCase().includes(t.name.toLowerCase().split(' ')[0])
-        );
-        if(m){ member=m; airlineName=cols.filter(c=>c!==col).join(', '); break; }
-      }
-      if(!member||!airlineName) return;
-      // Register airline if new
-      airlineName.split(',').map(a=>a.trim()).filter(Boolean).forEach(a=>{
-        if(!S.airlines[a]){
-          const idx = Object.keys(S.airlines).length % AIRLINE_COLORS.length;
-          S.airlines[a] = { positions:[], color:AIRLINE_COLORS[idx] };
-        }
-        if(!S.personAirlines[member.id]) S.personAirlines[member.id]=[];
-        if(!S.personAirlines[member.id].includes(a)){
-          S.personAirlines[member.id].push(a);
-          updated++;
-        }
+    if(!S.personAirlines) S.personAirlines={};
+
+    rowData.forEach(row=>{
+      const vals = row.map(v=>String(v||'').trim()).filter(v=>v && v!=='undefined');
+      if(!vals.length) return;
+
+      // Check if this row looks like people (names with spaces, not airline names)
+      const looksLikePeople = vals.every(v=>{
+        const words = v.split(' ');
+        return words.length >= 2 && !knownAirlines.has(v.toLowerCase());
       });
+
+      if(looksLikePeople && vals.length >= 2){
+        currentPeople = row.map(v=>String(v||'').trim());
+      } else {
+        // This is an airline row — assign per column to current people
+        row.forEach((cell, colIdx)=>{
+          const airlineName = String(cell||'').trim();
+          if(!airlineName || colIdx >= currentPeople.length) return;
+          const personName = currentPeople[colIdx];
+          if(!personName) return;
+
+          // Find team member
+          const member = S.team.find(m=>{
+            const mFirst = m.name.toLowerCase().split(' ')[0];
+            const pFirst = personName.toLowerCase().split(' ')[0];
+            return mFirst === pFirst || m.name.toLowerCase().includes(pFirst) || personName.toLowerCase().includes(mFirst);
+          });
+          if(!member) return;
+
+          // Register airline if new
+          if(!S.airlines[airlineName]){
+            const idx = Object.keys(S.airlines).length % AIRLINE_COLORS.length;
+            S.airlines[airlineName] = { positions:[], color:AIRLINE_COLORS[idx] };
+          }
+          if(!S.personAirlines[member.id]) S.personAirlines[member.id]=[];
+          if(!S.personAirlines[member.id].includes(airlineName)){
+            S.personAirlines[member.id].push(airlineName);
+            updated++;
+          }
+        });
+      }
     });
+
     save(); renderAirlinesPage();
     toast(`✅ ${updated} asignaciones importadas`);
   } catch(e){
