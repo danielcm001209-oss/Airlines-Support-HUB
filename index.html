@@ -222,14 +222,15 @@ header{background:var(--s1);border-bottom:1px solid var(--border);padding:0 14px
 <div class="page" id="page-changes">
   <div class="full-page">
     <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;margin-bottom:12px;">
-      <h2 style="font-size:18px;font-weight:900;">🔄 Cambios & Permutas</h2>
+      <h2 style="font-size:18px;font-weight:900;">🔄 Cambios</h2>
       <div style="display:flex;gap:6px;">
-        <button class="btn btn-outline" onclick="openOverrideModal(null,null)">+ Override / Extra</button>
-        <button class="btn btn-outline" onclick="openSwapModal()">⇄ Permuta</button>
+        <button class="btn btn-outline" onclick="openOverrideModal(null,null)">+ Refuerzo / Horas Extra</button>
+        <button class="btn btn-outline" onclick="openSwapModal()">⇄ Cambio</button>
       </div>
     </div>
+    <div style="font-size:10px;font-weight:800;letter-spacing:1px;color:var(--text3);text-transform:uppercase;margin-bottom:8px;">Refuerzos / Horas Extra</div>
     <div id="overridesList"></div>
-    <div style="margin-top:14px;font-size:10px;font-weight:800;letter-spacing:1px;color:var(--text3);text-transform:uppercase;margin-bottom:8px;">Permutas</div>
+    <div style="margin-top:14px;font-size:10px;font-weight:800;letter-spacing:1px;color:var(--text3);text-transform:uppercase;margin-bottom:8px;">Cambios entre Colaboradores</div>
     <div id="swapsList"></div>
   </div>
 </div>
@@ -428,7 +429,7 @@ header{background:var(--s1);border-bottom:1px solid var(--border);padding:0 14px
 <!-- ═══════ OVERRIDE MODAL ═══════ -->
 <div class="overlay" id="overrideModal">
 <div class="modal">
-  <div class="modal-title">📅 Override / Horas Extra</div>
+  <div class="modal-title">📅 Refuerzo / Horas Extra</div>
   <div class="frow">
     <div class="form-group"><label class="fl">Persona</label><select class="fs" id="ovPerson"></select></div>
     <div class="form-group" style="flex:0 0 140px"><label class="fl">Fecha</label><input type="date" class="fi" id="ovDate"></div>
@@ -458,17 +459,18 @@ header{background:var(--s1);border-bottom:1px solid var(--border);padding:0 14px
 <!-- ═══════ SWAP MODAL ═══════ -->
 <div class="overlay" id="swapModal">
 <div class="modal">
-  <div class="modal-title">⇄ Registrar Permuta</div>
+  <div class="modal-title">⇄ Registrar Cambio entre Colaboradores</div>
+  <p style="font-size:12px;color:var(--text3);margin-bottom:12px">Persona A cede su día a Persona B y vice versa. Cada uno trabaja el turno del otro.</p>
   <div class="frow">
     <div class="form-group"><label class="fl">Persona A</label><select class="fs" id="swapA"></select></div>
-    <div class="form-group" style="flex:0 0 140px"><label class="fl">Cede su día</label><input type="date" class="fi" id="swapDA"></div>
+    <div class="form-group" style="flex:0 0 140px"><label class="fl">Cede este día</label><input type="date" class="fi" id="swapDA"></div>
   </div>
   <div class="frow">
     <div class="form-group"><label class="fl">Persona B</label><select class="fs" id="swapB"></select></div>
-    <div class="form-group" style="flex:0 0 140px"><label class="fl">Cede su día</label><input type="date" class="fi" id="swapDB"></div>
+    <div class="form-group" style="flex:0 0 140px"><label class="fl">Cede este día</label><input type="date" class="fi" id="swapDB"></div>
   </div>
   <div class="form-group"><label class="fl">Nota</label><input class="fi" id="swapNotes" placeholder="opcional…"></div>
-  <div class="form-group"><label style="display:flex;align-items:center;gap:7px;cursor:pointer"><input type="checkbox" id="swapPending" checked style="width:14px;height:14px"><span style="font-size:13px">Pendiente de saldar</span></label></div>
+  <div class="form-group"><label style="display:flex;align-items:center;gap:7px;cursor:pointer"><input type="checkbox" id="swapPending" checked style="width:14px;height:14px"><span style="font-size:13px">Pendiente de aplicar</span></label></div>
   <div class="mactions">
     <button class="btn btn-outline" onclick="closeModal('swapModal')">Cancelar</button>
     <button class="btn btn-primary" onclick="saveSwap()">Guardar</button>
@@ -692,9 +694,26 @@ function dowIdx(date){ return (new Date(date+'T12:00:00').getDay()+6)%7; }
 function resolvedShift(m,date){
   const ov=S.overrides?.[m.id]?.[date];
   if(ov) return ov.shift==='LIBRE'?null:ov.shift;
+
+  // Cambios (swaps): Person A works on dateB with Person B's shift, and vice versa
   for(const sw of (S.swaps||[])){
-    if((sw.personA===m.id&&sw.dateA===date)||(sw.personB===m.id&&sw.dateB===date)) return null;
+    if(sw.personA===m.id && sw.dateA===date){
+      // A cedes their day → they work B's day instead (get B's base shift on dateB)
+      const mB=S.team.find(t=>t.id===sw.personB);
+      const bShift=mB?.schedule?.[dowIdx(sw.dateB)];
+      return (!bShift||bShift==='L'||bShift==='LIBRE')?null:bShift;
+    }
+    if(sw.personB===m.id && sw.dateB===date){
+      // B cedes their day → they work A's day instead (get A's base shift on dateA)
+      const mA=S.team.find(t=>t.id===sw.personA);
+      const aShift=mA?.schedule?.[dowIdx(sw.dateA)];
+      return (!aShift||aShift==='L'||aShift==='LIBRE')?null:aShift;
+    }
+    // On the day they gave away, they are libre
+    if(sw.personA===m.id && sw.dateB===date) return null;
+    if(sw.personB===m.id && sw.dateA===date) return null;
   }
+
   const s=m.schedule?.[dowIdx(date)];
   return (!s||s==='L'||s==='LIBRE')?null:s;
 }
@@ -1728,7 +1747,7 @@ function renderChanges(){
   const c=document.getElementById('overridesList');
   c.innerHTML=rows.length?`<table style="width:100%;border-collapse:collapse"><thead><tr><th style="text-align:left;padding:7px 10px;font-size:11px;font-weight:800;color:var(--text3);border-bottom:1px solid var(--border)">Persona</th><th style="padding:7px 6px;font-size:11px;font-weight:800;color:var(--text3);border-bottom:1px solid var(--border)">Fecha</th><th style="padding:7px 6px;font-size:11px;font-weight:800;color:var(--text3);border-bottom:1px solid var(--border)">Turno</th><th style="padding:7px 6px;font-size:11px;font-weight:800;color:var(--text3);border-bottom:1px solid var(--border)">Motivo</th><th></th></tr></thead><tbody>
   ${rows.map(({m,date,ov})=>{const d=new Date(date+'T12:00:00').toLocaleDateString('es-DO',{weekday:'short',day:'numeric',month:'short'});return `<tr style="border-bottom:1px solid rgba(30,45,66,.3)"><td style="padding:7px 10px;font-weight:700;font-size:12px">${m?.name||'?'}</td><td style="padding:7px 6px;font-size:11px;font-family:'IBM Plex Mono',monospace">${d}</td><td style="padding:7px 6px"><span style="font-size:11px;font-weight:800;padding:2px 7px;border-radius:4px;background:${SC(ov.shift)}22;color:${SC(ov.shift)}">${ov.shift}</span></td><td style="padding:7px 6px;font-size:11px;color:var(--text2)">${ov.reason||'—'}</td><td style="text-align:right;padding:7px 6px"><button class="btn btn-danger" style="font-size:10px;padding:2px 7px" onclick="deleteOverride('${m?.id}','${date}')">✕</button></td></tr>`;}).join('')}
-  </tbody></table>`:'<div style="color:var(--text3);font-size:12px">Sin overrides.</div>';
+  </tbody></table>`:'<div style="color:var(--text3);font-size:12px">Sin refuerzos registrados.</div>';
 
   // Swaps
   const sw=document.getElementById('swapsList');
@@ -1743,7 +1762,7 @@ function renderChanges(){
       <button class="btn btn-outline" style="font-size:10px;padding:2px 7px" onclick="toggleSwapPending('${s.id}')">${s.pending?'Saldar':'Reabrir'}</button>
       <button class="btn btn-danger" style="font-size:10px;padding:2px 7px" onclick="deleteSwap('${s.id}')">✕</button>
     </div>`;
-  }).join(''):'<div style="color:var(--text3);font-size:12px">Sin permutas.</div>';
+  }).join(''):'<div style="color:var(--text3);font-size:12px">Sin cambios registrados.</div>';
 }
 
 function openOverrideModal(mid,date){
@@ -1763,7 +1782,7 @@ function saveOverride(){
   if(!S.overrides) S.overrides={};
   if(!S.overrides[mid]) S.overrides[mid]={};
   S.overrides[mid][date]={shift,reason,ts:Date.now()};
-  save(); closeModal('overrideModal'); renderChanges(); renderBoard(); toast('✅ Override guardado');
+  save(); closeModal('overrideModal'); renderChanges(); renderBoard(); toast('✅ Refuerzo guardado');
 }
 
 function deleteOverride(mid,date){
@@ -1787,11 +1806,11 @@ function saveSwap(){
   if(!pA||!pB||!dA||!dB){toast('Completa todos los campos','error');return;}
   if(!S.swaps) S.swaps=[];
   S.swaps.push({id:'sw'+Date.now(),personA:pA,dateA:dA,personB:pB,dateB:dB,notes:document.getElementById('swapNotes').value.trim(),pending:document.getElementById('swapPending').checked,ts:Date.now()});
-  save(); closeModal('swapModal'); renderChanges(); toast('✅ Permuta guardada');
+  save(); closeModal('swapModal'); renderChanges(); toast('✅ Cambio guardado');
 }
 
 function toggleSwapPending(id){ const sw=S.swaps?.find(s=>s.id===id); if(sw){sw.pending=!sw.pending;save();renderChanges();} }
-function deleteSwap(id){ showConfirm('¿Eliminar permuta?','',()=>{S.swaps=S.swaps.filter(s=>s.id!==id);save();renderChanges();}); }
+function deleteSwap(id){ showConfirm('¿Eliminar cambio?','',()=>{S.swaps=S.swaps.filter(s=>s.id!==id);save();renderChanges();}); }
 
 // ═══════════════════════════════════════════════════════
 // HISTORY
@@ -1968,7 +1987,7 @@ async function callGemini(prompt,maxTokens){
   const ctrl=new AbortController();
   const tid=setTimeout(()=>ctrl.abort(),45000);
   try {
-    const res=await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${key}`,{
+    const res=await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${key}`,{
       method:'POST', signal:ctrl.signal,
       headers:{'Content-Type':'application/json'},
       body:JSON.stringify({
@@ -1979,7 +1998,10 @@ async function callGemini(prompt,maxTokens){
     clearTimeout(tid);
     if(!res.ok){ const e=await res.text(); let msg='HTTP '+res.status; try{msg=JSON.parse(e).error?.message||msg;}catch(x){} throw new Error(msg); }
     const data=await res.json();
-    if(data.error) throw new Error(data.error.message);
+    if(data.error) throw new Error(data.error.message+
+      (data.error.message?.includes('quota')||data.error.message?.includes('Quota')
+        ? '\n\nTu cuota gratuita se agotó. Ve a console.cloud.google.com y activa facturación (cuesta ~$0.01 por generación).'
+        : ''));
     const txt=data.candidates?.[0]?.content?.parts?.[0]?.text;
     if(!txt) throw new Error('Respuesta vacía');
     return txt;
