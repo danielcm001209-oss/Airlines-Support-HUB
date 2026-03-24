@@ -937,46 +937,43 @@ async function fetchLACOPS(){
     if(!res.ok) throw new Error('HTTP '+res.status);
     const data=await res.json();
 
-    // Try to extract flights from response
-    let text='';
-    if(typeof data==='string') text=data;
-    else if(Array.isArray(data)){
-      text=data.map(f=>{
-        const parts=[];
-        if(f.flight||f.vuelo||f.numero) parts.push(f.flight||f.vuelo||f.numero);
-        if(f.airline||f.aerolinea) parts.push(f.airline||f.aerolinea);
-        if(f.pos||f.position||f.gate||f.posicion) parts.push('POS '+(f.pos||f.position||f.gate||f.posicion));
-        if(f.sta||f.hora||f.time) parts.push(f.sta||f.hora||f.time);
-        if(f.type||f.tipo||f.operation) parts.push(f.type||f.tipo||f.operation);
-        return parts.join('  ');
-      }).join('\n');
-    } else if(typeof data==='object'){
-      // Try common response shapes
-      const flights=data.flights||data.vuelos||data.data||data.results||[];
-      if(Array.isArray(flights)){
-        text=flights.map(f=>{
-          const parts=[];
-          if(f.flight||f.vuelo||f.numero||f.flightNumber) parts.push(f.flight||f.vuelo||f.numero||f.flightNumber);
-          if(f.airline||f.aerolinea||f.airlineName) parts.push(f.airline||f.aerolinea||f.airlineName);
-          if(f.pos||f.position||f.gate||f.posicion||f.stand) parts.push('POS '+(f.pos||f.position||f.gate||f.posicion||f.stand));
-          if(f.sta||f.hora||f.time||f.scheduledTime) parts.push(f.sta||f.hora||f.time||f.scheduledTime);
-          if(f.type||f.tipo||f.movementType) parts.push(f.type||f.tipo||f.movementType);
-          return parts.join('  ');
-        }).join('\n');
-      } else {
-        text=JSON.stringify(data,null,2);
-      }
+    // Airport dashboard API format: {query_result: {data: {rows: [...]}}}
+    let flights = [];
+    if(data?.query_result?.data?.rows) {
+      flights = data.query_result.data.rows;
+    } else if(data?.data?.rows) {
+      flights = data.data.rows;
+    } else if(Array.isArray(data)) {
+      flights = data;
+    } else if(Array.isArray(data?.rows)) {
+      flights = data.rows;
     }
 
-    if(!text.trim()){
-      // Show raw JSON so we can see the format
-      text = typeof data === 'string' ? data : JSON.stringify(data, null, 2);
-      document.getElementById('flightTextInput').value=text;
-      onFlightTextChange();
-      status.style.color='var(--amber)';
-      status.textContent=`⚠️ Datos recibidos pero formato no reconocido. Revisa el texto abajo y guarda.`;
-      return;
-    }
+    if(!flights.length) throw new Error('No se recibieron vuelos del dashboard');
+
+    // Parse each flight row into readable text
+    // Fields: Aerolinea, Vuelo, STA, STD, ETA, ETD, Terminal, STAND, GATE, RUTA, paxin, paxout
+    text = flights.map(f => {
+      const airline = f.Aerolinea || f.aerolinea || '';
+      const flight  = f.Vuelo     || f.vuelo     || f.VUELO || '';
+      const sta     = f.STA       || f.sta       || '';
+      const std     = f.STD       || f.std       || '';
+      const eta     = f.ETA       || f.eta       || '';
+      const etd     = f.ETD       || f.etd       || '';
+      const stand   = f.STAND     || f.stand     || f.POS || f.pos || '';
+      const gate    = f.GATE      || f.gate      || '';
+      const terminal= f.Terminal  || f.terminal  || '';
+      const ruta    = f.RUTA      || f.ruta      || '';
+
+      // Use ETA if available, otherwise STA
+      const arrTime = eta||sta;
+      const depTime = etd||std;
+      const pos     = stand||gate;
+      const type    = arrTime ? 'ARR' : 'DEP';
+
+      return [airline, flight, pos?`POS ${pos}`:'', arrTime||depTime, type, ruta, terminal?`T${terminal}`:'']
+        .filter(Boolean).join('  ');
+    }).join('\n');
 
     document.getElementById('flightTextInput').value=text;
     onFlightTextChange();
@@ -1391,19 +1388,68 @@ function getPositionSuggestions(memberId){
 
 function parseFlightList(text){
   const flights=[];
-  const airlineMap={'transat':'Air Transat','tsc':'Air Transat','jetblue':'JetBlue','jbu':'JetBlue','american':'American Airlines','aal':'American Airlines','copa':'Copa Airlines','cmp':'Copa Airlines','westjet':'WestJet','wja':'WestJet','united':'United','ual':'United','delta':'Delta','dal':'Delta','canada':'Air Canada','aca':'Air Canada','arajet':'Arajet','dwi':'Arajet','avianca':'Avianca','ava':'Avianca','southwest':'Southwest Airlines','swa':'Southwest Airlines','spirit':'Spirit Airlines','nks':'Spirit Airlines','frontier':'Frontier Airlines','fft':'Frontier Airlines','flair':'Flair Airlines','fle':'Flair Airlines','aeromexico':'Aeromexico','amx':'Aeromexico','argentinas':'Aerolineas Argentinas','arg':'Aerolineas Argentinas','wingo':'Wingo','rpb':'Wingo','condor':'Condor','cfg':'Condor','gol':'Gol','glo':'Gol','jetsmart':'JetSmart','jec':'JetSmart','latam':'Latam','lan':'Latam','lpe':'Latam','avianca-taca':'Avianca'};
+  const airlineMap={'transat':'Air Transat','tsc':'Air Transat','jetblue':'JetBlue','jbu':'JetBlue','american':'American Airlines','aal':'American Airlines','copa':'Copa Airlines','cmp':'Copa Airlines','westjet':'WestJet','wja':'WestJet','united':'United','ual':'United','delta':'Delta','dal':'Delta','canada':'Air Canada','aca':'Air Canada','arajet':'Arajet','dwi':'Arajet','avianca':'Avianca','ava':'Avianca','southwest':'Southwest Airlines','swa':'Southwest Airlines','spirit':'Spirit Airlines','nks':'Spirit Airlines','frontier':'Frontier Airlines','fft':'Frontier Airlines','flair':'Flair Airlines','fle':'Flair Airlines','aeromexico':'Aeromexico','amx':'Aeromexico','argentinas':'Aerolineas Argentinas','arg':'Aerolineas Argentinas','wingo':'Wingo','rpb':'Wingo','condor':'Condor','cfg':'Condor','gol':'Gol','glo':'Gol','jetsmart':'JetSmart','jec':'JetSmart','latam':'Latam','lan':'Latam','lpe':'Latam','avianca-taca':'Avianca','aerolineas':'Aerolineas Argentinas'};
+
+  // Map full airline name to our internal names
+  const fullNameMap={
+    'Air Transat':'Air Transat','JetBlue Airways':'JetBlue','Jetblue Airways':'JetBlue',
+    'American Airlines':'American Airlines','Copa Airlines':'Copa Airlines',
+    'WestJet Airlines':'WestJet','Westjet Airlines':'WestJet',
+    'United Airlines':'United','Delta Air Lines':'Delta','Delta Airlines':'Delta',
+    'Air Canada':'Air Canada','Arajet':'Arajet','Avianca':'Avianca',
+    'Avianca-Taca':'Avianca','Southwest Airlines':'Southwest Airlines',
+    'Spirit Airlines':'Spirit Airlines','Frontier Airlines':'Frontier Airlines',
+    'Flair Airlines':'Flair Airlines','Aeromexico':'Aeromexico','AEROMEXICO':'Aeromexico',
+    'Aerolineas Argentinas':'Aerolineas Argentinas','Wingo':'Wingo','Condor':'Condor',
+    'Gol Transportes Aereos':'Gol','JetSmart':'JetSmart','Latam':'Latam',
+    'Lan Chile':'Latam','Lan Peru':'Latam','British Airways':'British Airways',
+    'Air France':'Air France','Lot Polish':'Lot Polish','TUI Airways':'TUI',
+    'Tui Airways':'TUI','World2Fly':'World2Fly','Sky Airlines Peru':'Sky Airlines Peru',
+    'Discover Airlines':'Discover Airlines','Air Europa':'Air Europa',
+    'Edelweiss Air':'Edelweiss Air','Breeze':'Breeze','Iberojet':'Iberojet',
+    'Global X':'Global X','Air Caraibes':'Air Caraibes','Make Up':'Make Up',
+    'Sky High':'Sky High','AllegiantAir':'AllegiantAir','Sun Country Airlines':'Sun Country',
+    'Air Century':'Air Century','Avelo':'Avelo','Rutaca Airlines':'Rutaca',
+  };
+
   text.split('\n').forEach(line=>{
-    const posMatch=line.match(/\b([BPN]\d{1,2}[A-Z]?)\b/);
-    if(!posMatch) return;
-    let rawPos=posMatch[1].replace(/[A-Z]$/,'');
+    if(!line.trim()) return;
+
+    // Match POS field explicitly (format: "POS 7", "POS B21", "POS N4")
+    const posMatch=line.match(/POS\s+([A-Z]?\d{1,2}[A-Z]?)/i);
     let pos='';
-    if(rawPos.startsWith('P')){ const n=parseInt(rawPos.slice(1)); if(n>=1&&n<=11) pos=String(n); }
-    else if(rawPos.startsWith('B')){ const n=parseInt(rawPos.slice(1)); if(n>=20&&n<=37) pos=String(n); }
-    else if(rawPos.startsWith('N')){ const n=parseInt(rawPos.slice(1)); if(n>=1&&n<=13) pos='N'+n; }
+    if(posMatch){
+      let rawPos=posMatch[1].toUpperCase();
+      // Map terminal positions to our numbering
+      if(/^[BPN]\d/.test(rawPos)){
+        rawPos=rawPos.replace(/[A-Z]$/,''); // strip trailing letter (B21A → B21)
+        if(rawPos.startsWith('P')){ const n=parseInt(rawPos.slice(1)); if(n>=1&&n<=11) pos=String(n); }
+        else if(rawPos.startsWith('B')){ const n=parseInt(rawPos.slice(1)); if(n>=20&&n<=37) pos=String(n); }
+        else if(rawPos.startsWith('N')){ const n=parseInt(rawPos.slice(1)); if(n>=1&&n<=13) pos='N'+n; }
+      } else {
+        const n=parseInt(rawPos); if(n>=1&&n<=37) pos=String(n);
+      }
+    } else {
+      // Fallback: look for B##, P##, N## patterns
+      const m=line.match(/\b([BPN]\d{1,2}[A-Z]?)\b/);
+      if(m){
+        let raw=m[1].replace(/[A-Z]$/,'');
+        if(raw.startsWith('P')){ const n=parseInt(raw.slice(1)); if(n>=1&&n<=11) pos=String(n); }
+        else if(raw.startsWith('B')){ const n=parseInt(raw.slice(1)); if(n>=20&&n<=37) pos=String(n); }
+        else if(raw.startsWith('N')){ const n=parseInt(raw.slice(1)); if(n>=1&&n<=13) pos='N'+n; }
+      }
+    }
     if(!pos) return;
-    const ll=line.toLowerCase();
+
+    // Match airline — try full name map first
     let airline='';
-    for(const[k,v] of Object.entries(airlineMap)){ if(ll.includes(k)){airline=v;break;} }
+    for(const[full,mapped] of Object.entries(fullNameMap)){
+      if(line.includes(full)){ airline=mapped; break; }
+    }
+    if(!airline){
+      const ll=line.toLowerCase();
+      for(const[k,v] of Object.entries(airlineMap)){ if(ll.includes(k)){airline=v;break;} }
+    }
     if(airline) flights.push({airline,pos});
   });
   return flights;
