@@ -460,14 +460,14 @@ header{background:var(--s1);border-bottom:1px solid var(--border);padding:0 14px
 <div class="overlay" id="swapModal">
 <div class="modal">
   <div class="modal-title">⇄ Registrar Cambio entre Colaboradores</div>
-  <p style="font-size:12px;color:var(--text3);margin-bottom:12px">Persona A cede su día a Persona B y vice versa. Cada uno trabaja el turno del otro.</p>
+  <p style="font-size:12px;color:var(--text3);margin-bottom:12px">Cada persona cede su día libre — <b>trabaja ese día</b> y el otro queda libre.</p>
   <div class="frow">
-    <div class="form-group"><label class="fl">Persona A</label><select class="fs" id="swapA"></select></div>
-    <div class="form-group" style="flex:0 0 140px"><label class="fl">Cede este día</label><input type="date" class="fi" id="swapDA"></div>
+    <div class="form-group"><label class="fl">Persona A — trabaja este día</label><select class="fs" id="swapA"></select></div>
+    <div class="form-group" style="flex:0 0 155px"><label class="fl">Día que cede (trabaja)</label><input type="date" class="fi" id="swapDA"></div>
   </div>
   <div class="frow">
-    <div class="form-group"><label class="fl">Persona B</label><select class="fs" id="swapB"></select></div>
-    <div class="form-group" style="flex:0 0 140px"><label class="fl">Cede este día</label><input type="date" class="fi" id="swapDB"></div>
+    <div class="form-group"><label class="fl">Persona B — trabaja este día</label><select class="fs" id="swapB"></select></div>
+    <div class="form-group" style="flex:0 0 155px"><label class="fl">Día que cede (trabaja)</label><input type="date" class="fi" id="swapDB"></div>
   </div>
   <div class="form-group"><label class="fl">Nota</label><input class="fi" id="swapNotes" placeholder="opcional…"></div>
   <div class="form-group"><label style="display:flex;align-items:center;gap:7px;cursor:pointer"><input type="checkbox" id="swapPending" checked style="width:14px;height:14px"><span style="font-size:13px">Pendiente de aplicar</span></label></div>
@@ -695,23 +695,36 @@ function resolvedShift(m,date){
   const ov=S.overrides?.[m.id]?.[date];
   if(ov) return ov.shift==='LIBRE'?null:ov.shift;
 
-  // Cambios (swaps): Person A works on dateB with Person B's shift, and vice versa
+  // Cambios entre colaboradores:
+  // "Ceder el día libre" = tú trabajas ese día, el otro descansa
+  //
+  // Persona A cede su libre (dateA):
+  //   → A TRABAJA el dateA con su turno habitual de ese día
+  //   → B está LIBRE el dateA
+  //
+  // Persona B cede su libre (dateB):
+  //   → B TRABAJA el dateB con su turno habitual de ese día
+  //   → A está LIBRE el dateB
+
   for(const sw of (S.swaps||[])){
-    if(sw.personA===m.id && sw.dateA===date){
-      // A cedes their day → they work B's day instead (get B's base shift on dateB)
-      const mB=S.team.find(t=>t.id===sw.personB);
-      const bShift=mB?.schedule?.[dowIdx(sw.dateB)];
-      return (!bShift||bShift==='L'||bShift==='LIBRE')?null:bShift;
+    // dateA: A trabaja (cedió su libre), B descansa
+    if(sw.dateA===date){
+      if(sw.personB===m.id) return null; // B libre ese día
+      if(sw.personA===m.id){
+        // A trabaja con su turno habitual de ese día de la semana
+        const s=m.schedule?.[dowIdx(date)];
+        return (!s||s==='L'||s==='LIBRE')?null:s;
+      }
     }
-    if(sw.personB===m.id && sw.dateB===date){
-      // B cedes their day → they work A's day instead (get A's base shift on dateA)
-      const mA=S.team.find(t=>t.id===sw.personA);
-      const aShift=mA?.schedule?.[dowIdx(sw.dateA)];
-      return (!aShift||aShift==='L'||aShift==='LIBRE')?null:aShift;
+    // dateB: B trabaja (cedió su libre), A descansa
+    if(sw.dateB===date){
+      if(sw.personA===m.id) return null; // A libre ese día
+      if(sw.personB===m.id){
+        // B trabaja con su turno habitual de ese día de la semana
+        const s=m.schedule?.[dowIdx(date)];
+        return (!s||s==='L'||s==='LIBRE')?null:s;
+      }
     }
-    // On the day they gave away, they are libre
-    if(sw.personA===m.id && sw.dateB===date) return null;
-    if(sw.personB===m.id && sw.dateA===date) return null;
   }
 
   const s=m.schedule?.[dowIdx(date)];
@@ -1981,18 +1994,20 @@ function updateApiKeyBtn(){
   btn.style.borderColor=has?'rgba(23,201,122,.4)':'';
 }
 
-async function callGemini(prompt,maxTokens){
+async function callGemini(prompt,maxTokens,forceJson){
   const key=getApiKey();
   if(!key) throw new Error('Sin API key. Toca 🔑 para agregarla.');
   const ctrl=new AbortController();
   const tid=setTimeout(()=>ctrl.abort(),45000);
   try {
+    const genConfig={maxOutputTokens:maxTokens||4000,temperature:0.2};
+    if(forceJson) genConfig.responseMimeType='application/json';
     const res=await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${key}`,{
       method:'POST', signal:ctrl.signal,
       headers:{'Content-Type':'application/json'},
       body:JSON.stringify({
         contents:[{role:'user',parts:[{text:prompt}]}],
-        generationConfig:{maxOutputTokens:maxTokens||4000,temperature:0.2}
+        generationConfig:genConfig
       })
     });
     clearTimeout(tid);
@@ -2000,7 +2015,7 @@ async function callGemini(prompt,maxTokens){
     const data=await res.json();
     if(data.error) throw new Error(data.error.message+
       (data.error.message?.includes('quota')||data.error.message?.includes('Quota')
-        ? '\n\nTu cuota gratuita se agotó. Ve a console.cloud.google.com y activa facturación (cuesta ~$0.01 por generación).'
+        ? '\n\nTu cuota gratuita se agotó. Ve a console.cloud.google.com y activa facturación.'
         : ''));
     const txt=data.candidates?.[0]?.content?.parts?.[0]?.text;
     if(!txt) throw new Error('Respuesta vacía');
@@ -2088,16 +2103,32 @@ RESPONDE SOLO JSON válido sin markdown:
   setAI(55,'Generando con IA…');
 
   try {
-    const raw=await callGemini(prompt,4000);
+    const raw=await callGemini(prompt,4000,true); // forceJson=true
     if(aiCancelled) return;
     setAI(85,'Procesando…');
     let parsed;
     try {
-      const clean=raw.replace(/```json\s*/gi,'').replace(/```\s*/g,'').trim();
+      // Strategy 1: strip markdown fences, find outermost { }
+      let clean=raw.replace(/```json\s*/gi,'').replace(/```\s*/g,'').trim();
+      // Strategy 2: if response has thinking text before JSON, find first {
       const s=clean.indexOf('{'), e=clean.lastIndexOf('}');
-      if(s===-1||e===-1) throw new Error('Sin JSON');
-      parsed=JSON.parse(clean.slice(s,e+1));
-    } catch(pe){ console.error('Parse error:',pe,'\nRaw:',raw.slice(0,300)); throw new Error('Error al parsear respuesta: '+pe.message); }
+      if(s===-1||e===-1){
+        // Strategy 3: try parsing as-is
+        parsed=JSON.parse(clean);
+      } else {
+        parsed=JSON.parse(clean.slice(s,e+1));
+      }
+    } catch(pe){
+      console.error('Parse error:',pe,'\nRaw:',raw.slice(0,500));
+      // Strategy 4: try to extract JSON with regex
+      const match=raw.match(/\{[\s\S]*"shifts"[\s\S]*\}/);
+      if(match){
+        try{ parsed=JSON.parse(match[0]); }
+        catch(pe2){ throw new Error('No se pudo leer la respuesta de IA. Intenta de nuevo.'); }
+      } else {
+        throw new Error('No se pudo leer la respuesta de IA. Intenta de nuevo.');
+      }
+    }
     aiDraft=parsed;
     setAI(100,'¡Listo!');
     setTimeout(()=>{ closeModal('aiLoading'); showDraftPreview(parsed); },300);
