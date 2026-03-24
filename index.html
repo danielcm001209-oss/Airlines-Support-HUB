@@ -98,7 +98,8 @@ header{background:var(--s1);border-bottom:1px solid var(--border);padding:0 14px
 .pos-btn{background:var(--s1);border:1px solid var(--border2);border-radius:5px;color:var(--text3);padding:4px 7px;font-size:11px;font-weight:700;cursor:pointer;font-family:'IBM Plex Mono',monospace;transition:all .15s;}
 .pos-btn:hover{border-color:var(--accent);color:var(--accent);}
 .pos-btn.sel{background:rgba(45,122,238,.2);border-color:var(--accent);color:var(--accent);}
-.pos-display{font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--accent);font-weight:700;padding:4px 0;min-height:20px;}
+.pos-btn.occ{border-color:rgba(240,165,0,.4);color:var(--amber);background:rgba(240,165,0,.05);}
+.pos-btn.occ:hover{border-color:var(--amber);}
 .task-buttons{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px;}
 .task-btn{padding:5px 11px;border-radius:6px;font-size:12px;font-weight:700;cursor:pointer;border:1px solid var(--border2);background:var(--s2);color:var(--text2);transition:all .15s;}
 .task-btn.sel{background:rgba(23,201,122,.15);border-color:var(--green);color:var(--green);}
@@ -160,9 +161,13 @@ header{background:var(--s1);border-bottom:1px solid var(--border);padding:0 14px
   <div class="out-panel">
     <div class="out-head">
       <span class="out-title">WhatsApp</span>
-      <button class="btn btn-outline" style="font-size:11px;padding:3px 8px;" onclick="doCopy()">Copiar</button>
+      <div style="display:flex;gap:5px;">
+        <button class="btn btn-outline" style="font-size:11px;padding:3px 7px;" id="editOutBtn" onclick="toggleOutEdit()">✏️ Editar</button>
+        <button class="btn btn-outline" style="font-size:11px;padding:3px 8px;" onclick="doCopy()">📋 Copiar</button>
+      </div>
     </div>
     <div class="out-body" id="outBody">El texto aparecerá aquí…</div>
+    <textarea class="out-body" id="outEditor" style="display:none;resize:none;border:none;outline:none;width:100%;flex:1;background:transparent;" spellcheck="false"></textarea>
   </div>
 </div>
 
@@ -248,7 +253,16 @@ header{background:var(--s1);border-bottom:1px solid var(--border);padding:0 14px
     <div class="modal-title" style="margin:0">✈️ Lista de Vuelos del Día</div>
     <button onclick="closeModal('flightModal')" style="background:none;border:none;color:var(--text3);font-size:20px;cursor:pointer">✕</button>
   </div>
-  <p style="font-size:12px;color:var(--text3);margin-bottom:12px">Sube el archivo de vuelos o pega el texto. La IA usará esto para sugerir posiciones.</p>
+  <p style="font-size:12px;color:var(--text3);margin-bottom:12px">Sube el archivo de vuelos, pega el texto, o carga desde LACOPS en tiempo real.</p>
+  <!-- LACOPS live fetch -->
+  <div style="background:var(--s2);border:1px solid var(--border2);border-radius:8px;padding:12px;margin-bottom:12px;">
+    <div style="font-size:10px;font-weight:800;letter-spacing:1px;color:var(--cyan);text-transform:uppercase;margin-bottom:8px;">🔗 Cargar desde LACOPS (tiempo real)</div>
+    <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+      <input class="fi" id="lacopsDate" type="date" style="flex:1;min-width:130px;font-size:12px;padding:5px 9px">
+      <button class="btn btn-primary" style="white-space:nowrap" onclick="fetchLACOPS()">⬇️ Cargar vuelos</button>
+    </div>
+    <div id="lacopsStatus" style="margin-top:8px;font-size:11px;color:var(--text3);display:none"></div>
+  </div>
   <div style="border:2px dashed var(--border2);border-radius:9px;padding:18px;text-align:center;margin-bottom:12px;">
     <div style="font-size:24px;margin-bottom:6px">📂</div>
     <div style="font-size:13px;font-weight:700;margin-bottom:10px">Seleccionar archivo</div>
@@ -296,6 +310,11 @@ header{background:var(--s1);border-bottom:1px solid var(--border);padding:0 14px
   <div id="shiftBadge" style="padding:7px 11px;border-radius:6px;font-size:11px;color:var(--text2);background:var(--s2);border:1px solid var(--border);margin-bottom:10px"></div>
   <!-- Dynamic shift sections -->
   <div id="shiftSections"></div>
+  <!-- Position legend -->
+  <div style="display:flex;gap:10px;margin-bottom:8px;flex-wrap:wrap;font-size:10px;color:var(--text3);">
+    <span><span style="display:inline-block;width:10px;height:10px;border-radius:2px;background:rgba(45,122,238,.2);border:1px solid var(--accent);margin-right:3px;vertical-align:middle"></span>Seleccionada</span>
+    <span><span style="display:inline-block;width:10px;height:10px;border-radius:2px;background:rgba(240,165,0,.05);border:1px solid rgba(240,165,0,.4);margin-right:3px;vertical-align:middle"></span>Ya asignada</span>
+  </div>
   <!-- Radio -->
   <div class="form-group">
     <label class="fl">Radio #</label>
@@ -852,20 +871,122 @@ function buildText(date){
 
 function addMins(t,m){ if(!t) return ''; const[h,min]=t.split(':').map(Number); const tot=h*60+min+m; return String(Math.floor(tot/60)%24).padStart(2,'0')+':'+String(tot%60).padStart(2,'0'); }
 
+// ═══════════════════════════════════════════════════════
+// WHATSAPP OUTPUT EDIT MODE
+// ═══════════════════════════════════════════════════════
+let outEditMode = false;
+
+function toggleOutEdit(){
+  outEditMode = !outEditMode;
+  const body=document.getElementById('outBody');
+  const editor=document.getElementById('outEditor');
+  const btn=document.getElementById('editOutBtn');
+  if(outEditMode){
+    editor.value=body.textContent;
+    body.style.display='none';
+    editor.style.display='block';
+    btn.textContent='✅ Listo';
+    btn.style.color='var(--green)';
+    editor.focus();
+  } else {
+    body.textContent=editor.value;
+    editor.style.display='none';
+    body.style.display='block';
+    btn.textContent='✏️ Editar';
+    btn.style.color='';
+  }
+}
+
 function refreshOutput(){
+  if(outEditMode) return; // don't overwrite while editing
   document.getElementById('outBody').textContent=buildText(S.activeDate);
 }
 
 function doCopy(){
-  const txt=buildText(S.activeDate);
+  const txt=outEditMode
+    ? document.getElementById('outEditor').value
+    : document.getElementById('outBody').textContent;
   if(navigator.clipboard&&window.isSecureContext){
     navigator.clipboard.writeText(txt).then(()=>toast('📋 ¡Copiado!'));
   } else {
     const ta=document.createElement('textarea');
     ta.value=txt; ta.style.cssText='position:fixed;left:-9999px;opacity:0;';
     document.body.appendChild(ta); ta.select();
-    try{document.execCommand('copy');toast('📋 ¡Copiado!');}catch(e){toast('Error al copiar','error');}
+    try{document.execCommand('copy');toast('📋 ¡Copiado!');}catch(e){}
     document.body.removeChild(ta);
+  }
+}
+
+// ═══════════════════════════════════════════════════════
+// LACOPS FLIGHT API
+// ═══════════════════════════════════════════════════════
+async function fetchLACOPS(){
+  const dateInput=document.getElementById('lacopsDate');
+  const date=dateInput.value||S.activeDate;
+  const status=document.getElementById('lacopsStatus');
+  status.style.display='block';
+  status.style.color='var(--text2)';
+  status.textContent='Conectando con LACOPS…';
+
+  try {
+    const ctrl = new AbortController();
+    const tid = setTimeout(()=>ctrl.abort(), 15000);
+    const url=`https://proxy-dashboard.josemiguel-account.workers.dev/vuelos?date=${date}`;
+    const res=await fetch(url, {signal: ctrl.signal});
+    clearTimeout(tid);
+    if(!res.ok) throw new Error('HTTP '+res.status);
+    const data=await res.json();
+
+    // Try to extract flights from response
+    let text='';
+    if(typeof data==='string') text=data;
+    else if(Array.isArray(data)){
+      text=data.map(f=>{
+        const parts=[];
+        if(f.flight||f.vuelo||f.numero) parts.push(f.flight||f.vuelo||f.numero);
+        if(f.airline||f.aerolinea) parts.push(f.airline||f.aerolinea);
+        if(f.pos||f.position||f.gate||f.posicion) parts.push('POS '+(f.pos||f.position||f.gate||f.posicion));
+        if(f.sta||f.hora||f.time) parts.push(f.sta||f.hora||f.time);
+        if(f.type||f.tipo||f.operation) parts.push(f.type||f.tipo||f.operation);
+        return parts.join('  ');
+      }).join('\n');
+    } else if(typeof data==='object'){
+      // Try common response shapes
+      const flights=data.flights||data.vuelos||data.data||data.results||[];
+      if(Array.isArray(flights)){
+        text=flights.map(f=>{
+          const parts=[];
+          if(f.flight||f.vuelo||f.numero||f.flightNumber) parts.push(f.flight||f.vuelo||f.numero||f.flightNumber);
+          if(f.airline||f.aerolinea||f.airlineName) parts.push(f.airline||f.aerolinea||f.airlineName);
+          if(f.pos||f.position||f.gate||f.posicion||f.stand) parts.push('POS '+(f.pos||f.position||f.gate||f.posicion||f.stand));
+          if(f.sta||f.hora||f.time||f.scheduledTime) parts.push(f.sta||f.hora||f.time||f.scheduledTime);
+          if(f.type||f.tipo||f.movementType) parts.push(f.type||f.tipo||f.movementType);
+          return parts.join('  ');
+        }).join('\n');
+      } else {
+        text=JSON.stringify(data,null,2);
+      }
+    }
+
+    if(!text.trim()){
+      // Show raw JSON so we can see the format
+      text = typeof data === 'string' ? data : JSON.stringify(data, null, 2);
+      document.getElementById('flightTextInput').value=text;
+      onFlightTextChange();
+      status.style.color='var(--amber)';
+      status.textContent=`⚠️ Datos recibidos pero formato no reconocido. Revisa el texto abajo y guarda.`;
+      return;
+    }
+
+    document.getElementById('flightTextInput').value=text;
+    onFlightTextChange();
+    const lines=text.split('\n').filter(l=>l.trim()).length;
+    status.style.color='var(--green)';
+    status.textContent=`✅ ${lines} vuelos cargados desde LACOPS (${date})`;
+
+  } catch(e){
+    status.style.color='var(--red)';
+    status.textContent='❌ '+(e.name==='AbortError'?'Timeout — LACOPS no respondió':e.message);
   }
 }
 
@@ -879,17 +1000,41 @@ function posPicker(prefix){
     <div class="pos-section"><div class="pos-section-label">Terminal B (20–26)</div><div class="pos-buttons" id="pb_${prefix}_TB"></div></div>
     <div class="pos-section"><div class="pos-section-label" style="color:var(--text3)">N B (N6–N13)</div><div class="pos-buttons" id="pb_${prefix}_NB"></div></div>
     <div class="pos-section"><div class="pos-section-label">Terminal B2 (27–37)</div><div class="pos-buttons" id="pb_${prefix}_TB2"></div></div>
-    <div style="font-size:11px;color:var(--accent);font-family:'IBM Plex Mono',monospace;font-weight:700;padding:3px 0;min-height:18px" id="pd_${prefix}">—</div>
-    <button type="button" class="btn btn-outline" style="font-size:10px;padding:3px 7px;align-self:flex-start" onclick="clearPicker('${prefix}')">✕ Limpiar</button>
+    <div style="display:flex;align-items:center;gap:8px;margin-top:2px;">
+      <div style="font-size:11px;color:var(--accent);font-family:'IBM Plex Mono',monospace;font-weight:700;min-height:18px" id="pd_${prefix}">—</div>
+      <button type="button" class="btn btn-outline" style="font-size:10px;padding:2px 7px" onclick="clearPicker('${prefix}')">✕ Limpiar</button>
+    </div>
   </div>`;
 }
 
+function getOccupiedPositions(){
+  // Returns set of positions already assigned today (excluding current edit)
+  const occupied=new Set();
+  const date=S.activeDate;
+  SHIFT_DEFS.forEach(shift=>{
+    (S.duties[date]?.[shift.id]||[]).forEach((d,i)=>{
+      if(shift.id===modalShift && i===modalEditIdx) return; // skip current
+      [d.primaryPos,d.afterMealPos,d.coverPos].forEach(p=>{
+        if(p&&p!=='—') parseRange(p).forEach(pos=>occupied.add(pos));
+      });
+    });
+  });
+  return occupied;
+}
+
 function buildPicker(prefix, arr){
+  const occupied=getOccupiedPositions();
   const groups={TA:POS.TA, NA:POS.N_A, TB:POS.TB, NB:POS.N_B, TB2:POS.TB2};
   for(const[grp,pos] of Object.entries(groups)){
     const el=document.getElementById(`pb_${prefix}_${grp}`);
     if(!el) continue;
-    el.innerHTML=pos.map(p=>`<button type="button" class="pos-btn${arr.includes(p)?' sel':''}" onclick="togglePos('${prefix}','${p}')">${p}</button>`).join('');
+    el.innerHTML=pos.map(p=>{
+      const isSel=arr.includes(p);
+      const isOcc=occupied.has(p)&&!isSel;
+      const cls=`pos-btn${isSel?' sel':''}${isOcc?' occ':''}`;
+      const title=isOcc?'Ya asignada a otro agente':'';
+      return `<button type="button" class="${cls}" onclick="togglePos('${prefix}','${p}')" title="${title}">${p}${isOcc?'<span style="font-size:8px;vertical-align:super;color:var(--amber)">●</span>':''}</button>`;
+    }).join('');
   }
   const d=document.getElementById(`pd_${prefix}`);
   if(d) d.textContent=posToRange(arr)||'—';
@@ -1113,11 +1258,30 @@ function addCoverRow(data){
   const div=document.createElement('div'); div.className='cover-row';
   div.innerHTML=`
     <select class="fs cover-who" style="flex:1" onchange="autofillCoverPos(this)">${opts}</select>
-    <input class="fi c-time" placeholder="Hora" value="${data?.time||''}" style="flex:0 0 85px;font-size:12px;padding:5px 8px">
-    <input class="fi c-pos" placeholder="Posición" value="${data?.pos||''}" style="flex:0 0 100px;font-size:12px;padding:5px 8px">
+    <input class="fi c-time" placeholder="Hora" value="${data?.time||''}" style="flex:0 0 80px;font-size:12px;padding:5px 8px" oninput="detectCoverType(this)">
+    <span class="cover-type-badge" style="font-size:10px;font-weight:800;padding:3px 7px;border-radius:5px;background:var(--s1);border:1px solid var(--border2);color:var(--text3);white-space:nowrap;align-self:flex-end;margin-bottom:1px">${detectMealType(data?.time||'')}</span>
+    <input class="fi c-pos" placeholder="Posición" value="${data?.pos||''}" style="flex:0 0 95px;font-size:12px;padding:5px 8px">
     <button type="button" class="btn btn-danger" style="font-size:11px;padding:4px 8px" onclick="this.parentElement.remove()">✕</button>`;
   c.appendChild(div);
   if(!data?.pos) autofillCoverPos(div.querySelector('.cover-who'));
+}
+
+function detectMealType(time){
+  if(!time) return '—';
+  const h=parseInt(time.split(':')[0]);
+  if(h>=11&&h<15) return '🍽 Almuerzo';
+  if(h>=17&&h<21) return '🌙 Cena';
+  return '—';
+}
+
+function detectCoverType(inp){
+  const badge=inp.parentElement.querySelector('.cover-type-badge');
+  if(!badge) return;
+  const type=detectMealType(inp.value);
+  badge.textContent=type;
+  if(type.includes('Almuerzo')){badge.style.color='var(--amber)';badge.style.borderColor='rgba(240,165,0,.4)';}
+  else if(type.includes('Cena')){badge.style.color='var(--purple)';badge.style.borderColor='rgba(139,92,246,.4)';}
+  else{badge.style.color='var(--text3)';badge.style.borderColor='var(--border2)';}
 }
 
 function autofillCoverPos(sel){
@@ -1661,6 +1825,8 @@ function triggerFile(id){ document.getElementById(id).click(); }
 function openFlightModal(){
   document.getElementById('flightTextInput').value=flightData;
   document.getElementById('flightFileStatus').style.display='none';
+  document.getElementById('lacopsStatus').style.display='none';
+  document.getElementById('lacopsDate').value=S.activeDate;
   onFlightTextChange();
   document.getElementById('flightModal').classList.add('open');
 }
