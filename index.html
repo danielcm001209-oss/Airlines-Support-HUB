@@ -7,6 +7,8 @@
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=Barlow:wght@400;600;700;800;900&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
 <style>
 :root{
   --bg:#07090f;--s1:#0d1117;--s2:#131a24;--s3:#1a2332;
@@ -111,6 +113,7 @@ header{background:var(--s1);border-bottom:1px solid var(--border);padding:0 14px
 .sched-row{display:flex;gap:3px;flex-wrap:wrap;margin-top:5px;}
 .sched-pip{font-size:10px;font-weight:800;padding:2px 5px;border-radius:4px;font-family:'IBM Plex Mono',monospace;}
 .swap-card{background:var(--s2);border:1px solid var(--border2);border-radius:8px;padding:11px;margin-bottom:7px;display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
+.changes-section-label{font-size:10px;font-weight:800;letter-spacing:1px;color:var(--text3);text-transform:uppercase;margin-bottom:8px;}
 .toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%) translateY(20px);background:var(--s1);border:1px solid var(--green);border-radius:8px;padding:10px 18px;font-size:13px;font-weight:700;opacity:0;transition:all .3s;z-index:9999;pointer-events:none;white-space:nowrap;}
 .toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
 @keyframes spin{to{transform:rotate(360deg)}}
@@ -134,6 +137,7 @@ header{background:var(--s1);border-bottom:1px solid var(--border);padding:0 14px
   </div>
   <div class="hactions">
     <button class="btn btn-outline" onclick="window.print()" title="Imprimir">🖨</button>
+    <span id="cloudPill" style="font-size:11px;font-family:'IBM Plex Mono',monospace;color:var(--text3);padding:4px 8px;background:var(--s2);border:1px solid var(--border);border-radius:14px;white-space:nowrap;">☁ Local</span>
     <button class="btn btn-outline" id="apiKeyBtn" onclick="configApiKey()" title="API Key Gemini">🔑</button>
     <button class="btn btn-outline" id="flightBtn" onclick="openFlightModal()">✈️ Vuelos</button>
     <button class="btn btn-outline" id="undoBtn" onclick="undo()" disabled style="opacity:.35">↩</button>
@@ -221,16 +225,30 @@ header{background:var(--s1);border-bottom:1px solid var(--border);padding:0 14px
 <!-- CHANGES -->
 <div class="page" id="page-changes">
   <div class="full-page">
-    <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;margin-bottom:12px;">
+    <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;margin-bottom:14px;">
       <h2 style="font-size:18px;font-weight:900;">🔄 Cambios</h2>
-      <div style="display:flex;gap:6px;">
-        <button class="btn btn-outline" onclick="openOverrideModal(null,null)">+ Refuerzo / Horas Extra</button>
+      <div style="display:flex;gap:6px;flex-wrap:wrap;">
+        <button class="btn btn-outline" onclick="openVacModal()">🏖 Vacaciones</button>
+        <button class="btn btn-outline" onclick="openOverrideModal(null,null)">🔧 Refuerzo / H. Extra</button>
+        <button class="btn btn-outline" onclick="openPermisoModal()">📋 Permiso</button>
+        <button class="btn btn-outline" onclick="openLicenciaModal()">🪪 Licencia</button>
         <button class="btn btn-outline" onclick="openSwapModal()">⇄ Cambio</button>
       </div>
     </div>
-    <div style="font-size:10px;font-weight:800;letter-spacing:1px;color:var(--text3);text-transform:uppercase;margin-bottom:8px;">Refuerzos / Horas Extra</div>
+
+    <div class="changes-section-label">🏖 Vacaciones</div>
+    <div id="vacList"></div>
+
+    <div class="changes-section-label" style="margin-top:14px">🔧 Refuerzos / Horas Extra</div>
     <div id="overridesList"></div>
-    <div style="margin-top:14px;font-size:10px;font-weight:800;letter-spacing:1px;color:var(--text3);text-transform:uppercase;margin-bottom:8px;">Cambios entre Colaboradores</div>
+
+    <div class="changes-section-label" style="margin-top:14px">📋 Permisos / Días Libres</div>
+    <div id="permisoList"></div>
+
+    <div class="changes-section-label" style="margin-top:14px">🪪 Licencias</div>
+    <div id="licenciaList"></div>
+
+    <div class="changes-section-label" style="margin-top:14px">⇄ Cambios entre Colaboradores</div>
     <div id="swapsList"></div>
   </div>
 </div>
@@ -426,7 +444,77 @@ header{background:var(--s1);border-bottom:1px solid var(--border);padding:0 14px
 </div>
 </div>
 
-<!-- ═══════ OVERRIDE MODAL ═══════ -->
+<!-- ═══════ VACACIONES MODAL ═══════ -->
+<div class="overlay" id="vacModal">
+<div class="modal">
+  <div class="modal-title">🏖 Registrar Vacaciones</div>
+  <div class="form-group"><label class="fl">Persona</label><select class="fs" id="vacPerson"></select></div>
+  <div class="frow">
+    <div class="form-group"><label class="fl">Fecha inicio</label><input type="date" class="fi" id="vacStart"></div>
+    <div class="form-group"><label class="fl">Fecha fin</label><input type="date" class="fi" id="vacEnd"></div>
+  </div>
+  <div class="form-group"><label class="fl">Días aprobados</label><input class="fi" id="vacDays" type="number" placeholder="ej: 10" style="max-width:100px"></div>
+  <div class="form-group"><label class="fl">Nota</label><input class="fi" id="vacNote" placeholder="opcional…"></div>
+  <div class="mactions">
+    <button class="btn btn-outline" onclick="closeModal('vacModal')">Cancelar</button>
+    <button class="btn btn-primary" onclick="saveVac()">Guardar</button>
+  </div>
+</div>
+</div>
+
+<!-- ═══════ PERMISO MODAL ═══════ -->
+<div class="overlay" id="permisoModal">
+<div class="modal">
+  <div class="modal-title">📋 Registrar Permiso / Día Libre</div>
+  <div class="form-group"><label class="fl">Persona</label><select class="fs" id="permisoPerson"></select></div>
+  <div class="frow">
+    <div class="form-group"><label class="fl">Fecha inicio</label><input type="date" class="fi" id="permisoStart"></div>
+    <div class="form-group"><label class="fl">Fecha fin</label><input type="date" class="fi" id="permisoEnd"></div>
+  </div>
+  <div class="form-group"><label class="fl">Motivo</label>
+    <select class="fs" id="permisoTipo">
+      <option value="Cita médica">Cita médica</option>
+      <option value="Asunto personal">Asunto personal</option>
+      <option value="Día libre por acumulación">Día libre por acumulación</option>
+      <option value="Emergencia familiar">Emergencia familiar</option>
+      <option value="Otro">Otro</option>
+    </select>
+  </div>
+  <div class="form-group"><label class="fl">Nota adicional</label><input class="fi" id="permisoNote" placeholder="opcional…"></div>
+  <div class="mactions">
+    <button class="btn btn-outline" onclick="closeModal('permisoModal')">Cancelar</button>
+    <button class="btn btn-primary" onclick="savePermiso()">Guardar</button>
+  </div>
+</div>
+</div>
+
+<!-- ═══════ LICENCIA MODAL ═══════ -->
+<div class="overlay" id="licenciaModal">
+<div class="modal">
+  <div class="modal-title">🪪 Registrar Licencia</div>
+  <div class="form-group"><label class="fl">Persona</label><select class="fs" id="licenciaPerson"></select></div>
+  <div class="frow">
+    <div class="form-group"><label class="fl">Fecha inicio</label><input type="date" class="fi" id="licenciaStart"></div>
+    <div class="form-group"><label class="fl">Fecha fin</label><input type="date" class="fi" id="licenciaEnd"></div>
+  </div>
+  <div class="form-group"><label class="fl">Tipo de licencia</label>
+    <select class="fs" id="licenciaTipo">
+      <option value="Licencia médica">Licencia médica</option>
+      <option value="Licencia de maternidad">Licencia de maternidad</option>
+      <option value="Licencia de paternidad">Licencia de paternidad</option>
+      <option value="Licencia sin sueldo">Licencia sin sueldo</option>
+      <option value="Otro">Otro</option>
+    </select>
+  </div>
+  <div class="form-group"><label class="fl">Nota</label><input class="fi" id="licenciaNote" placeholder="ej: Certificado médico entregado…"></div>
+  <div class="mactions">
+    <button class="btn btn-outline" onclick="closeModal('licenciaModal')">Cancelar</button>
+    <button class="btn btn-primary" onclick="saveLicencia()">Guardar</button>
+  </div>
+</div>
+</div>
+
+<!-- ═══════ OVERRIDE (REFUERZO) MODAL ═══════ -->
 <div class="overlay" id="overrideModal">
 <div class="modal">
   <div class="modal-title">📅 Refuerzo / Horas Extra</div>
@@ -511,6 +599,21 @@ header{background:var(--s1);border-bottom:1px solid var(--border);padding:0 14px
 
 <script>
 // ═══════════════════════════════════════════════════════
+// FIREBASE CONFIG
+// ═══════════════════════════════════════════════════════
+const FIREBASE_CONFIG = {
+  apiKey: "AIzaSyD4slf_9gdEI7zVEnTVsruoYmk3qLCQWd4",
+  authDomain: "airlines-support.firebaseapp.com",
+  projectId: "airlines-support",
+  storageBucket: "airlines-support.firebasestorage.app",
+  messagingSenderId: "138105289334",
+  appId: "1:138105289334:web:7a95e4f8392d4d60c83d57"
+};
+const CLOUD_DOC_PATH = {collection:'apps', doc:'airlines-support-hub'};
+
+let cloudDb=null, cloudDocRef=null, cloudReady=false, cloudApplying=false, cloudSaveTimer=null;
+
+// ═══════════════════════════════════════════════════════
 // CONSTANTS
 // ═══════════════════════════════════════════════════════
 const SHIFT_DEFS = [
@@ -558,6 +661,7 @@ const SCHED_COLORS = {A:'#17c97a',T9:'#2d7aee',B:'#8b5cf6',BC:'#fb923c',C:'#e845
 // ═══════════════════════════════════════════════════════
 let S = {
   team:[], duties:{}, observations:{}, overrides:{}, swaps:[],
+  vacaciones:[], permisos:[], licencias:[],
   activeDate: todayStr(),
   airlines:{}, personAirlines:{}
 };
@@ -576,7 +680,87 @@ function todayStr(){ return new Date().toISOString().split('T')[0]; }
 const UNDO=[], REDO=[];
 function snap(){ return JSON.stringify({duties:S.duties, observations:S.observations}); }
 function restore(s){ const p=JSON.parse(s); S.duties=p.duties; S.observations=p.observations; }
-function save(){ localStorage.setItem('airops4', JSON.stringify(S)); updateUndoBtns(); }
+function save(){
+  localStorage.setItem('airops4', JSON.stringify(S));
+  updateUndoBtns();
+  queueCloudSave();
+}
+
+function cloudPayload(){
+  const {activeDate, ...rest} = S;
+  return {...rest, updatedAt:Date.now(), schemaVersion:3};
+}
+
+function updateCloudPill(label, color){
+  const el=document.getElementById('cloudPill');
+  if(!el) return;
+  el.textContent=label;
+  el.style.color=color||'var(--text2)';
+}
+
+function queueCloudSave(){
+  if(!cloudReady||cloudApplying||!cloudDocRef) return;
+  clearTimeout(cloudSaveTimer);
+  cloudSaveTimer=setTimeout(async()=>{
+    try{
+      updateCloudPill('☁ Sincronizando…','var(--amber)');
+      await cloudDocRef.set(cloudPayload(), {merge:true});
+      updateCloudPill('☁ En nube','var(--green)');
+    }catch(e){
+      console.error('Cloud save error',e);
+      updateCloudPill('☁ Error nube','var(--red)');
+    }
+  },350);
+}
+
+function applyCloudState(data){
+  const keepDate=S.activeDate||todayStr();
+  const keepApiKey=localStorage.getItem('airops_gemini_key')||'';
+  Object.assign(S, data||{});
+  S.activeDate=keepDate;
+  migrate();
+  S.team.forEach(m=>{ if(!m.waName) m.waName=m.name.split(' ')[0]; });
+  if(keepApiKey) localStorage.setItem('airops_gemini_key', keepApiKey);
+}
+
+function initCloud(){
+  if(!window.firebase){ updateCloudPill('☁ Local','var(--text2)'); return; }
+  try{
+    if(!firebase.apps.length) firebase.initializeApp(FIREBASE_CONFIG);
+    cloudDb=firebase.firestore();
+    cloudDocRef=cloudDb.collection(CLOUD_DOC_PATH.collection).doc(CLOUD_DOC_PATH.doc);
+    cloudReady=true;
+    updateCloudPill('☁ Conectando…','var(--amber)');
+    cloudDocRef.onSnapshot(snap=>{
+      try{
+        cloudApplying=true;
+        if(snap.exists){
+          applyCloudState(snap.data()||{});
+          localStorage.setItem('airops4', JSON.stringify(S));
+          updateCloudPill('☁ En nube','var(--green)');
+          renderBoard(); refreshOutput(); renderChanges();
+          const teamPage=document.getElementById('page-team');
+          if(teamPage?.classList.contains('active')) renderTeamGrid();
+        } else {
+          // First time — push local data to cloud
+          updateCloudPill('☁ Inicializando…','var(--amber)');
+          queueCloudSave();
+        }
+      }catch(e){
+        console.error('Cloud snapshot error',e);
+        updateCloudPill('☁ Error','var(--red)');
+      } finally {
+        cloudApplying=false;
+      }
+    }, err=>{
+      console.error('Cloud listener error',err);
+      updateCloudPill('☁ Sin conexión','var(--red)');
+    });
+  }catch(e){
+    console.error('Cloud init error',e);
+    updateCloudPill('☁ Error init','var(--red)');
+  }
+}
 function saveDay(){ save(); toast('✅ Guardado'); }
 function pushUndo(){ UNDO.push(snap()); if(UNDO.length>50)UNDO.shift(); REDO.length=0; updateUndoBtns(); }
 function updateUndoBtns(){
@@ -695,34 +879,41 @@ function resolvedShift(m,date){
   const ov=S.overrides?.[m.id]?.[date];
   if(ov) return ov.shift==='LIBRE'?null:ov.shift;
 
-  // Cambios entre colaboradores:
-  // "Ceder el día libre" = tú trabajas ese día, el otro descansa
-  //
-  // Persona A cede su libre (dateA):
-  //   → A TRABAJA el dateA con su turno habitual de ese día
-  //   → B está LIBRE el dateA
-  //
-  // Persona B cede su libre (dateB):
-  //   → B TRABAJA el dateB con su turno habitual de ese día
-  //   → A está LIBRE el dateB
+  // Vacaciones, permisos, licencias → LIBRE durante el rango
+  const inRange=(list)=>(list||[]).some(r=>r.personId===m.id&&date>=r.start&&date<=r.end);
+  if(inRange(S.vacaciones)||inRange(S.permisos)||inRange(S.licencias)) return null;
 
+  // Cambios entre colaboradores:
+  // Persona A cede su día libre (dateA) → A TRABAJA ese día con el turno de B ese día
+  //                                     → B está LIBRE ese día
+  // Persona B cede su día libre (dateB) → B TRABAJA ese día con el turno de A ese día
+  //                                     → A está LIBRE ese día
   for(const sw of (S.swaps||[])){
-    // dateA: A trabaja (cedió su libre), B descansa
     if(sw.dateA===date){
-      if(sw.personB===m.id) return null; // B libre ese día
+      if(sw.personB===m.id) return null; // B libre en dateA
       if(sw.personA===m.id){
-        // A trabaja con su turno habitual de ese día de la semana
-        const s=m.schedule?.[dowIdx(date)];
-        return (!s||s==='L'||s==='LIBRE')?null:s;
+        // A trabaja en dateA — usa el turno habitual de B en ese día de la semana
+        const mB=S.team.find(t=>t.id===sw.personB);
+        const s=mB?.schedule?.[dowIdx(date)];
+        // Si B también está libre ese día, usar el primer turno disponible de A
+        if(!s||s==='L'||s==='LIBRE'){
+          const fallback=m.schedule?.find(x=>x&&x!=='L'&&x!=='LIBRE');
+          return fallback||'B'; // último recurso
+        }
+        return s;
       }
     }
-    // dateB: B trabaja (cedió su libre), A descansa
     if(sw.dateB===date){
-      if(sw.personA===m.id) return null; // A libre ese día
+      if(sw.personA===m.id) return null; // A libre en dateB
       if(sw.personB===m.id){
-        // B trabaja con su turno habitual de ese día de la semana
-        const s=m.schedule?.[dowIdx(date)];
-        return (!s||s==='L'||s==='LIBRE')?null:s;
+        // B trabaja en dateB — usa el turno habitual de A en ese día de la semana
+        const mA=S.team.find(t=>t.id===sw.personA);
+        const s=mA?.schedule?.[dowIdx(date)];
+        if(!s||s==='L'||s==='LIBRE'){
+          const fallback=m.schedule?.find(x=>x&&x!=='L'&&x!=='LIBRE');
+          return fallback||'B';
+        }
+        return s;
       }
     }
   }
@@ -952,73 +1143,103 @@ function doCopy(){
 // ═══════════════════════════════════════════════════════
 // LACOPS FLIGHT API
 // ═══════════════════════════════════════════════════════
+function parsePossibleDate(value){
+  if(!value) return null;
+  if(value instanceof Date && !isNaN(value)) return value;
+  const s=String(value).trim();
+  let m=s.match(/^(\d{4})-(\d{2})-(\d{2})/);
+  if(m) return new Date(`${m[1]}-${m[2]}-${m[3]}T12:00:00`);
+  m=s.match(/^(\d{2})\/(\d{2})\/(\d{4})/);
+  if(m) return new Date(`${m[3]}-${m[2]}-${m[1]}T12:00:00`);
+  m=s.match(/^(\d{2})-(\d{2})-(\d{4})/);
+  if(m) return new Date(`${m[3]}-${m[2]}-${m[1]}T12:00:00`);
+  return null;
+}
+
+function rowFlightDate(row){
+  const keys=['Fecha','FECHA','fecha','Date','DATE','date','flightDate','flight_date','operationDate','operation_date'];
+  for(const k of keys){
+    const d=parsePossibleDate(row?.[k]);
+    if(d) return d;
+  }
+  for(const [k,v] of Object.entries(row||{})){
+    if(/fecha|date/i.test(k)){ const d=parsePossibleDate(v); if(d) return d; }
+  }
+  return null;
+}
+
 async function fetchLACOPS(){
   const dateInput=document.getElementById('lacopsDate');
   const date=dateInput.value||S.activeDate;
   const status=document.getElementById('lacopsStatus');
   status.style.display='block';
   status.style.color='var(--text2)';
-  status.textContent='Conectando con LACOPS…';
+  status.textContent='Conectando con el dashboard del aeropuerto…';
 
   try {
-    const ctrl = new AbortController();
-    const tid = setTimeout(()=>ctrl.abort(), 15000);
+    const ctrl=new AbortController();
+    const tid=setTimeout(()=>ctrl.abort(),15000);
     const url=`https://proxy-dashboard.josemiguel-account.workers.dev/vuelos?date=${date}`;
-    const res=await fetch(url, {signal: ctrl.signal});
+    const res=await fetch(url,{signal:ctrl.signal});
     clearTimeout(tid);
     if(!res.ok) throw new Error('HTTP '+res.status);
     const data=await res.json();
 
-    // Airport dashboard API format: {query_result: {data: {rows: [...]}}}
-    let flights = [];
-    if(data?.query_result?.data?.rows) {
-      flights = data.query_result.data.rows;
-    } else if(data?.data?.rows) {
-      flights = data.data.rows;
-    } else if(Array.isArray(data)) {
-      flights = data;
-    } else if(Array.isArray(data?.rows)) {
-      flights = data.rows;
-    }
+    let flights=[];
+    if(data?.query_result?.data?.rows) flights=data.query_result.data.rows;
+    else if(data?.data?.rows) flights=data.data.rows;
+    else if(Array.isArray(data)) flights=data;
+    else if(Array.isArray(data?.rows)) flights=data.rows;
 
-    if(!flights.length) throw new Error('No se recibieron vuelos del dashboard');
+    if(!flights.length) throw new Error('No se recibieron vuelos');
 
-    // Parse each flight row into readable text
-    // Fields: Aerolinea, Vuelo, STA, STD, ETA, ETD, Terminal, STAND, GATE, RUTA, paxin, paxout
-    text = flights.map(f => {
-      const airline = f.Aerolinea || f.aerolinea || '';
-      const flight  = f.Vuelo     || f.vuelo     || f.VUELO || '';
+    // API returns current week. DIA = "Sábado 28" (text), DIANUMERO = day of week (0=Sun..6=Sat)
+    // Filter by day of week matching selected date
+    // JS getDay(): 0=Sun,1=Mon...6=Sat — matches DIANUMERO
+    const selectedDow = new Date(date + 'T12:00:00').getDay(); // 0=Sun..6=Sat
+    const filtered = flights.filter(f => {
+      const dn = f.DIANUMERO ?? f.dianumero;
+      return dn !== undefined && dn !== null && Number(dn) === selectedDow;
+    });
+    const finalFlights = filtered.length > 0 ? filtered : flights;
+    const filterNote = filtered.length > 0 ? '' : ' (sin filtro de fecha — mostrando todo)';
+
+    const text=finalFlights.map(f=>{
+      const airline = f.AEROLINEA || f.Aerolinea || f.aerolinea || '';
+      const flight  = f.Vuelo     || f.vuelo     || f.VUELO    || '';
       const sta     = f.STA       || f.sta       || '';
       const std     = f.STD       || f.std       || '';
       const eta     = f.ETA       || f.eta       || '';
       const etd     = f.ETD       || f.etd       || '';
-      const stand   = f.STAND     || f.stand     || f.POS || f.pos || '';
-      const gate    = f.GATE      || f.gate      || '';
-      const terminal= f.Terminal  || f.terminal  || '';
+      const terminal= f.TERMINAL  || f.Terminal  || f.terminal || '';
       const ruta    = f.RUTA      || f.ruta      || '';
+      const dianom  = f.dianom    || f.DIA       || '';
 
-      // Use ETA if available, otherwise STA
-      const arrTime = eta||sta;
-      const depTime = etd||std;
-      const pos     = stand||gate;
-      const type    = arrTime ? 'ARR' : 'DEP';
+      // STAND format: "B23B" → extract number → "23"
+      // GATE format: "23" (just the number)
+      const rawStand = f.STAND || f.stand || '';
+      const rawGate  = f.GATE  || f.gate  || '';
+      // Parse stand: remove prefix letter and suffix letter, get numeric part
+      const standNum = rawStand.replace(/^[A-Z]/i,'').replace(/[A-Z]+$/i,'');
+      const pos = standNum || rawGate || '';
 
-      return [airline, flight, pos?`POS ${pos}`:'', arrTime||depTime, type, ruta, terminal?`T${terminal}`:'']
+      const arrTime = eta && eta!=='OVER' ? eta : (sta && sta!=='OVER' ? sta : '');
+      const depTime = etd && etd!=='OVER' ? etd : (std && std!=='OVER' ? std : '');
+      const type    = (f.STA&&f.STA!=='OVER')||f.ETA ? 'ARR' : 'DEP';
+
+      return [airline, flight, pos?`POS ${pos}`:'', arrTime||depTime, type, ruta, terminal?`T${terminal}`:'', dianom]
         .filter(Boolean).join('  ');
     }).join('\n');
 
     document.getElementById('flightTextInput').value=text;
     onFlightTextChange();
-    const lines=text.split('\n').filter(l=>l.trim()).length;
     status.style.color='var(--green)';
-    status.textContent=`✅ ${lines} vuelos cargados desde LACOPS (${date})`;
-
+    status.textContent=`✅ ${finalFlights.length} vuelos del ${new Date(date+'T12:00:00').toLocaleDateString('es-DO',{weekday:'long',day:'numeric',month:'long'})}${filterNote}`;
   } catch(e){
     status.style.color='var(--red)';
-    status.textContent='❌ '+(e.name==='AbortError'?'Timeout — LACOPS no respondió':e.message);
+    status.textContent='❌ '+(e.name==='AbortError'?'Timeout — dashboard no respondió':e.message);
   }
 }
-
 // ═══════════════════════════════════════════════════════
 // POSITION PICKERS
 // ═══════════════════════════════════════════════════════
@@ -1749,29 +1970,152 @@ function exportScheduleExcel(){
 }
 
 // ═══════════════════════════════════════════════════════
-// CHANGES
+// VACACIONES / PERMISOS / LICENCIAS
 // ═══════════════════════════════════════════════════════
+function openVacModal(id){
+  const v=id?S.vacaciones?.find(x=>x.id===id):null;
+  document.getElementById('vacPerson').innerHTML=S.team.map(m=>`<option value="${m.id}"${v?.personId===m.id?' selected':''}>${m.name}</option>`).join('');
+  document.getElementById('vacStart').value=v?.start||S.activeDate;
+  document.getElementById('vacEnd').value=v?.end||S.activeDate;
+  document.getElementById('vacDays').value=v?.days||'';
+  document.getElementById('vacNote').value=v?.note||'';
+  document.getElementById('vacModal')._editId=id||null;
+  document.getElementById('vacModal').classList.add('open');
+}
+function saveVac(){
+  const personId=document.getElementById('vacPerson').value;
+  const start=document.getElementById('vacStart').value;
+  const end=document.getElementById('vacEnd').value;
+  const days=document.getElementById('vacDays').value;
+  const note=document.getElementById('vacNote').value.trim();
+  if(!personId||!start||!end){toast('Completa todos los campos','error');return;}
+  if(!S.vacaciones) S.vacaciones=[];
+  const editId=document.getElementById('vacModal')._editId;
+  if(editId){ const i=S.vacaciones.findIndex(x=>x.id===editId); if(i>-1) S.vacaciones[i]={...S.vacaciones[i],personId,start,end,days,note}; }
+  else S.vacaciones.push({id:'vac'+Date.now(),personId,start,end,days,note,ts:Date.now()});
+  save(); closeModal('vacModal'); renderChanges(); renderBoard(); toast('✅ Vacaciones registradas');
+}
+function deleteVac(id){ showConfirm('¿Eliminar vacaciones?','',()=>{S.vacaciones=S.vacaciones.filter(x=>x.id!==id);save();renderChanges();renderBoard();}); }
+
+function openPermisoModal(id){
+  const v=id?S.permisos?.find(x=>x.id===id):null;
+  document.getElementById('permisoPerson').innerHTML=S.team.map(m=>`<option value="${m.id}"${v?.personId===m.id?' selected':''}>${m.name}</option>`).join('');
+  document.getElementById('permisoStart').value=v?.start||S.activeDate;
+  document.getElementById('permisoEnd').value=v?.end||S.activeDate;
+  document.getElementById('permisoTipo').value=v?.tipo||'Cita médica';
+  document.getElementById('permisoNote').value=v?.note||'';
+  document.getElementById('permisoModal')._editId=id||null;
+  document.getElementById('permisoModal').classList.add('open');
+}
+function savePermiso(){
+  const personId=document.getElementById('permisoPerson').value;
+  const start=document.getElementById('permisoStart').value;
+  const end=document.getElementById('permisoEnd').value;
+  const tipo=document.getElementById('permisoTipo').value;
+  const note=document.getElementById('permisoNote').value.trim();
+  if(!personId||!start||!end){toast('Completa todos los campos','error');return;}
+  if(!S.permisos) S.permisos=[];
+  const editId=document.getElementById('permisoModal')._editId;
+  if(editId){ const i=S.permisos.findIndex(x=>x.id===editId); if(i>-1) S.permisos[i]={...S.permisos[i],personId,start,end,tipo,note}; }
+  else S.permisos.push({id:'per'+Date.now(),personId,start,end,tipo,note,ts:Date.now()});
+  save(); closeModal('permisoModal'); renderChanges(); renderBoard(); toast('✅ Permiso registrado');
+}
+function deletePermiso(id){ showConfirm('¿Eliminar permiso?','',()=>{S.permisos=S.permisos.filter(x=>x.id!==id);save();renderChanges();renderBoard();}); }
+
+function openLicenciaModal(id){
+  const v=id?S.licencias?.find(x=>x.id===id):null;
+  document.getElementById('licenciaPerson').innerHTML=S.team.map(m=>`<option value="${m.id}"${v?.personId===m.id?' selected':''}>${m.name}</option>`).join('');
+  document.getElementById('licenciaStart').value=v?.start||S.activeDate;
+  document.getElementById('licenciaEnd').value=v?.end||S.activeDate;
+  document.getElementById('licenciaTipo').value=v?.tipo||'Licencia médica';
+  document.getElementById('licenciaNote').value=v?.note||'';
+  document.getElementById('licenciaModal')._editId=id||null;
+  document.getElementById('licenciaModal').classList.add('open');
+}
+function saveLicencia(){
+  const personId=document.getElementById('licenciaPerson').value;
+  const start=document.getElementById('licenciaStart').value;
+  const end=document.getElementById('licenciaEnd').value;
+  const tipo=document.getElementById('licenciaTipo').value;
+  const note=document.getElementById('licenciaNote').value.trim();
+  if(!personId||!start||!end){toast('Completa todos los campos','error');return;}
+  if(!S.licencias) S.licencias=[];
+  const editId=document.getElementById('licenciaModal')._editId;
+  if(editId){ const i=S.licencias.findIndex(x=>x.id===editId); if(i>-1) S.licencias[i]={...S.licencias[i],personId,start,end,tipo,note}; }
+  else S.licencias.push({id:'lic'+Date.now(),personId,start,end,tipo,note,ts:Date.now()});
+  save(); closeModal('licenciaModal'); renderChanges(); renderBoard(); toast('✅ Licencia registrada');
+}
+function deleteLicencia(id){ showConfirm('¿Eliminar licencia?','',()=>{S.licencias=S.licencias.filter(x=>x.id!==id);save();renderChanges();renderBoard();}); }
 function renderChanges(){
-  // Overrides
+  const fmtDate=d=>new Date(d+'T12:00:00').toLocaleDateString('es-DO',{day:'numeric',month:'short',year:'numeric'});
+  const fmtRange=(s,e)=>fmtDate(s)+(s!==e?' → '+fmtDate(e):'');
+
+  // Helper to render a range-based list
+  function renderRangeList(containerId, list, emoji, editFn, deleteFn, extraField){
+    const c=document.getElementById(containerId);
+    const items=(list||[]).sort((a,b)=>b.ts-a.ts);
+    if(!items.length){c.innerHTML=`<div style="color:var(--text3);font-size:12px;margin-bottom:4px">Sin registros.</div>`;return;}
+    c.innerHTML=items.map(item=>{
+      const m=S.team.find(t=>t.id===item.personId);
+      const extra=extraField?item[extraField]:'';
+      return `<div class="swap-card" style="border-color:rgba(45,122,238,.2)">
+        <div style="flex:1">
+          <div style="font-size:13px;font-weight:700;color:${m?.color||'var(--text)'}">
+            ${emoji} ${m?.name||'?'}
+          </div>
+          <div style="font-size:11px;color:var(--text3);font-family:'IBM Plex Mono',monospace;margin-top:2px">
+            ${fmtRange(item.start,item.end)}${item.days?' · '+item.days+' días':''}${extra?' · '+extra:''}
+          </div>
+          ${item.note?`<div style="font-size:11px;color:var(--text2);margin-top:2px">${item.note}</div>`:''}
+        </div>
+        <button class="btn btn-outline" style="font-size:10px;padding:2px 7px" onclick="${editFn}('${item.id}')">✏️</button>
+        <button class="btn btn-danger" style="font-size:10px;padding:2px 7px" onclick="${deleteFn}('${item.id}')">✕</button>
+      </div>`;
+    }).join('');
+  }
+
+  renderRangeList('vacList', S.vacaciones, '🏖', 'openVacModal', 'deleteVac', 'days');
+  renderRangeList('permisoList', S.permisos, '📋', 'openPermisoModal', 'deletePermiso', 'tipo');
+  renderRangeList('licenciaList', S.licencias, '🪪', 'openLicenciaModal', 'deleteLicencia', 'tipo');
+
+  // Overrides (Refuerzos)
   const rows=[];
-  for(const[mid,dates] of Object.entries(S.overrides||{})){ for(const[date,ov] of Object.entries(dates)) rows.push({m:S.team.find(t=>t.id===mid),date,ov}); }
+  for(const[mid,dates] of Object.entries(S.overrides||{})){ for(const[date,ov] of Object.entries(dates)) rows.push({m:S.team.find(t=>t.id===mid),date,ov,mid}); }
   rows.sort((a,b)=>b.date.localeCompare(a.date));
   const SC=s=>({A:'var(--green)',T9:'var(--accent)',B:'var(--purple)','B+C':'#fb923c',C:'var(--red)',D:'var(--cyan)',LIBRE:'var(--text3)'}[s]||'var(--amber)');
-  const c=document.getElementById('overridesList');
-  c.innerHTML=rows.length?`<table style="width:100%;border-collapse:collapse"><thead><tr><th style="text-align:left;padding:7px 10px;font-size:11px;font-weight:800;color:var(--text3);border-bottom:1px solid var(--border)">Persona</th><th style="padding:7px 6px;font-size:11px;font-weight:800;color:var(--text3);border-bottom:1px solid var(--border)">Fecha</th><th style="padding:7px 6px;font-size:11px;font-weight:800;color:var(--text3);border-bottom:1px solid var(--border)">Turno</th><th style="padding:7px 6px;font-size:11px;font-weight:800;color:var(--text3);border-bottom:1px solid var(--border)">Motivo</th><th></th></tr></thead><tbody>
-  ${rows.map(({m,date,ov})=>{const d=new Date(date+'T12:00:00').toLocaleDateString('es-DO',{weekday:'short',day:'numeric',month:'short'});return `<tr style="border-bottom:1px solid rgba(30,45,66,.3)"><td style="padding:7px 10px;font-weight:700;font-size:12px">${m?.name||'?'}</td><td style="padding:7px 6px;font-size:11px;font-family:'IBM Plex Mono',monospace">${d}</td><td style="padding:7px 6px"><span style="font-size:11px;font-weight:800;padding:2px 7px;border-radius:4px;background:${SC(ov.shift)}22;color:${SC(ov.shift)}">${ov.shift}</span></td><td style="padding:7px 6px;font-size:11px;color:var(--text2)">${ov.reason||'—'}</td><td style="text-align:right;padding:7px 6px"><button class="btn btn-danger" style="font-size:10px;padding:2px 7px" onclick="deleteOverride('${m?.id}','${date}')">✕</button></td></tr>`;}).join('')}
-  </tbody></table>`:'<div style="color:var(--text3);font-size:12px">Sin refuerzos registrados.</div>';
+  const oc=document.getElementById('overridesList');
+  oc.innerHTML=rows.length?rows.map(({m,date,ov,mid})=>{
+    const d=new Date(date+'T12:00:00').toLocaleDateString('es-DO',{weekday:'short',day:'numeric',month:'short'});
+    return `<div class="swap-card" style="border-color:rgba(45,122,238,.2)">
+      <div style="flex:1">
+        <div style="font-size:13px;font-weight:700;color:${m?.color||'var(--text)'}">${m?.name||'?'}</div>
+        <div style="font-size:11px;color:var(--text3);font-family:'IBM Plex Mono',monospace;margin-top:2px">
+          ${d} · <span style="font-weight:800;padding:1px 6px;border-radius:4px;background:${SC(ov.shift)}22;color:${SC(ov.shift)}">${ov.shift}</span>${ov.reason?' · '+ov.reason:''}
+        </div>
+      </div>
+      <button class="btn btn-outline" style="font-size:10px;padding:2px 7px" onclick="openOverrideModal('${mid}','${date}')">✏️</button>
+      <button class="btn btn-danger" style="font-size:10px;padding:2px 7px" onclick="deleteOverride('${mid}','${date}')">✕</button>
+    </div>`;
+  }).join(''):'<div style="color:var(--text3);font-size:12px">Sin refuerzos registrados.</div>';
 
   // Swaps
   const sw=document.getElementById('swapsList');
   const swaps=[...(S.swaps||[])].sort((a,b)=>b.ts-a.ts);
   sw.innerHTML=swaps.length?swaps.map(s=>{
     const mA=S.team.find(t=>t.id===s.personA), mB=S.team.find(t=>t.id===s.personB);
-    const dA=new Date(s.dateA+'T12:00:00').toLocaleDateString('es-DO',{weekday:'short',day:'numeric',month:'short'});
-    const dB=new Date(s.dateB+'T12:00:00').toLocaleDateString('es-DO',{weekday:'short',day:'numeric',month:'short'});
+    const dA=fmtDate(s.dateA), dB=fmtDate(s.dateB);
     return `<div class="swap-card" style="border-color:${s.pending?'rgba(240,165,0,.3)':'rgba(23,201,122,.25)'}">
-      <div style="flex:1"><div style="font-size:13px;font-weight:700"><span style="color:${mA?.color||'var(--text)'}">${mA?.name||'?'}</span><span style="color:var(--text3);margin:0 6px;font-size:11px;font-family:'IBM Plex Mono',monospace">cede ${dA} ⇄ ${dB} cede</span><span style="color:${mB?.color||'var(--text)'}">${mB?.name||'?'}</span></div>${s.notes?`<div style="font-size:11px;color:var(--text3);margin-top:2px">${s.notes}</div>`:''}</div>
-      <span style="font-size:10px;font-weight:700;padding:2px 8px;border-radius:14px;background:${s.pending?'rgba(240,165,0,.12)':'rgba(23,201,122,.1)'};color:${s.pending?'var(--amber)':'var(--green)'}">${s.pending?'⏳ Pendiente':'✅ Saldada'}</span>
+      <div style="flex:1">
+        <div style="font-size:13px;font-weight:700">
+          <span style="color:${mA?.color||'var(--text)'}">${mA?.name||'?'}</span>
+          <span style="color:var(--text3);margin:0 5px;font-size:11px">trabaja ${dA}</span>
+          <span style="color:var(--text3);font-size:11px">⇄</span>
+          <span style="color:${mB?.color||'var(--text)'}"> ${mB?.name||'?'}</span>
+          <span style="color:var(--text3);margin:0 5px;font-size:11px">trabaja ${dB}</span>
+        </div>
+        ${s.notes?`<div style="font-size:11px;color:var(--text3);margin-top:2px">${s.notes}</div>`:''}
+      </div>
+      <span style="font-size:10px;font-weight:700;padding:2px 8px;border-radius:14px;background:${s.pending?'rgba(240,165,0,.12)':'rgba(23,201,122,.1)'};color:${s.pending?'var(--amber)':'var(--green)'}">${s.pending?'⏳':'✅'}</span>
       <button class="btn btn-outline" style="font-size:10px;padding:2px 7px" onclick="toggleSwapPending('${s.id}')">${s.pending?'Saldar':'Reabrir'}</button>
       <button class="btn btn-danger" style="font-size:10px;padding:2px 7px" onclick="deleteSwap('${s.id}')">✕</button>
     </div>`;
@@ -2206,6 +2550,7 @@ renderBoard();
 refreshOutput();
 updateUndoBtns();
 updateApiKeyBtn();
+initCloud();
 </script>
 </body>
 </html>
