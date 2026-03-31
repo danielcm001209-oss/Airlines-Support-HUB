@@ -120,10 +120,28 @@ header{background:var(--s1);border-bottom:1px solid var(--border);padding:0 14px
 @media(max-width:640px){
   .app{height:auto;min-height:calc(100vh - 94px);flex-direction:column;}
   .page.active{flex-direction:column;height:auto;}
-  .out-panel{width:100%;min-width:unset;border-left:none;border-top:1px solid var(--border);max-height:260px;}
+  .out-panel{width:100%;min-width:unset;border-left:none;border-top:1px solid var(--border);max-height:300px;}
   .logo{font-size:12px;}
   .hactions .btn{font-size:11px;padding:5px 7px;}
-  .header-mid{display:none;}
+  /* Show date controls on mobile */
+  .header-mid{display:flex!important;flex-wrap:wrap;gap:4px;}
+  #dateInput{width:120px!important;font-size:11px;}
+  .date-pill{display:none;} /* hide text pill on small screens, show input instead */
+  /* Stack header on mobile */
+  header{height:auto;flex-wrap:wrap;padding:8px 10px;gap:6px;}
+  .hactions{flex-wrap:wrap;justify-content:flex-end;}
+  /* Board */
+  .agents-grid{grid-template-columns:1fr!important;}
+  .stats-bar .stat{padding:6px 10px;}
+  .stat-n{font-size:16px;}
+  /* Modal */
+  .modal{padding:14px;max-height:95vh;}
+  .frow{flex-direction:column;}
+  .frow .form-group[style*="flex:0"]{flex:1!important;}
+  /* Tabs */
+  .tab{padding:8px 8px;font-size:10px;}
+  /* Changes buttons */
+  #page-changes .btn{font-size:11px;padding:5px 8px;}
 }
 </style>
 </head>
@@ -139,6 +157,7 @@ header{background:var(--s1);border-bottom:1px solid var(--border);padding:0 14px
     <button class="btn btn-outline" onclick="window.print()" title="Imprimir">🖨</button>
     <span id="cloudPill" style="font-size:11px;font-family:'IBM Plex Mono',monospace;color:var(--text3);padding:4px 8px;background:var(--s2);border:1px solid var(--border);border-radius:14px;white-space:nowrap;">☁ Local</span>
     <button class="btn btn-outline" id="apiKeyBtn" onclick="configApiKey()" title="API Key Gemini">🔑</button>
+    <button class="btn btn-outline" id="fbBtn" onclick="configFirebase()" title="Configurar Firebase">🔥</button>
     <button class="btn btn-outline" id="flightBtn" onclick="openFlightModal()">✈️ Vuelos</button>
     <button class="btn btn-outline" id="undoBtn" onclick="undo()" disabled style="opacity:.35">↩</button>
     <button class="btn btn-outline" id="redoBtn" onclick="redo()" disabled style="opacity:.35">↪</button>
@@ -200,7 +219,7 @@ header{background:var(--s1);border-bottom:1px solid var(--border);padding:0 14px
       <div id="personAirlineList"></div>
     </div>
     <div style="margin-top:10px;padding:9px 12px;background:rgba(240,165,0,.07);border:1px solid rgba(240,165,0,.2);border-radius:7px;font-size:12px;color:var(--amber);">
-      ⚠️ Máximo 3 posiciones sin vehículo (TTP119 / CGP17)
+      ⚠️ Máximo 3 posiciones sin vehículo (TPe119 / CGP17)
     </div>
   </div>
 </div>
@@ -342,6 +361,22 @@ header{background:var(--s1);border-bottom:1px solid var(--border);padding:0 14px
   <!-- Tasks -->
   <div class="divider"><span>Tareas / Vehículos</span></div>
   <div class="task-buttons" id="taskBtns"></div>
+  <!-- Vehicle until time -->
+  <div id="vehHastaRow" style="display:none;margin-bottom:8px">
+    <div class="frow" style="align-items:center;gap:8px">
+      <label class="fl" style="white-space:nowrap;margin:0">Vehículo hasta las</label>
+      <input class="fi" id="vehHasta" type="time" style="width:110px;font-size:13px;padding:5px 8px" placeholder="ej: 17:00">
+      <span style="font-size:11px;color:var(--text3)">opcional</span>
+    </div>
+  </div>
+  <!-- Cubrir primeras ops (solo A y T9) -->
+  <div id="cubrirOpsRow" style="display:none;margin-bottom:8px">
+    <div class="divider"><span>Cubrir primeras ops</span></div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap">
+      <button type="button" class="task-btn" id="cubrirTA" onclick="toggleCubrirOps('A')">Cubre primeras ops T.A</button>
+      <button type="button" class="task-btn" id="cubrirTB" onclick="toggleCubrirOps('B')">Cubre primeras ops T.B</button>
+    </div>
+  </div>
   <!-- Covers -->
   <div class="divider"><span>Coberturas</span></div>
   <div id="coverRows"></div>
@@ -437,6 +472,13 @@ header{background:var(--s1);border-bottom:1px solid var(--border);padding:0 14px
     </select>
   </div>
   <div class="form-group"><label style="display:flex;align-items:center;gap:7px;cursor:pointer"><input type="checkbox" id="memIsSup" style="width:14px;height:14px"><span style="font-size:13px;font-weight:600">Es Supervisor/a</span></label></div>
+  <div class="form-group" style="background:rgba(240,165,0,.06);border:1px solid rgba(240,165,0,.2);border-radius:7px;padding:10px 12px;">
+    <label style="display:flex;align-items:center;gap:7px;cursor:pointer">
+      <input type="checkbox" id="memNoLicencia" style="width:14px;height:14px">
+      <div><div style="font-size:13px;font-weight:600">🚫 Sin licencia de conducir</div>
+      <div style="font-size:11px;color:var(--text3)">Activa si esta persona NO tiene licencia. No se le asignará vehículo ni TTP/CGP.</div></div>
+    </label>
+  </div>
   <div class="mactions">
     <button class="btn btn-outline" onclick="closeModal('memberModal')">Cancelar</button>
     <button class="btn btn-primary" onclick="saveMember()">Guardar</button>
@@ -601,17 +643,33 @@ header{background:var(--s1);border-bottom:1px solid var(--border);padding:0 14px
 // ═══════════════════════════════════════════════════════
 // FIREBASE CONFIG
 // ═══════════════════════════════════════════════════════
-const FIREBASE_CONFIG = {
-  apiKey: "AIzaSyD4slf_9gdEI7zVEnTVsruoYmk3qLCQWd4",
-  authDomain: "airlines-support.firebaseapp.com",
-  projectId: "airlines-support",
-  storageBucket: "airlines-support.firebasestorage.app",
-  messagingSenderId: "138105289334",
-  appId: "1:138105289334:web:7a95e4f8392d4d60c83d57"
-};
 const CLOUD_DOC_PATH = {collection:'apps', doc:'airlines-support-hub'};
 
 let cloudDb=null, cloudDocRef=null, cloudReady=false, cloudApplying=false, cloudSaveTimer=null;
+
+function getFirebaseConfig(){
+  try{ const s=localStorage.getItem('airops_fb_config'); return s?JSON.parse(s):null; }catch(e){ return null; }
+}
+function saveFirebaseConfig(cfg){ localStorage.setItem('airops_fb_config',JSON.stringify(cfg)); }
+
+function configFirebase(){
+  const cur=getFirebaseConfig();
+  const msg=cur
+    ? `Firebase ya configurado (proyecto: ${cur.projectId})\n\nPega una nueva config JSON para reemplazar, o cancela para mantener la actual:`
+    : `Pega la configuración de Firebase (JSON).\n\nVe a Firebase Console → Configuración del proyecto → Tu app web → firebaseConfig`;
+  const raw=prompt(msg, cur?JSON.stringify(cur,null,2):'');
+  if(raw===null) return;
+  if(!raw.trim()){ localStorage.removeItem('airops_fb_config'); updateCloudPill('☁ Local','var(--text2)'); toast('Firebase desconectado'); return; }
+  try{
+    // Accept both the raw object and wrapped in const x = {...}
+    const clean=raw.replace(/^.*?=\s*/,'').replace(/;?\s*$/,'').trim();
+    const cfg=JSON.parse(clean);
+    if(!cfg.apiKey||!cfg.projectId) throw new Error('Falta apiKey o projectId');
+    saveFirebaseConfig(cfg);
+    toast('✅ Firebase configurado — recargando…');
+    setTimeout(()=>location.reload(),800);
+  } catch(e){ toast('❌ JSON inválido: '+e.message,'error'); }
+}
 
 // ═══════════════════════════════════════════════════════
 // CONSTANTS
@@ -641,14 +699,21 @@ const SHIFT_RULES = {
   'T9+C':{label:'Extra T9→C — 09:00 a 00:00', primerasOps:true,  afterMeal:true,  coverPos:true,  meal:{type:'Almuerzo',time:'13:00'}, cena:{default:'17:00',dur:60}, cierre:true, noAssign:false},
 };
 
-const SPECIAL_TASKS = ['TTP119','CGP17','Arreglo de hojas C/D+Cobus'];
+const SPECIAL_TASKS = ['TPe119','CGP17','Arreglo de hojas C/D+Cobus'];
 
 const POS = {
+  // Terminal A: posiciones 1-8 corridas, luego 9-10-11 separadas
   TA:  ['1','2','3','4','5','6','7','8','9','10','11'],
+  // Rampa Norte Terminal A
   N_A: ['N1','N2','N3','N4','N5'],
-  TB:  ['20','21','22','23','24','25','26'],
+  // Terminal B1: pares derecha (20,22,24,26), impares izquierda (21,23,25)
+  TB1_PAR:  ['20','22','24','26'],
+  TB1_IMPAR:['21','23','25'],
+  // Terminal B2: forma de U, 27-33 lado derecho subiendo, 34-37 bloque final
+  TB2A: ['27','28','29','30','31','32','33'],
+  TB2B: ['34','35','36','37'],
+  // Rampa Norte B: stands remotos detrás de B34-B37
   N_B: ['N6','N7','N8','N9','N10','N11','N12','N13'],
-  TB2: ['27','28','29','30','31','32','33','34','35','36','37'],
 };
 
 const AIRLINE_COLORS = ['#2d7aee','#17c97a','#f0a500','#e84545','#8b5cf6','#0eb8c9','#ec4899','#f87171','#34d399','#fb923c','#a78bfa','#38bdf8','#fbbf24','#4ade80','#22d3ee'];
@@ -693,9 +758,14 @@ function cloudPayload(){
 
 function updateCloudPill(label, color){
   const el=document.getElementById('cloudPill');
-  if(!el) return;
-  el.textContent=label;
-  el.style.color=color||'var(--text2)';
+  if(el){ el.textContent=label; el.style.color=color||'var(--text2)'; }
+  const fb=document.getElementById('fbBtn');
+  if(fb){
+    const cfg=getFirebaseConfig();
+    fb.textContent=cfg?'🔥✓':'🔥';
+    fb.style.color=cfg?'var(--amber)':'';
+    fb.style.borderColor=cfg?'rgba(240,165,0,.4)':'';
+  }
 }
 
 function queueCloudSave(){
@@ -725,8 +795,10 @@ function applyCloudState(data){
 
 function initCloud(){
   if(!window.firebase){ updateCloudPill('☁ Local','var(--text2)'); return; }
+  const cfg=getFirebaseConfig();
+  if(!cfg){ updateCloudPill('☁ Sin config','var(--text3)'); return; }
   try{
-    if(!firebase.apps.length) firebase.initializeApp(FIREBASE_CONFIG);
+    if(!firebase.apps.length) firebase.initializeApp(cfg);
     cloudDb=firebase.firestore();
     cloudDocRef=cloudDb.collection(CLOUD_DOC_PATH.collection).doc(CLOUD_DOC_PATH.doc);
     cloudReady=true;
@@ -1000,18 +1072,27 @@ function renderBoard(){
         let rows='';
         if(d.primaryPos) rows+=dr('Primeras ops',`<span class="bp">${d.primaryPos}</span>`);
         if(d.coverPos) rows+=dr('Cubre',`<span class="bp">${d.coverPos}</span>`);
-        if(d.specialTasks) d.specialTasks.split(',').filter(t=>t.trim()).forEach(t=>rows+=dr('Tarea',`<span class="bt">${t.trim()}</span>`));
+        if(d.specialTasks) d.specialTasks.split(',').filter(t=>t.trim()).forEach(t=>rows+=dr('Tarea',`<span class="bt">${t.trim()}${d.vehHasta?' hasta '+d.vehHasta:''}</span>`));
+        if(d.cubrirOpsA) rows+=dr('Cubre',`<span class="bp">Primeras ops T.A</span>`);
+        if(d.cubrirOpsB) rows+=dr('Cubre',`<span class="bp">Primeras ops T.B</span>`);
         if(d.mealType&&d.mealTime) rows+=dr(d.mealType,`<span class="bm">${d.mealTime}</span>`);
         if(d.radioNum) rows+=dr('Radio',`<span style="color:var(--cyan);font-family:'IBM Plex Mono',monospace">📻 ${d.radioNum}</span>`);
         if(d.afterMealPos) rows+=dr('Post-alm.',`<span class="bp">${d.afterMealPos}</span>`);
-        (d.covers||[]).forEach(c=>{if(c.who||c.pos) rows+=dr('Cubre',`<span class="bc">${c.who?'Cena '+c.who:''}${c.time?' a las '+c.time:''}${c.pos?' '+c.pos:''}</span>`);});
+        (d.covers||[]).forEach(c=>{
+          if(c.who||c.pos){
+            const mtype=detectMealType(c.time||'');
+            const lbl=mtype.includes('Cena')?'Cena':mtype.includes('Almuerzo')?'Almuerzo':'Cubre';
+            rows+=dr('Cubre',`<span class="bc">${c.who?lbl+' '+c.who:''}${c.time?' a las '+c.time:''}${c.pos?' '+c.pos:''}</span>`);
+          }
+        });
         if(d.cenaTime) rows+=dr('Cena',`<span class="bm">${d.cenaTime}</span>`);
         if(d.cierrePos) rows+=dr('Cierre',`<span class="bp">${d.cierrePos}</span>`);
         if(d.extraNotes) rows+=dr('Nota',`<span style="color:var(--text2)">${d.extraNotes}</span>`);
         // position limit warning
         const posCount=countPositions(d.primaryPos)+countPositions(d.coverPos)+countPositions(d.afterMealPos);
-        const hasVeh=d.specialTasks&&(d.specialTasks.includes('TTP119')||d.specialTasks.includes('CGP17'));
+        const hasVeh=d.specialTasks&&(d.specialTasks.includes('TPe119')||d.specialTasks.includes('CGP17'));
         if(posCount>3&&!hasVeh) rows=`<div style="font-size:10px;color:var(--red);font-weight:700;margin-bottom:3px">⚠️ +3 pos sin vehículo</div>`+rows;
+        if(m.noLicencia&&hasVeh) rows=`<div style="font-size:10px;color:var(--amber);font-weight:700;margin-bottom:3px">⚠️ Sin licencia — vehículo asignado</div>`+rows;
         html+=`<div class="agent-card" onclick="openAssignModal('${shift.id}',${i},null)">
           <div class="atop">
             <div class="av" style="background:${m.color}22;color:${m.color}">${init}</div>
@@ -1067,13 +1148,18 @@ function buildText(date){
       txt+=`@${wa}\n`;
       if(duty.primaryPos&&duty.primaryPos!=='—') txt+=`Pendiente primeras ops ${duty.primaryPos}\n`;
       if(duty.coverPos&&duty.coverPos!=='—') txt+=`Cubre posiciones ${duty.coverPos}\n`;
-      if(duty.specialTasks) duty.specialTasks.split(',').filter(t=>t.trim()).forEach(t=>txt+=t.trim()+'\n');
+      if(duty.specialTasks) duty.specialTasks.split(',').filter(t=>t.trim()).forEach(t=>txt+=t.trim()+(duty.vehHasta?' hasta '+duty.vehHasta:'')+'\n');
+      if(duty.cubrirOpsA) txt+=`Cubre primeras ops Terminal A\n`;
+      if(duty.cubrirOpsB) txt+=`Cubre primeras ops Terminal B\n`;
       if(duty.mealType&&duty.mealTime) txt+=`${duty.mealType} ${duty.mealTime}\n`;
       if(duty.radioNum) txt+=`Radio ${duty.radioNum}\n`;
       if(duty.afterMealPos&&duty.afterMealPos!=='—') txt+=`Luego del almuerzo cubre ${duty.afterMealPos}\n`;
       (duty.covers||[]).forEach(c=>{
+        const mtype=detectMealType(c.time||'');
+        const lbl=mtype.includes('Cena')?'cena':mtype.includes('Almuerzo')?'almuerzo':'cobertura';
+        const dur=lbl==='cena'?(duty.cenaTime?45:60):60;
         let l='';
-        if(c.who&&c.time) l=`Cubre cena de ${c.who} hasta las ${addMins(c.time,duty.cenaTime?45:60)}`;
+        if(c.who&&c.time) l=`Cubre ${lbl} de ${c.who} hasta las ${addMins(c.time,dur)}`;
         else if(c.who) l=`Cubre a ${c.who}`;
         if(c.pos) l+=(l?' en ':'')+c.pos;
         if(l) txt+=l+'\n';
@@ -1202,9 +1288,17 @@ async function fetchLACOPS(){
       return dn !== undefined && dn !== null && Number(dn) === selectedDow;
     });
     const finalFlights = filtered.length > 0 ? filtered : flights;
-    const filterNote = filtered.length > 0 ? '' : ' (sin filtro de fecha — mostrando todo)';
+    const filterNote = filtered.length > 0 ? '' : ' (sin filtro de día — mostrando todo)';
 
-    const text=finalFlights.map(f=>{
+    // Deduplicate: API can return same vuelo multiple times due to GROUP BY
+    const seen = new Set();
+    const deduped = finalFlights.filter(f=>{
+      const key=(f.Vuelo||f.vuelo||'')+'|'+(f.AEROLINEA||f.Aerolinea||f.aerolinea||'')+'|'+(f.STA||f.sta||f.STD||f.std||'');
+      if(seen.has(key)) return false;
+      seen.add(key); return true;
+    });
+
+    const text=deduped.map(f=>{
       const airline = f.AEROLINEA || f.Aerolinea || f.aerolinea || '';
       const flight  = f.Vuelo     || f.vuelo     || f.VUELO    || '';
       const sta     = f.STA       || f.sta       || '';
@@ -1234,7 +1328,8 @@ async function fetchLACOPS(){
     document.getElementById('flightTextInput').value=text;
     onFlightTextChange();
     status.style.color='var(--green)';
-    status.textContent=`✅ ${finalFlights.length} vuelos del ${new Date(date+'T12:00:00').toLocaleDateString('es-DO',{weekday:'long',day:'numeric',month:'long'})}${filterNote}`;
+    const dupNote = deduped.length < finalFlights.length ? ` (${finalFlights.length-deduped.length} duplicados eliminados)` : '';
+    status.textContent=`✅ ${deduped.length} vuelos del ${new Date(date+'T12:00:00').toLocaleDateString('es-DO',{weekday:'long',day:'numeric',month:'long'})}${dupNote}${filterNote}`;
   } catch(e){
     status.style.color='var(--red)';
     status.textContent='❌ '+(e.name==='AbortError'?'Timeout — dashboard no respondió':e.message);
@@ -1245,11 +1340,13 @@ async function fetchLACOPS(){
 // ═══════════════════════════════════════════════════════
 function posPicker(prefix){
   return `<div style="display:flex;flex-direction:column;gap:5px;margin-bottom:4px">
-    <div class="pos-section"><div class="pos-section-label">Terminal A (1–11)</div><div class="pos-buttons" id="pb_${prefix}_TA"></div></div>
-    <div class="pos-section"><div class="pos-section-label" style="color:var(--text3)">N A (N1–N5)</div><div class="pos-buttons" id="pb_${prefix}_NA"></div></div>
-    <div class="pos-section"><div class="pos-section-label">Terminal B (20–26)</div><div class="pos-buttons" id="pb_${prefix}_TB"></div></div>
-    <div class="pos-section"><div class="pos-section-label" style="color:var(--text3)">N B (N6–N13)</div><div class="pos-buttons" id="pb_${prefix}_NB"></div></div>
-    <div class="pos-section"><div class="pos-section-label">Terminal B2 (27–37)</div><div class="pos-buttons" id="pb_${prefix}_TB2"></div></div>
+    <div class="pos-section"><div class="pos-section-label">🅐 Terminal A — 1 al 11</div><div class="pos-buttons" id="pb_${prefix}_TA"></div></div>
+    <div class="pos-section"><div class="pos-section-label" style="color:var(--cyan)">Rampa Norte A — N1 al N5</div><div class="pos-buttons" id="pb_${prefix}_NA"></div></div>
+    <div class="pos-section"><div class="pos-section-label">🅑 Terminal B1 — Pares (der.) 20,22,24,26</div><div class="pos-buttons" id="pb_${prefix}_TB1P"></div></div>
+    <div class="pos-section"><div class="pos-section-label" style="color:var(--text3)">Terminal B1 — Impares (izq.) 21,23,25</div><div class="pos-buttons" id="pb_${prefix}_TB1I"></div></div>
+    <div class="pos-section"><div class="pos-section-label">Terminal B2 — 27 al 33 (forma U)</div><div class="pos-buttons" id="pb_${prefix}_TB2A"></div></div>
+    <div class="pos-section"><div class="pos-section-label" style="color:var(--text3)">Terminal B2 — 34 al 37 (bloque final)</div><div class="pos-buttons" id="pb_${prefix}_TB2B"></div></div>
+    <div class="pos-section"><div class="pos-section-label" style="color:var(--cyan)">Rampa Norte B — N6 al N13 (remotos)</div><div class="pos-buttons" id="pb_${prefix}_NB"></div></div>
     <div style="display:flex;align-items:center;gap:8px;margin-top:2px;">
       <div style="font-size:11px;color:var(--accent);font-family:'IBM Plex Mono',monospace;font-weight:700;min-height:18px" id="pd_${prefix}">—</div>
       <button type="button" class="btn btn-outline" style="font-size:10px;padding:2px 7px" onclick="clearPicker('${prefix}')">✕ Limpiar</button>
@@ -1274,7 +1371,12 @@ function getOccupiedPositions(){
 
 function buildPicker(prefix, arr){
   const occupied=getOccupiedPositions();
-  const groups={TA:POS.TA, NA:POS.N_A, TB:POS.TB, NB:POS.N_B, TB2:POS.TB2};
+  const groups={
+    TA:POS.TA, NA:POS.N_A,
+    TB1P:POS.TB1_PAR, TB1I:POS.TB1_IMPAR,
+    TB2A:POS.TB2A, TB2B:POS.TB2B,
+    NB:POS.N_B
+  };
   for(const[grp,pos] of Object.entries(groups)){
     const el=document.getElementById(`pb_${prefix}_${grp}`);
     if(!el) continue;
@@ -1320,7 +1422,7 @@ function posToRange(arr){
 
 function parseRange(str){
   if(!str||str==='—') return [];
-  const all=[...POS.TA,...POS.N_A,...POS.TB,...POS.N_B,...POS.TB2];
+  const all=[...POS.TA,...POS.N_A,...POS.TB1_PAR,...POS.TB1_IMPAR,...POS.TB2A,...POS.TB2B,...POS.N_B];
   const out=[];
   str.split(',').forEach(part=>{
     part=part.trim();
@@ -1370,6 +1472,9 @@ function openAssignModal(shiftId, editIdx, preselect){
       document.getElementById('radioNum').value=d.radioNum||'';
       document.getElementById('extraNotes').value=d.extraNotes||'';
       buildTaskBtns((d.specialTasks||'').split(',').map(t=>t.trim()).filter(Boolean));
+      const vh=document.getElementById('vehHasta'); if(vh) vh.value=d.vehHasta||'';
+      if(d.cubrirOpsA) document.getElementById('cubrirTA')?.classList.add('sel');
+      if(d.cubrirOpsB) document.getElementById('cubrirTB')?.classList.add('sel');
       (d.covers||[]).forEach(c=>addCoverRow(c));
       primSel=parseRange(d.primaryPos); afterSel=parseRange(d.afterMealPos);
       coverPosSel=parseRange(d.coverPos); cierreSel=parseRange(d.cierrePos?.split(' - ')[0]);
@@ -1482,7 +1587,40 @@ function getEffectiveShift(){
   return map[modalShift+'+'+extra]||(modalShift+'+'+extra);
 }
 
-function onAgentChange(){ showAirlineSuggestion(document.getElementById('agentSel').value); }
+function onAgentChange(){
+  const agentId=document.getElementById('agentSel').value;
+  showAirlineSuggestion(agentId);
+  // Check licencia
+  const m=S.team.find(t=>t.id===agentId);
+  const noLic=m?.noLicencia||false;
+  let licBanner=document.getElementById('licenciaBanner');
+  if(!licBanner){
+    licBanner=document.createElement('div');
+    licBanner.id='licenciaBanner';
+    licBanner.style.cssText='margin-bottom:8px;padding:8px 11px;background:rgba(240,165,0,.1);border:1px solid rgba(240,165,0,.35);border-radius:6px;font-size:12px;font-weight:700;color:var(--amber);display:none';
+    licBanner.textContent='🚫 Sin licencia de conducir — no asignar vehículo (TPe119, CGP17) ni rangos amplios de posiciones.';
+    document.getElementById('shiftBadge').insertAdjacentElement('afterend', licBanner);
+  }
+  licBanner.style.display=noLic?'block':'none';
+  // Disable/enable task buttons
+  setTimeout(()=>{
+    document.querySelectorAll('#taskBtns .task-btn').forEach(btn=>{
+      const isVeh=btn.textContent.includes('TPe119')||btn.textContent.includes('CGP17');
+      if(isVeh&&noLic){
+        btn.disabled=true;
+        btn.style.opacity='.4';
+        btn.style.cursor='not-allowed';
+        btn.classList.remove('sel');
+        btn.title='Sin licencia de conducir';
+      } else {
+        btn.disabled=false;
+        btn.style.opacity='1';
+        btn.style.cursor='pointer';
+        btn.title='';
+      }
+    });
+  },50);
+}
 
 function onExtraChange(){
   const extra=document.getElementById('extraShiftSel').value;
@@ -1499,8 +1637,28 @@ function buildTaskBtns(selected){
   document.getElementById('taskBtns').innerHTML=SPECIAL_TASKS.map(t=>
     `<button type="button" class="task-btn${selected.includes(t)?' sel':''}" onclick="toggleTask(this,'${t}')">${t}</button>`
   ).join('');
+  // Show vehicle-until-time row if a vehicle task is selected
+  updateVehHastaRow();
+  // Show cubrir ops row for A/T9 shifts
+  const eff=getEffectiveShift();
+  const showCubrir=eff==='A'||eff==='T9'||eff==='A+B'||eff==='A+C'||eff==='T9+C';
+  document.getElementById('cubrirOpsRow').style.display=showCubrir?'block':'none';
 }
-function toggleTask(btn,t){ btn.classList.toggle('sel'); }
+
+function updateVehHastaRow(){
+  const hasVeh=[...document.querySelectorAll('#taskBtns .task-btn.sel')].some(b=>b.textContent.includes('TPe119')||b.textContent.includes('CGP17'));
+  document.getElementById('vehHastaRow').style.display=hasVeh?'block':'none';
+}
+
+function toggleTask(btn,t){
+  btn.classList.toggle('sel');
+  updateVehHastaRow();
+}
+
+function toggleCubrirOps(term){
+  const btn=document.getElementById('cubrirT'+term);
+  btn.classList.toggle('sel');
+}
 
 function addCoverRow(data){
   const c=document.getElementById('coverRows');
@@ -1557,6 +1715,9 @@ function saveAssign(){
     cierrePos:   rules.cierre      ? posToRange(cierreSel)||'' : '',
     radioNum:    document.getElementById('radioNum').value.trim(),
     specialTasks:[...document.querySelectorAll('#taskBtns .task-btn.sel')].map(b=>b.textContent).join(','),
+    vehHasta:    document.getElementById('vehHasta')?.value||'',
+    cubrirOpsA:  document.getElementById('cubrirTA')?.classList.contains('sel')||false,
+    cubrirOpsB:  document.getElementById('cubrirTB')?.classList.contains('sel')||false,
     mealType:    rules.meal?.type||'',
     mealTime:    document.getElementById('mealTimeInp')?.value||'',
     cenaTime:    document.getElementById('cenaTimeInp')?.value||'',
@@ -1837,7 +1998,13 @@ function renderTeamGrid(){
     return `<div class="team-card">
       <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">
         <div style="width:32px;height:32px;border-radius:50%;background:${m.color}22;color:${m.color};display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800">${init}</div>
-        <div style="flex:1"><div style="font-size:12px;font-weight:700${m.sup?';color:var(--red)':''}">${m.sup?'⭐ ':''}${m.name}</div><div style="font-size:10px;color:var(--text3)">${m.role||m.terminal?'Term.'+m.terminal:''}</div></div>
+        <div style="flex:1">
+          <div style="font-size:12px;font-weight:700${m.sup?';color:var(--red)':''}">
+            ${m.sup?'⭐ ':''}${m.name}
+            ${m.noLicencia?'<span style="font-size:10px;background:rgba(240,165,0,.15);color:var(--amber);border:1px solid rgba(240,165,0,.3);border-radius:4px;padding:1px 5px;margin-left:3px;vertical-align:middle">🚫 Sin lic.</span>':'<span style="font-size:10px;color:var(--green);margin-left:3px;vertical-align:middle">🪪</span>'}
+          </div>
+          <div style="font-size:10px;color:var(--text3)">${m.role||(m.terminal?'Term.'+m.terminal:'')}</div>
+        </div>
         <button onclick="openMemberModal('${m.id}')" style="background:none;border:none;color:var(--text3);cursor:pointer;font-size:14px">✏️</button>
         <button onclick="deleteMember('${m.id}')" style="background:none;border:none;color:var(--text3);cursor:pointer;font-size:14px">🗑</button>
       </div>
@@ -1856,13 +2023,14 @@ function openMemberModal(editId){
   document.getElementById('memColor').value=m?.color||'#2d7aee';
   document.getElementById('memTerminal').value=m?.terminal||'';
   document.getElementById('memIsSup').checked=m?.sup||false;
+  document.getElementById('memNoLicencia').checked=m?.noLicencia||false;
   document.getElementById('memberModal').classList.add('open');
 }
 
 function saveMember(){
   const name=document.getElementById('memName').value.trim();
   if(!name){toast('Ingresa un nombre','error');return;}
-  const data={name,waName:document.getElementById('memWaName').value.trim()||name.split(' ')[0],role:document.getElementById('memRole').value.trim(),color:document.getElementById('memColor').value,terminal:document.getElementById('memTerminal').value,sup:document.getElementById('memIsSup').checked};
+  const data={name,waName:document.getElementById('memWaName').value.trim()||name.split(' ')[0],role:document.getElementById('memRole').value.trim(),color:document.getElementById('memColor').value,terminal:document.getElementById('memTerminal').value,sup:document.getElementById('memIsSup').checked,noLicencia:document.getElementById('memNoLicencia').checked};
   if(S._editId){
     const i=S.team.findIndex(m=>m.id===S._editId);
     if(i>-1) S.team[i]={...S.team[i],...data};
@@ -2417,10 +2585,11 @@ ${rosterLines}
 SUPERVISORES (no asignar posiciones):
 ${supsHoy}
 
-TERMINALES:
-- Terminal A: Posiciones 1–11 y N1–N5
-- Terminal B oeste: 20–26 y N6–N13
-- Terminal B2 este: 27–37
+TERMINALES Y POSICIONES (mapa real PUJ):
+- Terminal A: Posiciones 1–8 (corridas), 9–11 (separadas), Rampa Norte N1–N5
+- Terminal B1: Pares derecha 20,22,24,26 — Impares izquierda 21,23,25
+- Terminal B2: 27–33 (forma de U), 34–37 (bloque final separado)
+- Rampa Norte B: N6–N13 (stands remotos detrás de B34–B37, requieren vehículo)
 
 TERMINALES FIJAS (NUNCA violar):
 - Arlene Mercedes Rijo → Terminal A (pos 1–11 o N1–N5) siempre
@@ -2428,6 +2597,9 @@ TERMINALES FIJAS (NUNCA violar):
 - Yeidry Hernández → Terminal B siempre
 - Alexandra Delgado Torres → Terminal B siempre
 - Sachariel Márquez → Terminal B siempre
+
+SIN LICENCIA DE CONDUCIR (NO asignar TPe119, CGP17, ni rangos amplios):
+${S.team.filter(m=>m.noLicencia&&!m.sup).map(m=>m.name).join(', ')||'Ninguno'}
 
 REGLAS POR TURNO:
 - A y T9: tienen primaryPos (primeras ops) + afterMealPos (diferente, después del almuerzo 13:00)
