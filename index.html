@@ -1406,13 +1406,31 @@ async function fetchLACOPS(){
       const ruta    = f.RUTA      || f.ruta      || '';
       const dianom  = f.dianom    || f.DIA       || '';
 
-      // STAND format: "B23B" → extract number → "23"
-      // GATE format: "23" (just the number)
+      // STAND format examples from dashboard:
+      // Terminal A: "P7", "P7A" → pos "7"
+      // Terminal B: "B21", "B26A" → pos "21", "26"
+      // Rampa Norte A: "AN1", "AN2" or "N1", "N2" → pos "N1", "N2"
+      // Rampa Norte B: "N6", "N7" etc → pos "N6"
       const rawStand = f.STAND || f.stand || '';
       const rawGate  = f.GATE  || f.gate  || '';
-      // Parse stand: remove prefix letter and suffix letter, get numeric part
-      const standNum = rawStand.replace(/^[A-Z]/i,'').replace(/[A-Z]+$/i,'');
-      const pos = standNum || rawGate || '';
+
+      let pos = '';
+      const s = rawStand.toUpperCase().trim();
+      if(s){
+        // Check for Rampa Norte patterns: AN1, AN2, N1, N2...
+        const rampaNorteA = s.match(/^A?N(\d+)$/);
+        const rampaNorteB = s.match(/^N(\d+)$/);
+        if(rampaNorteA){
+          const n=parseInt(rampaNorteA[1]);
+          if(n>=1&&n<=5) pos='N'+n;
+          else if(n>=6&&n<=13) pos='N'+n;
+        } else {
+          // Strip leading letter(s) and trailing letter(s), keep numeric part
+          const stripped = s.replace(/^[A-Z]+/,'').replace(/[A-Z]+$/,'');
+          if(stripped) pos = stripped;
+        }
+      }
+      if(!pos && rawGate) pos = rawGate.replace(/[A-Z]+$/i,'').replace(/^[A-Z]+/i,'') || rawGate;
 
       const arrTime = eta && eta!=='OVER' ? eta : (sta && sta!=='OVER' ? sta : '');
       const depTime = etd && etd!=='OVER' ? etd : (std && std!=='OVER' ? std : '');
@@ -2143,10 +2161,13 @@ function buildSuggestionsPanel(){
   const flights=parseFlightList(flightData);
   const posCount={};
   flights.forEach(f=>{ posCount[f.pos]=(posCount[f.pos]||0)+1; });
-  const zones={A:0,B1:0,B2:0,N:0};
+  const zones={A:0,NA:0,B1:0,B2:0,NB:0};
   Object.entries(posCount).forEach(([pos,cnt])=>{
     const n=parseInt(pos.replace('N',''));
-    if(pos.startsWith('N')) zones.N+=cnt;
+    if(pos.startsWith('N')){
+      if(n>=1&&n<=5) zones.NA+=cnt;
+      else if(n>=6&&n<=13) zones.NB+=cnt;
+    }
     else if(n>=1&&n<=11) zones.A+=cnt;
     else if(n>=20&&n<=26) zones.B1+=cnt;
     else if(n>=27&&n<=37) zones.B2+=cnt;
@@ -2173,7 +2194,7 @@ function buildSuggestionsPanel(){
   const shiftColors={A:'#17c97a',T9:'#2d7aee',B:'#8b5cf6','B+C':'#fb923c',C:'#e84545',D:'#0eb8c9'};
   let html=`<div style="margin-bottom:12px">
     <div style="font-size:11px;font-weight:700;color:var(--text3);margin-bottom:6px;text-transform:uppercase;letter-spacing:.5px">Carga por zona hoy</div>`;
-  [['Terminal A (1–11)',zones.A,'#2d7aee'],['Terminal B1 (20–26)',zones.B1,'#e84545'],['Terminal B2 (27–37)',zones.B2,'#f0a500'],['Remotos (N6–N13)',zones.N,'#7a90ab']].forEach(([name,cnt,col])=>{
+  [['Terminal A (1–11)',zones.A,'#2d7aee'],['Rampa Norte A (N1–N5)',zones.NA,'#0eb8c9'],['Terminal B1 (20–26)',zones.B1,'#e84545'],['Terminal B2 (27–37)',zones.B2,'#f0a500'],['Rampa Norte B (N6–N13)',zones.NB,'#7a90ab']].forEach(([name,cnt,col])=>{
     const pct=Math.round((cnt/maxZone)*100);
     html+=`<div style="display:flex;align-items:center;gap:8px;margin-bottom:5px">
       <span style="font-size:11px;min-width:130px;color:var(--text2)">${name}</span>
