@@ -320,17 +320,6 @@ input[type="date"]::-webkit-calendar-picker-indicator{
 <div class="overlay" id="analysisModal">
 <div class="modal" style="width:620px;max-height:92vh;">
   <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;">
-    <div class="modal-title" style="margin:0">📊 Análisis del día</div>
-    <button onclick="closeModal('analysisModal')" style="background:none;border:none;color:var(--text3);font-size:20px;cursor:pointer">✕</button>
-  </div>
-  <div id="analysisBody"></div>
-</div>
-</div>
-
-<!-- ═══════ ANALYSIS MODAL ═══════ -->
-<div class="overlay" id="analysisModal">
-<div class="modal" style="width:620px;max-height:92vh;">
-  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;">
     <div>
       <div class="modal-title" style="margin:0">📊 Análisis del día</div>
       <div id="analysisFecha" style="font-size:11px;color:var(--text3);margin-top:2px;font-family:'IBM Plex Mono',monospace"></div>
@@ -2611,20 +2600,7 @@ function openHistView(date){
 // ═══════════════════════════════════════════════════════
 function openAnalysis(){
   if(!flightData||!flightData.trim()){
-    // Show the modal but with a clear prompt to load flights
-    document.getElementById('analysisBody').innerHTML=`
-      <div style="text-align:center;padding:32px 20px;">
-        <div style="font-size:36px;margin-bottom:12px">✈️</div>
-        <div style="font-size:15px;font-weight:700;margin-bottom:8px">Sin vuelos cargados</div>
-        <div style="font-size:13px;color:var(--text2);margin-bottom:20px;line-height:1.6">
-          Para ver el análisis del día necesitas cargar primero<br>
-          la lista de vuelos desde el dashboard del aeropuerto.
-        </div>
-        <button class="btn btn-primary" onclick="closeModal('analysisModal');openFlightModal()" style="font-size:13px;padding:8px 18px;">
-          ✈️ Cargar vuelos del día
-        </button>
-      </div>`;
-    document.getElementById('analysisModal').classList.add('open');
+    toast('⚠️ Carga los vuelos primero — botón ✈️ Vuelos','error');
     return;
   }
 
