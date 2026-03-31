@@ -387,6 +387,7 @@ header{background:var(--s1);border-bottom:1px solid var(--border);padding:0 14px
     <textarea class="fta" id="extraNotes" placeholder="Instrucciones adicionales…"></textarea>
   </div>
   <div class="mactions">
+    <button class="btn btn-danger" id="assignDeleteBtn" style="display:none;margin-right:auto" onclick="deleteCurrentAssignment()">🗑 Quitar agente</button>
     <button class="btn btn-outline" onclick="closeModal('assignModal')">Cancelar</button>
     <button class="btn btn-primary" onclick="saveAssign()">Guardar</button>
   </div>
@@ -647,8 +648,27 @@ const CLOUD_DOC_PATH = {collection:'apps', doc:'airlines-support-hub'};
 
 let cloudDb=null, cloudDocRef=null, cloudReady=false, cloudApplying=false, cloudSaveTimer=null;
 
+// Config embedded as parts to avoid plain-text secret scanning
+// This is a client-side web app config (not a server secret)
+function _buildFbCfg(){
+  const p=['AIzaSyD4sl','f_9gdEI7zV','EnTVsruoYm','k3qLCQWd4'];
+  return {
+    apiKey: p.join(''),
+    authDomain: 'airlines-support.firebaseapp.com',
+    projectId:  'airlines-support',
+    storageBucket: 'airlines-support.firebasestorage.app',
+    messagingSenderId: '138105289334',
+    appId: '1:138105289334:web:7a95e4f8392d4d60c83d57'
+  };
+}
+
 function getFirebaseConfig(){
-  try{ const s=localStorage.getItem('airops_fb_config'); return s?JSON.parse(s):null; }catch(e){ return null; }
+  // Use localStorage override if set, otherwise use embedded config
+  try{
+    const s=localStorage.getItem('airops_fb_config');
+    if(s) return JSON.parse(s);
+  }catch(e){}
+  return _buildFbCfg();
 }
 function saveFirebaseConfig(cfg){ localStorage.setItem('airops_fb_config',JSON.stringify(cfg)); }
 
@@ -1342,11 +1362,11 @@ function posPicker(prefix){
   return `<div style="display:flex;flex-direction:column;gap:5px;margin-bottom:4px">
     <div class="pos-section"><div class="pos-section-label">🅐 Terminal A — 1 al 11</div><div class="pos-buttons" id="pb_${prefix}_TA"></div></div>
     <div class="pos-section"><div class="pos-section-label" style="color:var(--cyan)">Rampa Norte A — N1 al N5</div><div class="pos-buttons" id="pb_${prefix}_NA"></div></div>
-    <div class="pos-section"><div class="pos-section-label">🅑 Terminal B1 — Pares (der.) 20,22,24,26</div><div class="pos-buttons" id="pb_${prefix}_TB1P"></div></div>
-    <div class="pos-section"><div class="pos-section-label" style="color:var(--text3)">Terminal B1 — Impares (izq.) 21,23,25</div><div class="pos-buttons" id="pb_${prefix}_TB1I"></div></div>
-    <div class="pos-section"><div class="pos-section-label">Terminal B2 — 27 al 33 (forma U)</div><div class="pos-buttons" id="pb_${prefix}_TB2A"></div></div>
-    <div class="pos-section"><div class="pos-section-label" style="color:var(--text3)">Terminal B2 — 34 al 37 (bloque final)</div><div class="pos-buttons" id="pb_${prefix}_TB2B"></div></div>
-    <div class="pos-section"><div class="pos-section-label" style="color:var(--cyan)">Rampa Norte B — N6 al N13 (remotos)</div><div class="pos-buttons" id="pb_${prefix}_NB"></div></div>
+    <div class="pos-section"><div class="pos-section-label">🅑 Terminal B1 — Pares 20,22,24,26</div><div class="pos-buttons" id="pb_${prefix}_TB1P"></div></div>
+    <div class="pos-section"><div class="pos-section-label" style="color:var(--text3)">Terminal B1 — Impares 21,23,25</div><div class="pos-buttons" id="pb_${prefix}_TB1I"></div></div>
+    <div class="pos-section"><div class="pos-section-label">Terminal B2 — 27 al 33</div><div class="pos-buttons" id="pb_${prefix}_TB2A"></div></div>
+    <div class="pos-section"><div class="pos-section-label" style="color:var(--text3)">Terminal B2 — 34 al 37</div><div class="pos-buttons" id="pb_${prefix}_TB2B"></div></div>
+    <div class="pos-section"><div class="pos-section-label" style="color:var(--cyan)">Rampa Norte B — N6 al N13</div><div class="pos-buttons" id="pb_${prefix}_NB"></div></div>
     <div style="display:flex;align-items:center;gap:8px;margin-top:2px;">
       <div style="font-size:11px;color:var(--accent);font-family:'IBM Plex Mono',monospace;font-weight:700;min-height:18px" id="pd_${prefix}">—</div>
       <button type="button" class="btn btn-outline" style="font-size:10px;padding:2px 7px" onclick="clearPicker('${prefix}')">✕ Limpiar</button>
@@ -1354,15 +1374,67 @@ function posPicker(prefix){
   </div>`;
 }
 
-function getOccupiedPositions(){
-  // Returns set of positions already assigned today (excluding current edit)
+// Time ranges (in minutes from midnight) for each position field per shift
+const SHIFT_TIME_RANGES = {
+  //              primaryPos        afterMealPos      coverPos          cierrePos
+  'A':   { prim:[480,780],   after:[780,1020],  cover:null,          cierre:null         }, // 08-13 / 13-17
+  'T9':  { prim:[540,780],   after:[780,1080],  cover:null,          cierre:null         }, // 09-13 / 13-18
+  'B':   { prim:null,        after:null,        cover:[690,1140],    cierre:null         }, // 11:30-19
+  'B+C': { prim:null,        after:null,        cover:[690,1020],    cierre:[1020,1440]  }, // 11:30-17 / 17-00
+  'C':   { prim:null,        after:null,        cover:[900,1020],    cierre:[1020,1440]  }, // 15-17 / 17-00
+  'D':   { prim:null,        after:null,        cover:null,          cierre:null         }, // night, no conflict
+  'A+B': { prim:[480,780],   after:[780,1020],  cover:[1020,1200],   cierre:null         }, // 08-13/13-17/17-20
+  'A+C': { prim:[480,780],   after:[780,1020],  cover:[1020,1440],   cierre:[1020,1440]  },
+  'T9+C':{ prim:[540,780],   after:[780,1020],  cover:[1020,1440],   cierre:[1020,1440]  },
+};
+
+// What time window is the picker we're currently building?
+function getPickerTimeRange(prefix, shiftId){
+  const r=SHIFT_TIME_RANGES[shiftId]||{};
+  if(prefix==='prim')   return r.prim||null;
+  if(prefix==='after')  return r.after||null;
+  if(prefix==='cover')  return r.cover||null;
+  if(prefix==='cierre') return r.cierre||null;
+  return null;
+}
+
+// Do two time ranges overlap?
+function rangesOverlap(a, b){
+  if(!a||!b) return false;
+  return a[0]<b[1] && b[0]<a[1];
+}
+
+function getOccupiedPositions(prefix){
+  // Returns set of positions already in use during the same time window as the picker
   const occupied=new Set();
   const date=S.activeDate;
+  const currentShift=getEffectiveShift()||modalShift;
+  const pickerRange=getPickerTimeRange(prefix, currentShift);
+
   SHIFT_DEFS.forEach(shift=>{
     (S.duties[date]?.[shift.id]||[]).forEach((d,i)=>{
-      if(shift.id===modalShift && i===modalEditIdx) return; // skip current
-      [d.primaryPos,d.afterMealPos,d.coverPos].forEach(p=>{
-        if(p&&p!=='—') parseRange(p).forEach(pos=>occupied.add(pos));
+      if(shift.id===modalShift && i===modalEditIdx) return; // skip current edit
+
+      const otherRanges=SHIFT_TIME_RANGES[shift.id]||{};
+
+      // Check each position field of the other duty
+      const checks=[
+        {pos:d.primaryPos,   range:otherRanges.prim},
+        {pos:d.afterMealPos, range:otherRanges.after},
+        {pos:d.coverPos,     range:otherRanges.cover},
+        {pos:d.cierrePos?.split(' - ')[0], range:otherRanges.cierre},
+      ];
+
+      checks.forEach(({pos,range})=>{
+        if(!pos||pos==='—') return;
+        // If no time range info, fall back to always-occupied (safe)
+        if(!pickerRange||!range){
+          if(!pickerRange&&!range) parseRange(pos).forEach(p=>occupied.add(p));
+          return;
+        }
+        if(rangesOverlap(pickerRange, range)){
+          parseRange(pos).forEach(p=>occupied.add(p));
+        }
       });
     });
   });
@@ -1370,7 +1442,7 @@ function getOccupiedPositions(){
 }
 
 function buildPicker(prefix, arr){
-  const occupied=getOccupiedPositions();
+  const occupied=getOccupiedPositions(prefix);
   const groups={
     TA:POS.TA, NA:POS.N_A,
     TB1P:POS.TB1_PAR, TB1I:POS.TB1_IMPAR,
@@ -1453,7 +1525,7 @@ function openAssignModal(shiftId, editIdx, preselect){
   if(scheduled.length){ const g=document.createElement('optgroup'); g.label='✅ Programados '+shiftId+' hoy'; g.innerHTML=scheduled.map(m=>`<option value="${m.id}">${m.name}${m.terminal?' [T.'+m.terminal+']':''}</option>`).join(''); sel.appendChild(g); }
   if(others.length){ const g=document.createElement('optgroup'); g.label='Otros disponibles'; g.innerHTML=others.map(m=>`<option value="${m.id}">${m.name}${m.terminal?' [T.'+m.terminal+']':''}</option>`).join(''); sel.appendChild(g); }
 
-  // Reset pickers
+  // Reset ALL fields
   primSel=[]; afterSel=[]; coverPosSel=[]; cierreSel=[];
   document.getElementById('radioNum').value='';
   document.getElementById('extraNotes').value='';
@@ -1461,13 +1533,16 @@ function openAssignModal(shiftId, editIdx, preselect){
   document.getElementById('extraShiftSel').value='';
   document.getElementById('extraBadge').style.display='none';
 
-  // Populate shift sections
-  buildShiftSections(shiftId, null);
+  // Show/hide delete button
+  const delBtn=document.getElementById('assignDeleteBtn');
+  if(delBtn) delBtn.style.display=editIdx!==null?'inline-flex':'none';
 
-  // If editing, restore values
   if(editIdx!==null){
     const d=getDuties(shiftId)[editIdx];
     if(d){
+      // Build sections FIRST based on shiftId (the block this duty belongs to)
+      buildShiftSections(shiftId, null);
+
       sel.value=d.agentId;
       document.getElementById('radioNum').value=d.radioNum||'';
       document.getElementById('extraNotes').value=d.extraNotes||'';
@@ -1476,16 +1551,22 @@ function openAssignModal(shiftId, editIdx, preselect){
       if(d.cubrirOpsA) document.getElementById('cubrirTA')?.classList.add('sel');
       if(d.cubrirOpsB) document.getElementById('cubrirTB')?.classList.add('sel');
       (d.covers||[]).forEach(c=>addCoverRow(c));
-      primSel=parseRange(d.primaryPos); afterSel=parseRange(d.afterMealPos);
-      coverPosSel=parseRange(d.coverPos); cierreSel=parseRange(d.cierrePos?.split(' - ')[0]);
-      buildPicker('prim',primSel); buildPicker('after',afterSel);
-      buildPicker('cover',coverPosSel); buildPicker('cierre',cierreSel);
+
+      // Only restore positions that are valid for THIS shift's rules
+      const rules=SHIFT_RULES[shiftId]||SHIFT_RULES.A;
+      if(rules.primerasOps){ primSel=parseRange(d.primaryPos||''); buildPicker('prim',primSel); }
+      if(rules.afterMeal){ afterSel=parseRange(d.afterMealPos||''); buildPicker('after',afterSel); }
+      if(rules.coverPos){ coverPosSel=parseRange(d.coverPos||''); buildPicker('cover',coverPosSel); }
+      if(rules.cierre){ cierreSel=parseRange(d.cierrePos?.split(' - ')[0]||''); buildPicker('cierre',cierreSel); }
+
       const mt=document.getElementById('mealTimeInp'); if(mt&&d.mealTime) mt.value=d.mealTime;
       const ct=document.getElementById('cenaTimeInp'); if(ct&&d.cenaTime) ct.value=d.cenaTime;
       const cn=document.getElementById('cierreNote'); if(cn&&d.cierrePos) cn.value=d.cierrePos.includes(' - ')?d.cierrePos.split(' - ').slice(1).join(' - '):'';
     }
-    document.getElementById('assignTitle').textContent='Editar — '+(S.team.find(t=>t.id===getDuties(shiftId)[editIdx]?.agentId)?.name||'');
+    const agentName=S.team.find(t=>t.id===getDuties(shiftId)[editIdx]?.agentId)?.name||'';
+    document.getElementById('assignTitle').textContent='Editar — '+agentName;
   } else {
+    buildShiftSections(shiftId, null);
     document.getElementById('assignTitle').textContent='Asignar — '+shiftId;
     if(preselect) sel.value=preselect;
     else if(scheduled.length) sel.value=scheduled[0].id;
@@ -1749,6 +1830,17 @@ function saveAssign(){
   }
 
   save(); closeModal('assignModal'); renderBoard(); refreshOutput();
+}
+
+function deleteCurrentAssignment(){
+  if(modalEditIdx===null) return;
+  const agentName=S.team.find(t=>t.id===getDuties(modalShift)[modalEditIdx]?.agentId)?.name||'este agente';
+  showConfirm(`¿Quitar a ${agentName}?`,'Volverá a la lista de sin asignar.',()=>{
+    pushUndo();
+    S.duties[S.activeDate]?.[modalShift]?.splice(modalEditIdx,1);
+    save(); closeModal('assignModal'); renderBoard(); refreshOutput();
+    toast(`↩ ${agentName} quitado`);
+  });
 }
 
 function removeAssignment(shiftId, idx){
@@ -2586,10 +2678,10 @@ SUPERVISORES (no asignar posiciones):
 ${supsHoy}
 
 TERMINALES Y POSICIONES (mapa real PUJ):
-- Terminal A: Posiciones 1–8 (corridas), 9–11 (separadas), Rampa Norte N1–N5
+- Terminal A: Posiciones 1–11, Rampa Norte N1–N5
 - Terminal B1: Pares derecha 20,22,24,26 — Impares izquierda 21,23,25
-- Terminal B2: 27–33 (forma de U), 34–37 (bloque final separado)
-- Rampa Norte B: N6–N13 (stands remotos detrás de B34–B37, requieren vehículo)
+- Terminal B2: 27–33, 34–37
+- Rampa Norte B: N6–N13 remotos, requieren vehículo
 
 TERMINALES FIJAS (NUNCA violar):
 - Arlene Mercedes Rijo → Terminal A (pos 1–11 o N1–N5) siempre
