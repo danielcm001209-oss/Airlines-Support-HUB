@@ -114,9 +114,51 @@ header{background:var(--s1);border-bottom:1px solid var(--border);padding:0 14px
 .sched-pip{font-size:10px;font-weight:800;padding:2px 5px;border-radius:4px;font-family:'IBM Plex Mono',monospace;}
 .swap-card{background:var(--s2);border:1px solid var(--border2);border-radius:8px;padding:11px;margin-bottom:7px;display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
 .changes-section-label{font-size:10px;font-weight:800;letter-spacing:1px;color:var(--text3);text-transform:uppercase;margin-bottom:8px;}
-.toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%) translateY(20px);background:var(--s1);border:1px solid var(--green);border-radius:8px;padding:10px 18px;font-size:13px;font-weight:700;opacity:0;transition:all .3s;z-index:9999;pointer-events:none;white-space:nowrap;}
+.analysis-sec{background:var(--s2);border:1px solid var(--border2);border-radius:8px;padding:12px;margin-bottom:10px;}
+.analysis-sec-title{font-size:10px;font-weight:800;letter-spacing:1px;color:var(--text3);text-transform:uppercase;margin-bottom:10px;}
+.zone-bar-wrap{display:flex;align-items:center;gap:8px;margin-bottom:7px;}
+.zone-bar-label{font-size:12px;font-weight:600;min-width:145px;color:var(--text);}
+.zone-bar-track{flex:1;background:var(--bg);border-radius:4px;height:8px;overflow:hidden;}
+.zone-bar-fill{height:100%;border-radius:4px;}
+.zone-bar-count{font-size:11px;font-family:'IBM Plex Mono',monospace;color:var(--text2);min-width:55px;text-align:right;}
+.analysis-person-row{display:flex;align-items:center;gap:8px;padding:7px 0;border-bottom:1px solid var(--border);}
+.analysis-person-row:last-child{border-bottom:none;}
+.analysis-pos{font-family:'IBM Plex Mono',monospace;font-size:12px;font-weight:800;color:var(--accent);background:rgba(45,122,238,.1);border:1px solid rgba(45,122,238,.3);border-radius:5px;padding:2px 8px;white-space:nowrap;flex-shrink:0;}
+.analysis-reason{font-size:11px;color:var(--text3);margin-top:2px;}
+.shift-tab-bar{display:flex;gap:5px;flex-wrap:wrap;margin-bottom:10px;}
+.shift-tab{font-size:11px;font-weight:700;padding:4px 10px;border-radius:6px;border:1px solid var(--border2);background:var(--bg);color:var(--text3);cursor:pointer;transition:all .15s;}
+.shift-tab.on{background:rgba(45,122,238,.15);border-color:var(--accent);color:var(--accent);}
+.zone-bar-wrap{background:var(--border);border-radius:3px;height:8px;flex:1;overflow:hidden;}
+.zone-bar{height:100%;border-radius:3px;transition:width .4s ease;}
+.analysis-person-row{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--border);}
+.analysis-person-row:last-child{border-bottom:none;}
+.analysis-pos{font-size:12px;font-weight:800;padding:3px 9px;border-radius:6px;background:rgba(45,122,238,.15);color:var(--accent);font-family:'IBM Plex Mono',monospace;white-space:nowrap;}
+.analysis-reason{font-size:11px;color:var(--text3);margin-top:1px;}bottom:20px;left:50%;transform:translateX(-50%) translateY(20px);background:var(--s1);border:1px solid var(--green);border-radius:8px;padding:10px 18px;font-size:13px;font-weight:700;opacity:0;transition:all .3s;z-index:9999;pointer-events:none;white-space:nowrap;}
 .toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
 @keyframes spin{to{transform:rotate(360deg)}}
+input[type="date"]{color-scheme:dark;}
+input[type="date"]::-webkit-calendar-picker-indicator{
+  filter:invert(1) brightness(2);
+  opacity:.8;
+  cursor:pointer;
+  background-color:transparent;
+}
+input[type="date"]::-webkit-calendar-picker-indicator:hover{opacity:1;}
+#dateInput::-webkit-calendar-picker-indicator,
+#lacopsDate::-webkit-calendar-picker-indicator,
+#vacStart::-webkit-calendar-picker-indicator,
+#vacEnd::-webkit-calendar-picker-indicator,
+#permisoStart::-webkit-calendar-picker-indicator,
+#permisoEnd::-webkit-calendar-picker-indicator,
+#licenciaStart::-webkit-calendar-picker-indicator,
+#licenciaEnd::-webkit-calendar-picker-indicator,
+#ovDate::-webkit-calendar-picker-indicator,
+#swapDA::-webkit-calendar-picker-indicator,
+#swapDB::-webkit-calendar-picker-indicator{
+  filter:invert(1) brightness(2) !important;
+  opacity:.8;
+  cursor:pointer;
+}
 @media(max-width:640px){
   .app{height:auto;min-height:calc(100vh - 94px);flex-direction:column;}
   .page.active{flex-direction:column;height:auto;}
@@ -159,6 +201,7 @@ header{background:var(--s1);border-bottom:1px solid var(--border);padding:0 14px
     <button class="btn btn-outline" id="apiKeyBtn" onclick="configApiKey()" title="API Key Gemini">🔑</button>
     <button class="btn btn-outline" id="fbBtn" onclick="configFirebase()" title="Configurar Firebase">🔥</button>
     <button class="btn btn-outline" id="flightBtn" onclick="openFlightModal()">✈️ Vuelos</button>
+    <button class="btn btn-outline" id="analysisBtn" onclick="openAnalysis()" title="Análisis del día">📊 Análisis</button>
     <button class="btn btn-outline" id="undoBtn" onclick="undo()" disabled style="opacity:.35">↩</button>
     <button class="btn btn-outline" id="redoBtn" onclick="redo()" disabled style="opacity:.35">↪</button>
     <button class="btn btn-danger" onclick="clearDay()">🗑</button>
@@ -284,6 +327,31 @@ header{background:var(--s1);border-bottom:1px solid var(--border);padding:0 14px
 
 <div class="toast" id="toast"></div>
 
+<!-- ═══════ ANALYSIS MODAL ═══════ -->
+<div class="overlay" id="analysisModal">
+<div class="modal" style="width:620px;max-height:92vh;">
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;">
+    <div class="modal-title" style="margin:0">📊 Análisis del día</div>
+    <button onclick="closeModal('analysisModal')" style="background:none;border:none;color:var(--text3);font-size:20px;cursor:pointer">✕</button>
+  </div>
+  <div id="analysisBody"></div>
+</div>
+</div>
+
+<!-- ═══════ ANALYSIS MODAL ═══════ -->
+<div class="overlay" id="analysisModal">
+<div class="modal" style="width:620px;max-height:92vh;">
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;">
+    <div>
+      <div class="modal-title" style="margin:0">📊 Análisis del día</div>
+      <div id="analysisFecha" style="font-size:11px;color:var(--text3);margin-top:2px;font-family:'IBM Plex Mono',monospace"></div>
+    </div>
+    <button onclick="closeModal('analysisModal')" style="background:none;border:none;color:var(--text3);font-size:20px;cursor:pointer">✕</button>
+  </div>
+  <div id="analysisBody"></div>
+</div>
+</div>
+
 <!-- ═══════ FLIGHT MODAL ═══════ -->
 <div class="overlay" id="flightModal">
 <div class="modal">
@@ -315,6 +383,10 @@ header{background:var(--s1);border-bottom:1px solid var(--border);padding:0 14px
     <button class="btn btn-danger" onclick="clearFlightData()">🗑 Limpiar</button>
     <button class="btn btn-outline" onclick="closeModal('flightModal')">Cancelar</button>
     <button class="btn btn-primary" onclick="saveFlightData()">✅ Guardar</button>
+  </div>
+  <div id="flightSuggestionsWrap" style="display:none;margin-top:12px;border-top:1px solid var(--border);padding-top:12px;">
+    <div style="font-size:10px;font-weight:800;letter-spacing:1px;color:var(--green);text-transform:uppercase;margin-bottom:10px;">💡 Sugerencias de asignación</div>
+    <div id="flightSuggestions"></div>
   </div>
 </div>
 </div>
@@ -1374,6 +1446,10 @@ async function fetchLACOPS(){
 
     document.getElementById('flightTextInput').value=text;
     onFlightTextChange();
+    flightData=text;
+    updateFlightBtn();
+    buildSuggestionsPanel();
+    document.getElementById('flightSuggestionsWrap').style.display='block';
     status.style.color='var(--green)';
     const dupNote = deduped.length < finalFlights.length ? ` (${finalFlights.length-deduped.length} duplicados eliminados)` : '';
     status.textContent=`✅ ${deduped.length} vuelos del ${new Date(date+'T12:00:00').toLocaleDateString('es-DO',{weekday:'long',day:'numeric',month:'long'})}${dupNote}${filterNote}`;
@@ -2542,8 +2618,150 @@ function openHistView(date){
 }
 
 // ═══════════════════════════════════════════════════════
-// FLIGHT DATA
+// ANÁLISIS DEL DÍA
 // ═══════════════════════════════════════════════════════
+function openAnalysis(){
+  if(!flightData||!flightData.trim()){
+    toast('⚠️ Carga los vuelos del día primero — botón ✈️ Vuelos','error');
+    return;
+  }
+  document.getElementById('analysisBody').innerHTML=buildAnalysisHTML();
+  document.getElementById('analysisModal').classList.add('open');
+}
+
+function buildAnalysisHTML(){
+  const date=S.activeDate;
+  const flights=parseFlightList(flightData);
+
+  // 1. Count flights per position
+  const posCount={};
+  flights.forEach(f=>{ posCount[f.pos]=(posCount[f.pos]||0)+1; });
+
+  // 2. Count by zone
+  const zones=[
+    {label:'Terminal A — 1 al 11',  positions:POS.TA,           color:'#2d7aee'},
+    {label:'Rampa Norte A — N1–N5', positions:POS.N_A,          color:'#0eb8c9'},
+    {label:'Terminal B1 — 20–26',   positions:[...POS.TB1_PAR,...POS.TB1_IMPAR], color:'#8b5cf6'},
+    {label:'Terminal B2 — 27–37',   positions:[...POS.TB2A,...POS.TB2B],         color:'#fb923c'},
+    {label:'Remotos — N6–N13',      positions:POS.N_B,          color:'#17c97a'},
+  ];
+  const zoneTotals=zones.map(z=>({
+    ...z,
+    total:z.positions.reduce((s,p)=>s+(posCount[p]||0),0)
+  }));
+  const maxZone=Math.max(...zoneTotals.map(z=>z.total),1);
+
+  // 3. Zone bars HTML
+  let zoneHTML='<div class="analysis-sec"><div class="analysis-sec-title">Carga de vuelos por zona</div>';
+  zoneTotals.forEach(z=>{
+    const pct=Math.round(z.total/maxZone*100);
+    const badge=z.total>=50?`<span style="font-size:10px;font-weight:800;color:var(--red);margin-left:4px">● ALTA</span>`:
+                z.total>=25?`<span style="font-size:10px;font-weight:800;color:var(--amber);margin-left:4px">● MEDIA</span>`:
+                `<span style="font-size:10px;color:var(--text3);margin-left:4px">● baja</span>`;
+    zoneHTML+=`<div class="zone-bar-wrap">
+      <span class="zone-bar-label">${z.label}${badge}</span>
+      <div class="zone-bar-track"><div class="zone-bar-fill" style="width:${pct}%;background:${z.color}"></div></div>
+      <span class="zone-bar-count">${z.total} vuelo${z.total!==1?'s':''}</span>
+    </div>`;
+  });
+  zoneHTML+='</div>';
+
+  // 4. Per-shift distribution + person suggestions
+  const activeShifts=SHIFT_DEFS.filter(s=>
+    S.team.some(m=>!m.sup&&resolvedShift(m,date)===s.id)
+  );
+
+  let tabsHTML='<div class="analysis-sec"><div class="analysis-sec-title">Distribución sugerida por turno</div>';
+  tabsHTML+=`<div class="shift-tab-bar">`;
+  activeShifts.forEach((s,i)=>tabsHTML+=`<div class="shift-tab${i===0?' on':''}" onclick="switchAnalysisTab('${s.id}',this)">${s.label}</div>`);
+  tabsHTML+=`</div><div id="analysisTabs">`;
+  activeShifts.forEach((s,i)=>{
+    tabsHTML+=`<div id="atab-${s.id}" style="display:${i===0?'block':'none'}">`;
+    tabsHTML+=buildShiftAnalysis(s.id, date, flights, posCount, zoneTotals);
+    tabsHTML+=`</div>`;
+  });
+  tabsHTML+=`</div></div>`;
+
+  return zoneHTML+tabsHTML;
+}
+
+function buildShiftAnalysis(shiftId, date, flights, posCount, zoneTotals){
+  const rules=SHIFT_RULES[shiftId];
+  const people=S.team.filter(m=>!m.sup&&resolvedShift(m,date)===shiftId);
+  if(!people.length) return `<div style="color:var(--text3);font-size:12px">Sin agentes en este turno hoy.</div>`;
+
+  // Zone distribution suggestion based on flight load
+  const sortedZones=[...zoneTotals].sort((a,b)=>b.total-a.total);
+  let distHTML=`<div style="margin-bottom:10px;padding:8px 10px;background:rgba(45,122,238,.07);border:1px solid rgba(45,122,238,.2);border-radius:6px;font-size:12px;color:var(--text2)">
+    <b style="color:var(--accent)">${people.length} persona${people.length!==1?'s':''} en turno ${shiftId}</b> — 
+    Zona más cargada: <b style="color:var(--accent)">${sortedZones[0].label.split('—')[0].trim()}</b> (${sortedZones[0].total} vuelos)
+  </div>`;
+
+  // Per-person suggestions
+  people.forEach(m=>{
+    const airlines=(S.personAirlines||{})[m.id]||[];
+    const init=m.name.split(' ').map(p=>p[0]).join('').slice(0,2).toUpperCase();
+
+    // Find best positions for this person's airlines
+    let bestPos='', bestReason='', bestCount=0;
+    const allPOS=[...POS.TA,...POS.N_A,...POS.TB1_PAR,...POS.TB1_IMPAR,...POS.TB2A,...POS.TB2B,...POS.N_B];
+
+    flights.forEach(f=>{
+      if(!airlines.some(a=>a.toLowerCase()===f.airline.toLowerCase())) return;
+      const cnt=posCount[f.pos]||0;
+      if(cnt>bestCount){ bestCount=cnt; bestPos=f.pos; }
+    });
+
+    // If found match, group nearby positions
+    let sugPos='', reason='';
+    if(bestPos&&bestCount>0){
+      // Find adjacent positions with same airlines
+      const myFlightPos=new Set(flights.filter(f=>airlines.some(a=>a.toLowerCase()===f.airline.toLowerCase())).map(f=>f.pos));
+      const posArr=[...myFlightPos].slice(0,2);
+      sugPos=posArr.join('/');
+      const matchedAirlines=[...new Set(flights.filter(f=>myFlightPos.has(f.pos)&&airlines.some(a=>a.toLowerCase()===f.airline.toLowerCase())).map(f=>f.airline))];
+      const totalFlights=posArr.reduce((s,p)=>s+(posCount[p]||0),0);
+      reason=`${matchedAirlines.slice(0,2).join(', ')} — ${totalFlights} vuelo${totalFlights!==1?'s':''} hoy en esa zona`;
+    } else {
+      // No airline match — suggest by zone load, respecting fixed terminal
+      const fixedTerm=m.terminal;
+      let targetZone;
+      if(fixedTerm==='A') targetZone=zoneTotals.find(z=>z.label.includes('Terminal A'));
+      else if(fixedTerm==='B') targetZone=sortedZones.find(z=>z.label.includes('B1')||z.label.includes('B2'));
+      else targetZone=sortedZones[0];
+
+      if(targetZone&&targetZone.positions.length){
+        // Pick the position with most flights in that zone
+        const best=targetZone.positions.reduce((a,b)=>(posCount[b]||0)>(posCount[a]||0)?b:a);
+        sugPos=best;
+        reason=`zona más cargada${targetZone.total>0?` — ${targetZone.total} vuelos`:''} (sin aerolínea asignada en vuelos de hoy)`;
+      } else {
+        sugPos='—';
+        reason='Sin datos suficientes para sugerir';
+      }
+    }
+
+    const noLicBadge=m.noLicencia?`<span style="font-size:10px;color:var(--amber);margin-left:4px">🚫 sin lic.</span>`:'';
+    distHTML+=`<div class="analysis-person-row">
+      <div style="width:28px;height:28px;border-radius:50%;background:${m.color}22;color:${m.color};display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;flex-shrink:0">${init}</div>
+      <div style="flex:1;min-width:0">
+        <div style="font-size:13px;font-weight:700;color:var(--text)">${m.name}${noLicBadge}</div>
+        <div class="analysis-reason">${reason}</div>
+      </div>
+      <span class="analysis-pos">${sugPos}</span>
+    </div>`;
+  });
+
+  return distHTML;
+}
+
+function switchAnalysisTab(shiftId, el){
+  document.querySelectorAll('.shift-tab').forEach(t=>t.classList.remove('on'));
+  el.classList.add('on');
+  document.querySelectorAll('[id^="atab-"]').forEach(t=>t.style.display='none');
+  const tab=document.getElementById('atab-'+shiftId);
+  if(tab) tab.style.display='block';
+}
 function triggerFile(id){ document.getElementById(id).click(); }
 
 function openFlightModal(){
@@ -2599,7 +2817,8 @@ function saveFlightData(){
   flightData=document.getElementById('flightTextInput').value.trim();
   const lines=flightData.split('\n').filter(l=>l.trim()).length;
   updateFlightBtn();
-  closeModal('flightModal');
+  if(flightData) buildSuggestionsPanel();
+  else document.getElementById('flightSuggestionsWrap').style.display='none';
   toast(flightData?`✅ ${lines} líneas de vuelos guardadas`:'Vuelos limpiados');
 }
 
@@ -2612,10 +2831,269 @@ function clearFlightData(){
   toast('Vuelos limpiados');
 }
 
+function buildSuggestionsPanel(){
+  const date = S.activeDate;
+  const flights = parseFlightList(flightData);
+
+  // Count flights per position
+  const posCount = {};
+  flights.forEach(f=>{ posCount[f.pos]=(posCount[f.pos]||0)+1; });
+
+  // Count flights per zone
+  const zones = {A:0, B1:0, B2:0, N:0};
+  Object.entries(posCount).forEach(([pos,cnt])=>{
+    const n=parseInt(pos.replace('N',''));
+    if(pos.startsWith('N')) zones.N+=cnt;
+    else if(n>=1&&n<=11) zones.A+=cnt;
+    else if(n>=20&&n<=26) zones.B1+=cnt;
+    else if(n>=27&&n<=37) zones.B2+=cnt;
+  });
+  const maxZone=Math.max(...Object.values(zones))||1;
+
+  // Get people on shift today
+  const onShift={};
+  S.team.filter(m=>!m.sup).forEach(m=>{
+    const sh=resolvedShift(m,date);
+    if(sh){ if(!onShift[sh]) onShift[sh]=[]; onShift[sh].push(m); }
+  });
+
+  // For each person, find best positions based on their airlines
+  function bestPosForPerson(m){
+    const airlines=(S.personAirlines||{})[m.id]||[];
+    if(!airlines.length) return null;
+    // Find positions where their airlines operate today
+    const myFlights=flights.filter(f=>airlines.some(a=>a.toLowerCase()===f.airline.toLowerCase()||f.airline.toLowerCase().includes(a.toLowerCase().split(' ')[0])));
+    if(!myFlights.length) return null;
+    // Group by pos and count
+    const byPos={};
+    myFlights.forEach(f=>{ byPos[f.pos]=(byPos[f.pos]||0)+1; });
+    // Sort by count desc
+    const sorted=Object.entries(byPos).sort((a,b)=>b[1]-a[1]);
+    // Return top 1-2 positions
+    const topPos=sorted.slice(0,2).map(([p])=>p);
+    const totalVuelos=sorted.slice(0,2).reduce((a,[,c])=>a+c,0);
+    const airline=airlines[0];
+    const topFlight=sorted[0];
+    return {pos:topPos.join('/'), vuelos:totalVuelos, airline, posDetail:sorted.slice(0,2).map(([p,c])=>`${p}(${c})`).join(', ')};
+  }
+
+  // Build HTML
+  const SHIFT_ORDER=['A','T9','B','B+C','C','D'];
+  const shiftColors={A:'#17c97a',T9:'#2d7aee',B:'#8b5cf6','B+C':'#fb923c',C:'#e84545',D:'#0eb8c9'};
+
+  let html=`<div style="margin-bottom:12px">
+    <div style="font-size:11px;font-weight:700;color:var(--text3);margin-bottom:6px;text-transform:uppercase;letter-spacing:.5px">Carga por zona hoy</div>
+    <div style="display:flex;flex-direction:column;gap:5px;">`;
+  [['Terminal A (1–11)',zones.A,'#2d7aee'],['Terminal B1 (20–26)',zones.B1,'#e84545'],['Terminal B2 (27–37)',zones.B2,'#f0a500'],['Remotos (N6–N13)',zones.N,'#7a90ab']].forEach(([name,cnt,col])=>{
+    const pct=Math.round((cnt/maxZone)*100);
+    const level=pct>70?'Alta':pct>40?'Media':'Baja';
+    html+=`<div style="display:flex;align-items:center;gap:8px;">
+      <span style="font-size:11px;min-width:130px;color:var(--text2)">${name}</span>
+      <div style="flex:1;background:var(--s2);border-radius:3px;height:7px;overflow:hidden">
+        <div style="width:${pct}%;height:100%;background:${col};border-radius:3px"></div>
+      </div>
+      <span style="font-size:11px;color:var(--text3);min-width:65px;text-align:right">${cnt} vuelos · ${level}</span>
+    </div>`;
+  });
+  html+=`</div></div>`;
+
+  // Per-shift person suggestions
+  const shiftsWithPeople=SHIFT_ORDER.filter(s=>onShift[s]?.length);
+  if(!shiftsWithPeople.length){ html+='<div style="font-size:12px;color:var(--text3)">Sin personas en turno hoy.</div>'; }
+  else {
+    shiftsWithPeople.forEach(shiftId=>{
+      const people=onShift[shiftId];
+      const col=shiftColors[shiftId]||'var(--accent)';
+      html+=`<div style="margin-bottom:10px">
+        <div style="font-size:11px;font-weight:800;color:${col};text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px;padding:4px 8px;background:${col}15;border-radius:5px;display:inline-block">Turno ${shiftId} — ${people.length} persona${people.length>1?'s':''}</div>`;
+      people.forEach(m=>{
+        const init=m.name.split(' ').map(p=>p[0]).join('').slice(0,2).toUpperCase();
+        const sug=bestPosForPerson(m);
+        const airlines=(S.personAirlines||{})[m.id]||[];
+        html+=`<div style="display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid var(--border)">
+          <div style="width:26px;height:26px;border-radius:50%;background:${m.color}22;color:${m.color};display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:800;flex-shrink:0">${init}</div>
+          <div style="flex:1">
+            <div style="font-size:12px;font-weight:700">${m.name}${m.noLicencia?' <span style="font-size:10px;color:var(--amber)">🚫 Sin lic.</span>':''}</div>
+            <div style="font-size:10px;color:var(--text3)">${airlines.slice(0,2).join(', ')||'Sin aerolínea asignada'}</div>
+          </div>
+          ${sug
+            ? `<div style="text-align:right">
+                <div style="font-size:12px;font-weight:800;color:var(--accent);font-family:'IBM Plex Mono',monospace">POS ${sug.pos}</div>
+                <div style="font-size:10px;color:var(--text3)">${sug.airline} · ${sug.vuelos} vuelo${sug.vuelos>1?'s':''}</div>
+              </div>`
+            : `<div style="font-size:11px;color:var(--text3);text-align:right">Sin vuelos<br>de su aerolínea hoy</div>`
+          }
+        </div>`;
+      });
+      html+=`</div>`;
+    });
+  }
+
+  document.getElementById('flightSuggestions').innerHTML=html;
+  document.getElementById('flightSuggestionsWrap').style.display='block';
+}
+
 function updateFlightBtn(){
   const btn=document.getElementById('flightBtn');
   if(flightData){btn.style.background='rgba(23,201,122,.15)';btn.style.borderColor='rgba(23,201,122,.4)';btn.style.color='var(--green)';btn.textContent='✈️ Vuelos ✓';}
   else{btn.style.background='';btn.style.borderColor='';btn.style.color='';btn.textContent='✈️ Vuelos';}
+}
+
+// ═══════════════════════════════════════════════════════
+// ANÁLISIS DEL DÍA
+// ═══════════════════════════════════════════════════════
+function openAnalysis(){
+  if(!flightData||!flightData.trim()){
+    toast('⚠️ Carga los vuelos del día primero (botón ✈️ Vuelos)','error');
+    return;
+  }
+
+  const date=S.activeDate;
+  const d=new Date(date+'T12:00:00');
+  document.getElementById('analysisFecha').textContent=
+    d.toLocaleDateString('es-DO',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
+
+  const flights=parseFlightList(flightData);
+
+  // 1. Count flights per zone
+  const zoneCounts={TA:0,TB1:0,TB2A:0,TB2B:0,NB:0};
+  const flightsByPos={};
+  flights.forEach(f=>{
+    const p=f.pos;
+    if(!p) return;
+    if(!flightsByPos[p]) flightsByPos[p]={count:0,airlines:{}};
+    flightsByPos[p].count++;
+    flightsByPos[p].airlines[f.airline]=(flightsByPos[p].airlines[f.airline]||0)+1;
+    const n=parseInt(p.replace('N',''));
+    if(p.startsWith('N')){ if(n>=6&&n<=13) zoneCounts.NB++; else if(n>=1&&n<=5) zoneCounts.TA++; }
+    else if(n>=1&&n<=11) zoneCounts.TA++;
+    else if(n>=20&&n<=26) zoneCounts.TB1++;
+    else if(n>=27&&n<=33) zoneCounts.TB2A++;
+    else if(n>=34&&n<=37) zoneCounts.TB2B++;
+  });
+
+  const totalFlights=Object.values(zoneCounts).reduce((a,b)=>a+b,0)||1;
+  const maxZ=Math.max(...Object.values(zoneCounts),1);
+
+  const zoneLabel={TA:'Terminal A (1–11)',TB1:'Terminal B1 (20–26)',TB2A:'Terminal B2 (27–33)',TB2B:'Terminal B2 (34–37)',NB:'Rampa Norte B (N6–N13)'};
+  const zoneColor={TA:'#2d7aee',TB1:'#e84545',TB2A:'#f0a500',TB2B:'#fb923c',NB:'#7a90ab'};
+
+  function intensityBadge(count,max){
+    const r=count/max;
+    if(r>0.6) return `<span style="font-size:10px;font-weight:700;padding:1px 7px;border-radius:4px;background:rgba(232,69,69,.15);color:var(--red)">alta</span>`;
+    if(r>0.3) return `<span style="font-size:10px;font-weight:700;padding:1px 7px;border-radius:4px;background:rgba(240,165,0,.15);color:var(--amber)">media</span>`;
+    return `<span style="font-size:10px;font-weight:700;padding:1px 7px;border-radius:4px;background:var(--s2);color:var(--text3)">baja</span>`;
+  }
+
+  // Zone bars section
+  let html=`<div style="margin-bottom:14px">
+    <div style="font-size:10px;font-weight:800;letter-spacing:1px;color:var(--text3);text-transform:uppercase;margin-bottom:10px">Carga de vuelos por zona</div>`;
+  Object.entries(zoneCounts).forEach(([k,v])=>{
+    const pct=Math.round(v/maxZ*100);
+    html+=`<div class="zone-bar-wrap" style="display:flex;align-items:center;gap:8px;margin-bottom:7px">
+      <span class="zone-bar-label" style="font-size:12px;color:var(--text);min-width:170px">${zoneLabel[k]}</span>
+      <div class="zone-bar-track" style="flex:1;background:var(--border);border-radius:3px;height:8px;overflow:hidden">
+        <div style="height:100%;border-radius:3px;background:${zoneColor[k]};width:${pct}%"></div>
+      </div>
+      <span style="font-size:11px;font-family:'IBM Plex Mono',monospace;color:var(--text2);min-width:50px;text-align:right">${v} vuelos</span>
+      ${intensityBadge(v,maxZ)}
+    </div>`;
+  });
+  html+='</div><div style="height:1px;background:var(--border);margin-bottom:14px"></div>';
+
+  // 2. Per-shift suggestions
+  const SHIFT_ORDER=['A','T9','B','B+C','C','D'];
+  const onShift={};
+  S.team.filter(m=>!m.sup).forEach(m=>{
+    const sh=resolvedShift(m,date);
+    if(!sh) return;
+    if(!onShift[sh]) onShift[sh]=[];
+    onShift[sh].push(m);
+  });
+
+  const shiftColors={A:'var(--green)',T9:'var(--accent)',B:'var(--purple)','B+C':'#fb923c',C:'var(--red)',D:'var(--cyan)'};
+
+  // Find best position for a person based on their airlines and flight data
+  function suggestForPerson(m){
+    const airlines=(S.personAirlines||{})[m.id]||[];
+    if(!airlines.length) return {pos:'—',reason:'Sin aerolíneas asignadas',byAirline:false};
+
+    // Find positions with most flights for their airlines today
+    let bestPos=null,bestCount=0,bestAirline='';
+    Object.entries(flightsByPos).forEach(([pos,data])=>{
+      airlines.forEach(al=>{
+        const cnt=data.airlines[al]||0;
+        if(cnt>bestCount){ bestCount=cnt; bestPos=pos; bestAirline=al; }
+      });
+    });
+
+    if(bestPos&&bestCount>0){
+      // Check if same airline has adjacent positions — suggest range
+      const adjacents=[bestPos];
+      const bn=parseInt(bestPos.replace('N',''));
+      const isN=bestPos.startsWith('N');
+      [-1,1].forEach(d=>{
+        const adj=isN?'N'+(bn+d):String(bn+d);
+        if(flightsByPos[adj]){
+          airlines.forEach(al=>{ if((flightsByPos[adj].airlines[al]||0)>0) adjacents.push(adj); });
+        }
+      });
+      const uniqueAdj=[...new Set(adjacents)].sort((a,b)=>parseInt(a.replace('N',''))-parseInt(b.replace('N','')));
+      const posStr=uniqueAdj.length>1?uniqueAdj[0]+'/'+uniqueAdj[uniqueAdj.length-1]:bestPos;
+      const totalAlFlights=airlines.reduce((sum,al)=>sum+Object.values(flightsByPos).reduce((s,d)=>s+(d.airlines[al]||0),0),0);
+      return {pos:posStr,reason:`${bestAirline} — ${bestCount} vuelo${bestCount>1?'s':''} en POS ${bestPos}`,byAirline:true};
+    }
+
+    // Fallback: suggest by zone load
+    const zoneMap={TA:'Terminal A',TB1:'Terminal B1',TB2A:'Terminal B2 (27–33)',TB2B:'Terminal B2 (34–37)',NB:'Remotos'};
+    const topZone=Object.entries(zoneCounts).sort((a,b)=>b[1]-a[1])[0]?.[0]||'TB1';
+    return {pos:'—',reason:`Sin vuelos de sus aerolíneas hoy — zona de mayor carga: ${zoneMap[topZone]}`,byAirline:false};
+  }
+
+  html+=`<div style="font-size:10px;font-weight:800;letter-spacing:1px;color:var(--text3);text-transform:uppercase;margin-bottom:10px">Sugerencias por turno y persona</div>`;
+
+  const hasData=Object.keys(onShift).length>0;
+  if(!hasData){
+    html+=`<div style="color:var(--text3);font-size:13px">No hay personas en turno para hoy según el horario.</div>`;
+  } else {
+    SHIFT_ORDER.forEach(shiftId=>{
+      const members=onShift[shiftId];
+      if(!members||!members.length) return;
+      const rules=SHIFT_RULES[shiftId];
+      if(!rules||rules.noAssign) return;
+
+      html+=`<div style="margin-bottom:14px">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">
+          <span style="font-size:11px;font-weight:800;padding:3px 9px;border-radius:5px;background:${shiftColors[shiftId]}22;color:${shiftColors[shiftId]};border:1px solid ${shiftColors[shiftId]}44">
+            Turno ${shiftId}
+          </span>
+          <span style="font-size:11px;color:var(--text3)">${members.length} persona${members.length>1?'s':''}</span>
+        </div>`;
+
+      members.forEach(m=>{
+        const {pos,reason,byAirline}=suggestForPerson(m);
+        const init=m.name.split(' ').map(p=>p[0]).join('').slice(0,2).toUpperCase();
+        const noLicBadge=m.noLicencia?`<span style="font-size:10px;padding:1px 5px;border-radius:3px;background:rgba(240,165,0,.15);color:var(--amber);margin-left:4px">sin lic.</span>`:'';
+        const airlineBadge=byAirline?`<span style="font-size:10px;padding:1px 5px;border-radius:3px;background:rgba(23,201,122,.12);color:var(--green);margin-left:4px">aerolínea</span>`:`<span style="font-size:10px;padding:1px 5px;border-radius:3px;background:var(--s2);color:var(--text3);margin-left:4px">zona</span>`;
+        html+=`<div class="analysis-person-row">
+          <div style="width:30px;height:30px;border-radius:50%;background:${m.color}22;color:${m.color};display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;flex-shrink:0">${init}</div>
+          <div style="flex:1;min-width:0">
+            <div style="font-size:13px;font-weight:700;color:var(--text)">${m.name}${noLicBadge}${m.terminal?`<span style="font-size:10px;color:var(--text3);margin-left:4px">T.${m.terminal}</span>`:''}</div>
+            <div class="analysis-reason">${reason}</div>
+          </div>
+          <div style="text-align:right;flex-shrink:0">
+            ${pos!=='—'?`<div class="analysis-pos">${pos}</div>`:`<div style="font-size:11px;color:var(--text3)">sin sugerencia</div>`}
+            <div style="margin-top:2px">${airlineBadge}</div>
+          </div>
+        </div>`;
+      });
+
+      html+='</div>';
+    });
+  }
+
+  document.getElementById('analysisBody').innerHTML=html;
+  document.getElementById('analysisModal').classList.add('open');
 }
 
 // ═══════════════════════════════════════════════════════
