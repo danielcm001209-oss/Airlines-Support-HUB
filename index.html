@@ -809,6 +809,7 @@ function applyCloudState(data){
   Object.assign(S, data||{});
   S.activeDate=keepDate;
   migrate();
+  cleanStaleDuties();
   S.team.forEach(m=>{ if(!m.waName) m.waName=m.name.split(' ')[0]; });
   if(keepApiKey) localStorage.setItem('airops_gemini_key', keepApiKey);
 }
@@ -883,6 +884,7 @@ function clearDay(){
 function load(){
   try{ const r=localStorage.getItem('airops4'); if(r) Object.assign(S,JSON.parse(r)); }catch(e){}
   migrate();
+  cleanStaleDuties();
   S.team.forEach(m=>{ if(!m.waName) m.waName=m.name.split(' ')[0]; });
 }
 
@@ -1015,6 +1017,23 @@ function resolvedShift(m,date){
 }
 function getDuties(shiftId){ return S.duties[S.activeDate]?.[shiftId]||[]; }
 
+function cleanStaleDuties(){
+  // Remove fields that don't belong to a shift's rules (stale data from old saves)
+  Object.values(S.duties||{}).forEach(dayDuties=>{
+    Object.entries(dayDuties||{}).forEach(([shiftId,list])=>{
+      const rules=SHIFT_RULES[shiftId];
+      if(!rules) return;
+      (list||[]).forEach(d=>{
+        if(!rules.primerasOps){ d.primaryPos=''; d.afterMealPos=''; d.cubrirOpsA=false; d.cubrirOpsB=false; }
+        if(!rules.afterMeal)  { d.afterMealPos=''; }
+        if(!rules.coverPos)   { d.coverPos=''; }
+        if(!rules.cierre)     { d.cierrePos=''; }
+        if(!rules.cena)       { d.cenaTime=''; }
+      });
+    });
+  });
+}
+
 // ═══════════════════════════════════════════════════════
 // TABS
 // ═══════════════════════════════════════════════════════
@@ -1090,14 +1109,15 @@ function renderBoard(){
         if(!m) return;
         const init=m.name.split(' ').map(p=>p[0]).join('').slice(0,2).toUpperCase();
         let rows='';
-        if(d.primaryPos) rows+=dr('Primeras ops',`<span class="bp">${d.primaryPos}</span>`);
-        if(d.coverPos) rows+=dr('Cubre',`<span class="bp">${d.coverPos}</span>`);
+        const rules=SHIFT_RULES[shift.id]||SHIFT_RULES.A;
+        if(d.primaryPos&&rules.primerasOps) rows+=dr('Primeras ops',`<span class="bp">${d.primaryPos}</span>`);
+        if(d.coverPos&&rules.coverPos) rows+=dr('Cubre',`<span class="bp">${d.coverPos}</span>`);
         if(d.specialTasks) d.specialTasks.split(',').filter(t=>t.trim()).forEach(t=>rows+=dr('Tarea',`<span class="bt">${t.trim()}${d.vehHasta?' hasta '+d.vehHasta:''}</span>`));
-        if(d.cubrirOpsA) rows+=dr('Cubre',`<span class="bp">Primeras ops T.A</span>`);
-        if(d.cubrirOpsB) rows+=dr('Cubre',`<span class="bp">Primeras ops T.B</span>`);
+        if(d.cubrirOpsA&&rules.primerasOps) rows+=dr('Cubre',`<span class="bp">Primeras ops T.A</span>`);
+        if(d.cubrirOpsB&&rules.primerasOps) rows+=dr('Cubre',`<span class="bp">Primeras ops T.B</span>`);
         if(d.mealType&&d.mealTime) rows+=dr(d.mealType,`<span class="bm">${d.mealTime}</span>`);
         if(d.radioNum) rows+=dr('Radio',`<span style="color:var(--cyan);font-family:'IBM Plex Mono',monospace">📻 ${d.radioNum}</span>`);
-        if(d.afterMealPos) rows+=dr('Post-alm.',`<span class="bp">${d.afterMealPos}</span>`);
+        if(d.afterMealPos&&rules.afterMeal) rows+=dr('Post-alm.',`<span class="bp">${d.afterMealPos}</span>`);
         (d.covers||[]).forEach(c=>{
           if(c.who||c.pos){
             const mtype=detectMealType(c.time||'');
@@ -1105,8 +1125,8 @@ function renderBoard(){
             rows+=dr('Cubre',`<span class="bc">${c.who?lbl+' '+c.who:''}${c.time?' a las '+c.time:''}${c.pos?' '+c.pos:''}</span>`);
           }
         });
-        if(d.cenaTime) rows+=dr('Cena',`<span class="bm">${d.cenaTime}</span>`);
-        if(d.cierrePos) rows+=dr('Cierre',`<span class="bp">${d.cierrePos}</span>`);
+        if(d.cenaTime&&rules.cena) rows+=dr('Cena',`<span class="bm">${d.cenaTime}</span>`);
+        if(d.cierrePos&&rules.cierre) rows+=dr('Cierre',`<span class="bp">${d.cierrePos}</span>`);
         if(d.extraNotes) rows+=dr('Nota',`<span style="color:var(--text2)">${d.extraNotes}</span>`);
         // position limit warning
         const posCount=countPositions(d.primaryPos)+countPositions(d.coverPos)+countPositions(d.afterMealPos);
@@ -1162,18 +1182,19 @@ function buildText(date){
     const list=duties[shift.id]||[];
     if(!list.length) return;
     txt+=`\n*${shift.label}*\n\n`;
+    const shiftRules=SHIFT_RULES[shift.id]||SHIFT_RULES.A;
     list.forEach(duty=>{
       const m=S.team.find(t=>t.id===duty.agentId); if(!m) return;
       const wa=m.waName||m.name.split(' ')[0];
       txt+=`@${wa}\n`;
-      if(duty.primaryPos&&duty.primaryPos!=='—') txt+=`Pendiente primeras ops ${duty.primaryPos}\n`;
-      if(duty.coverPos&&duty.coverPos!=='—') txt+=`Cubre posiciones ${duty.coverPos}\n`;
+      if(shiftRules.primerasOps&&duty.primaryPos&&duty.primaryPos!=='—') txt+=`Pendiente primeras ops ${duty.primaryPos}\n`;
+      if(shiftRules.coverPos&&duty.coverPos&&duty.coverPos!=='—') txt+=`Cubre posiciones ${duty.coverPos}\n`;
       if(duty.specialTasks) duty.specialTasks.split(',').filter(t=>t.trim()).forEach(t=>txt+=t.trim()+(duty.vehHasta?' hasta '+duty.vehHasta:'')+'\n');
-      if(duty.cubrirOpsA) txt+=`Cubre primeras ops Terminal A\n`;
-      if(duty.cubrirOpsB) txt+=`Cubre primeras ops Terminal B\n`;
+      if(shiftRules.primerasOps&&duty.cubrirOpsA) txt+=`Cubre primeras ops Terminal A\n`;
+      if(shiftRules.primerasOps&&duty.cubrirOpsB) txt+=`Cubre primeras ops Terminal B\n`;
       if(duty.mealType&&duty.mealTime) txt+=`${duty.mealType} ${duty.mealTime}\n`;
       if(duty.radioNum) txt+=`Radio ${duty.radioNum}\n`;
-      if(duty.afterMealPos&&duty.afterMealPos!=='—') txt+=`Luego del almuerzo cubre ${duty.afterMealPos}\n`;
+      if(shiftRules.afterMeal&&duty.afterMealPos&&duty.afterMealPos!=='—') txt+=`Luego del almuerzo cubre ${duty.afterMealPos}\n`;
       (duty.covers||[]).forEach(c=>{
         const mtype=detectMealType(c.time||'');
         const lbl=mtype.includes('Cena')?'cena':mtype.includes('Almuerzo')?'almuerzo':'cobertura';
@@ -1184,8 +1205,8 @@ function buildText(date){
         if(c.pos) l+=(l?' en ':'')+c.pos;
         if(l) txt+=l+'\n';
       });
-      if(duty.cenaTime) txt+=`Cena ${duty.cenaTime}\n`;
-      if(duty.cierrePos&&duty.cierrePos!=='—') txt+=`Cierre ${duty.cierrePos}\n`;
+      if(shiftRules.cena&&duty.cenaTime) txt+=`Cena ${duty.cenaTime}\n`;
+      if(shiftRules.cierre&&duty.cierrePos&&duty.cierrePos!=='—') txt+=`Cierre ${duty.cierrePos}\n`;
       if(duty.extraNotes) txt+=duty.extraNotes+'\n';
       txt+='\n';
     });
@@ -1376,16 +1397,23 @@ function posPicker(prefix){
 
 // Time ranges (in minutes from midnight) for each position field per shift
 const SHIFT_TIME_RANGES = {
-  //              primaryPos        afterMealPos      coverPos          cierrePos
-  'A':   { prim:[480,780],   after:[780,1020],  cover:null,          cierre:null         }, // 08-13 / 13-17
-  'T9':  { prim:[540,780],   after:[780,1080],  cover:null,          cierre:null         }, // 09-13 / 13-18
-  'B':   { prim:null,        after:null,        cover:[690,1140],    cierre:null         }, // 11:30-19
-  'B+C': { prim:null,        after:null,        cover:[690,1020],    cierre:[1020,1440]  }, // 11:30-17 / 17-00
-  'C':   { prim:null,        after:null,        cover:[900,1020],    cierre:[1020,1440]  }, // 15-17 / 17-00
-  'D':   { prim:null,        after:null,        cover:null,          cierre:null         }, // night, no conflict
-  'A+B': { prim:[480,780],   after:[780,1020],  cover:[1020,1200],   cierre:null         }, // 08-13/13-17/17-20
-  'A+C': { prim:[480,780],   after:[780,1020],  cover:[1020,1440],   cierre:[1020,1440]  },
-  'T9+C':{ prim:[540,780],   after:[780,1020],  cover:[1020,1440],   cierre:[1020,1440]  },
+  // Ranges in minutes from midnight
+  // prim  = primeras ops (only conflicts with other prim)
+  // after = post-almuerzo (conflicts with B/BC/C cover since they overlap 13:00-17:00)
+  // cover = cubre posiciones
+  // cierre = cierre (only conflicts with other cierre)
+  //
+  // Key rule: primeras ops (08-13) NEVER conflict with B/C cover
+  //           post-almuerzo (13-17) DOES conflict with B cover and C cover
+  'A':   { prim:[480,780],   after:[780,1020],  cover:null,       cierre:null        },
+  'T9':  { prim:[540,780],   after:[780,1080],  cover:null,       cierre:null        },
+  'B':   { prim:null,        after:null,        cover:[780,1140], cierre:null        }, // 13:00–19:00 (conflict zone starts at post-almuerzo time)
+  'B+C': { prim:null,        after:null,        cover:[780,1020], cierre:[1020,1440] }, // 13:00–17:00 / 17:00–00:00
+  'C':   { prim:null,        after:null,        cover:[780,1020], cierre:[1020,1440] }, // 13:00–17:00 / 17:00–00:00
+  'D':   { prim:null,        after:null,        cover:null,       cierre:null        },
+  'A+B': { prim:[480,780],   after:[780,1020],  cover:[780,1200], cierre:null        },
+  'A+C': { prim:[480,780],   after:[780,1020],  cover:[780,1440], cierre:[1020,1440] },
+  'T9+C':{ prim:[540,780],   after:[780,1020],  cover:[780,1440], cierre:[1020,1440] },
 };
 
 // What time window is the picker we're currently building?
@@ -1405,33 +1433,41 @@ function rangesOverlap(a, b){
 }
 
 function getOccupiedPositions(prefix){
-  // Returns set of positions already in use during the same time window as the picker
   const occupied=new Set();
   const date=S.activeDate;
   const currentShift=getEffectiveShift()||modalShift;
   const pickerRange=getPickerTimeRange(prefix, currentShift);
+  if(!pickerRange) return occupied; // no range = no conflicts to show
 
   SHIFT_DEFS.forEach(shift=>{
     (S.duties[date]?.[shift.id]||[]).forEach((d,i)=>{
-      if(shift.id===modalShift && i===modalEditIdx) return; // skip current edit
+      if(shift.id===modalShift && i===modalEditIdx) return;
 
       const otherRanges=SHIFT_TIME_RANGES[shift.id]||{};
 
-      // Check each position field of the other duty
-      const checks=[
-        {pos:d.primaryPos,   range:otherRanges.prim},
-        {pos:d.afterMealPos, range:otherRanges.after},
-        {pos:d.coverPos,     range:otherRanges.cover},
-        {pos:d.cierrePos?.split(' - ')[0], range:otherRanges.cierre},
-      ];
+      // prim picker only conflicts with other prim fields (same zone, same time)
+      // after picker conflicts with after AND cover fields (post-almuerzo overlaps B/C cover)
+      // cover picker conflicts with cover AND after fields
+      // cierre picker only conflicts with other cierre fields
+      let checks=[];
+      if(prefix==='prim'){
+        checks=[{pos:d.primaryPos, range:otherRanges.prim}];
+      } else if(prefix==='after'){
+        checks=[
+          {pos:d.afterMealPos, range:otherRanges.after},
+          {pos:d.coverPos,     range:otherRanges.cover},
+        ];
+      } else if(prefix==='cover'){
+        checks=[
+          {pos:d.coverPos,     range:otherRanges.cover},
+          {pos:d.afterMealPos, range:otherRanges.after},
+        ];
+      } else if(prefix==='cierre'){
+        checks=[{pos:d.cierrePos?.split(' - ')[0], range:otherRanges.cierre}];
+      }
 
       checks.forEach(({pos,range})=>{
-        if(!pos||pos==='—') return;
-        // If no time range info, fall back to always-occupied (safe)
-        if(!pickerRange||!range){
-          if(!pickerRange&&!range) parseRange(pos).forEach(p=>occupied.add(p));
-          return;
-        }
+        if(!pos||pos==='—'||!range) return;
         if(rangesOverlap(pickerRange, range)){
           parseRange(pos).forEach(p=>occupied.add(p));
         }
