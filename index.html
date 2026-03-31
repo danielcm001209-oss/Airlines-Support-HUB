@@ -2137,6 +2137,77 @@ function updateFlightBtn(){
   if(flightData){btn.style.background='rgba(23,201,122,.15)';btn.style.borderColor='rgba(23,201,122,.4)';btn.style.color='var(--green)';btn.textContent='✈️ Vuelos ✓';}
   else{btn.style.background='';btn.style.borderColor='';btn.style.color='';btn.textContent='✈️ Vuelos';}
 }
+
+function buildSuggestionsPanel(){
+  const date=S.activeDate;
+  const flights=parseFlightList(flightData);
+  const posCount={};
+  flights.forEach(f=>{ posCount[f.pos]=(posCount[f.pos]||0)+1; });
+  const zones={A:0,B1:0,B2:0,N:0};
+  Object.entries(posCount).forEach(([pos,cnt])=>{
+    const n=parseInt(pos.replace('N',''));
+    if(pos.startsWith('N')) zones.N+=cnt;
+    else if(n>=1&&n<=11) zones.A+=cnt;
+    else if(n>=20&&n<=26) zones.B1+=cnt;
+    else if(n>=27&&n<=37) zones.B2+=cnt;
+  });
+  const maxZone=Math.max(...Object.values(zones))||1;
+  const onShift={};
+  S.team.filter(m=>!m.sup).forEach(m=>{
+    const sh=resolvedShift(m,date);
+    if(sh){ if(!onShift[sh]) onShift[sh]=[]; onShift[sh].push(m); }
+  });
+  function bestPosForPerson(m){
+    const airlines=(S.personAirlines||{})[m.id]||[];
+    if(!airlines.length) return null;
+    const myFlights=flights.filter(f=>airlines.some(a=>a.toLowerCase()===f.airline.toLowerCase()||f.airline.toLowerCase().includes(a.toLowerCase().split(' ')[0])));
+    if(!myFlights.length) return null;
+    const byPos={};
+    myFlights.forEach(f=>{ byPos[f.pos]=(byPos[f.pos]||0)+1; });
+    const sorted=Object.entries(byPos).sort((a,b)=>b[1]-a[1]);
+    const topPos=sorted.slice(0,2).map(([p])=>p);
+    const totalVuelos=sorted.slice(0,2).reduce((a,[,c])=>a+c,0);
+    return {pos:topPos.join('/'),vuelos:totalVuelos,airline:airlines[0]};
+  }
+  const SHIFT_ORDER=['A','T9','B','B+C','C','D'];
+  const shiftColors={A:'#17c97a',T9:'#2d7aee',B:'#8b5cf6','B+C':'#fb923c',C:'#e84545',D:'#0eb8c9'};
+  let html=`<div style="margin-bottom:12px">
+    <div style="font-size:11px;font-weight:700;color:var(--text3);margin-bottom:6px;text-transform:uppercase;letter-spacing:.5px">Carga por zona hoy</div>`;
+  [['Terminal A (1–11)',zones.A,'#2d7aee'],['Terminal B1 (20–26)',zones.B1,'#e84545'],['Terminal B2 (27–37)',zones.B2,'#f0a500'],['Remotos (N6–N13)',zones.N,'#7a90ab']].forEach(([name,cnt,col])=>{
+    const pct=Math.round((cnt/maxZone)*100);
+    html+=`<div style="display:flex;align-items:center;gap:8px;margin-bottom:5px">
+      <span style="font-size:11px;min-width:130px;color:var(--text2)">${name}</span>
+      <div style="flex:1;background:var(--s2);border-radius:3px;height:7px;overflow:hidden"><div style="width:${pct}%;height:100%;background:${col};border-radius:3px"></div></div>
+      <span style="font-size:11px;color:var(--text3);min-width:65px;text-align:right">${cnt} vuelos</span>
+    </div>`;
+  });
+  html+=`</div>`;
+  const shiftsWithPeople=SHIFT_ORDER.filter(s=>onShift[s]?.length);
+  shiftsWithPeople.forEach(shiftId=>{
+    const people=onShift[shiftId];
+    const col=shiftColors[shiftId]||'var(--accent)';
+    html+=`<div style="margin-bottom:10px"><div style="font-size:11px;font-weight:800;color:${col};text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px;padding:3px 8px;background:${col}15;border-radius:5px;display:inline-block">Turno ${shiftId} — ${people.length} persona${people.length>1?'s':''}</div>`;
+    people.forEach(m=>{
+      const init=m.name.split(' ').map(p=>p[0]).join('').slice(0,2).toUpperCase();
+      const sug=bestPosForPerson(m);
+      const airlines=(S.personAirlines||{})[m.id]||[];
+      html+=`<div style="display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid var(--border)">
+        <div style="width:26px;height:26px;border-radius:50%;background:${m.color}22;color:${m.color};display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:800;flex-shrink:0">${init}</div>
+        <div style="flex:1">
+          <div style="font-size:12px;font-weight:700">${m.name}${m.noLicencia?' <span style="font-size:10px;color:var(--amber)">🚫</span>':''}</div>
+          <div style="font-size:10px;color:var(--text3)">${airlines.slice(0,2).join(', ')||'Sin aerolínea'}</div>
+        </div>
+        ${sug
+          ? `<div style="text-align:right"><div style="font-size:12px;font-weight:800;color:var(--accent);font-family:'IBM Plex Mono',monospace">POS ${sug.pos}</div><div style="font-size:10px;color:var(--text3)">${sug.airline} · ${sug.vuelos} vuelo${sug.vuelos>1?'s':''}</div></div>`
+          : `<div style="font-size:11px;color:var(--text3);text-align:right">Sin vuelos<br>de su aerolínea</div>`
+        }
+      </div>`;
+    });
+    html+=`</div>`;
+  });
+  document.getElementById('flightSuggestions').innerHTML=html;
+  document.getElementById('flightSuggestionsWrap').style.display='block';
+}
 function renderAirlines(){
   renderFlightPosPreview();
   // Airlines list
