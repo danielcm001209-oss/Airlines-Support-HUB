@@ -1149,11 +1149,14 @@ function renderBoard(){
   // Observations
   const obs=(S.observations[date]||[]);
   html+=`<div class="obs-sec">
-    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px">
-      <div style="font-size:10px;font-weight:800;letter-spacing:1px;color:var(--text3);text-transform:uppercase">Observaciones</div>
-      <button class="btn btn-outline" style="font-size:11px;padding:3px 8px" onclick="addObs()">✏️ Agregar</button>
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
+      <div style="font-size:10px;font-weight:800;letter-spacing:1px;color:var(--text3);text-transform:uppercase">📋 Observaciones</div>
     </div>
-    ${obs.length?obs.map((o,i)=>`<div class="obs-item"><span>• ${o}</span><button onclick="removeObs(${i})" style="background:none;border:none;color:var(--text3);cursor:pointer;font-size:14px">✕</button></div>`).join(''):'<div style="color:var(--text3);font-size:12px">Sin observaciones.</div>'}
+    ${obs.map((o,i)=>`<div class="obs-item"><span>• ${o}</span><button onclick="removeObs(${i})" style="background:none;border:none;color:var(--text3);cursor:pointer;font-size:14px;padding:0 4px">✕</button></div>`).join('')}
+    <div style="display:flex;gap:6px;margin-top:8px;">
+      <input class="fi" id="obsInput" placeholder="Agregar observación…" style="flex:1;font-size:12px;padding:6px 10px" onkeydown="if(event.key==='Enter')addObs()">
+      <button class="btn btn-outline" style="font-size:12px;padding:5px 10px" onclick="addObs()">+ Agregar</button>
+    </div>
   </div>`;
 
   wrap.innerHTML=html;
@@ -1163,13 +1166,16 @@ function dr(label,val){ return `<div class="drow"><span class="dlabel">${label}<
 function countPositions(s){ if(!s||s==='—') return 0; let n=0; s.split(',').forEach(p=>{ p=p.trim(); if(p.includes('/'))n+=Math.abs(parseInt(p.split('/')[1].replace('N',''))-parseInt(p.split('/')[0].replace('N','')))+1; else if(p) n++; }); return n; }
 
 function addObs(){
-  const v=prompt('Observación:'); if(!v||!v.trim()) return;
+  const inp=document.getElementById('obsInput');
+  const v=inp?.value?.trim()||'';
+  if(!v) return;
   pushUndo();
   if(!S.observations[S.activeDate]) S.observations[S.activeDate]=[];
-  S.observations[S.activeDate].push(v.trim());
-  save(); renderBoard();
+  S.observations[S.activeDate].push(v);
+  if(inp) inp.value='';
+  save(); renderBoard(); refreshOutput();
 }
-function removeObs(i){ pushUndo(); S.observations[S.activeDate].splice(i,1); save(); renderBoard(); }
+function removeObs(i){ pushUndo(); S.observations[S.activeDate].splice(i,1); save(); renderBoard(); refreshOutput(); }
 
 // ═══════════════════════════════════════════════════════
 // WHATSAPP OUTPUT
