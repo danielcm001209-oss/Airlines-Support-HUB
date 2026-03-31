@@ -2058,8 +2058,85 @@ function parseFlightList(text){
 }
 
 // ═══════════════════════════════════════════════════════
-// AIRLINES PAGE
+// FLIGHT MODAL FUNCTIONS
 // ═══════════════════════════════════════════════════════
+function triggerFile(id){ document.getElementById(id).click(); }
+
+function openFlightModal(){
+  document.getElementById('flightTextInput').value=flightData;
+  document.getElementById('flightFileStatus').style.display='none';
+  document.getElementById('lacopsStatus').style.display='none';
+  document.getElementById('lacopsDate').value=S.activeDate;
+  onFlightTextChange();
+  document.getElementById('flightModal').classList.add('open');
+}
+
+function onFlightTextChange(){
+  const v=document.getElementById('flightTextInput').value;
+  const lines=v.split('\n').filter(l=>l.trim()).length;
+  document.getElementById('flightCharCount').textContent=v.length?`${lines} líneas · ${v.length} chars`:'';
+}
+
+function setFlightStatus(msg,type){
+  const el=document.getElementById('flightFileStatus');
+  el.style.display='block'; el.textContent=msg;
+  el.style.background=type==='ok'?'rgba(23,201,122,.08)':type==='err'?'rgba(232,69,69,.08)':'rgba(45,122,238,.08)';
+  el.style.border='1px solid '+(type==='ok'?'rgba(23,201,122,.25)':type==='err'?'rgba(232,69,69,.25)':'rgba(45,122,238,.25)');
+  el.style.color=type==='ok'?'var(--green)':type==='err'?'var(--red)':'var(--text2)';
+}
+
+async function handleFlightFile(file){
+  if(!file) return;
+  const ext=file.name.split('.').pop().toLowerCase();
+  setFlightStatus('Procesando '+file.name+'…','info');
+  try {
+    let text='';
+    if(ext==='csv'){ text=await file.text(); }
+    else if(ext==='xlsx'||ext==='xls'){
+      const XLSX=window.XLSX; if(!XLSX) throw new Error('SheetJS no disponible');
+      const buf=await file.arrayBuffer();
+      const wb=XLSX.read(buf,{type:'array'});
+      text=XLSX.utils.sheet_to_csv(wb.Sheets[wb.SheetNames[0]]);
+    } else if(ext==='pdf'){
+      if(!window.pdfjsLib) throw new Error('pdf.js no disponible');
+      const buf=await file.arrayBuffer();
+      const pdf=await pdfjsLib.getDocument({data:buf}).promise;
+      let t='';
+      for(let i=1;i<=pdf.numPages;i++){const pg=await pdf.getPage(i);const c=await pg.getTextContent();t+=c.items.map(x=>x.str).join(' ')+'\n';}
+      text=t;
+    }
+    document.getElementById('flightTextInput').value=text;
+    onFlightTextChange();
+    setFlightStatus('✅ Archivo procesado: '+file.name,'ok');
+  } catch(e){ setFlightStatus('❌ '+e.message,'err'); }
+}
+
+function saveFlightData(){
+  flightData=document.getElementById('flightTextInput').value.trim();
+  const lines=flightData.split('\n').filter(l=>l.trim()).length;
+  updateFlightBtn();
+  if(flightData) buildSuggestionsPanel();
+  else document.getElementById('flightSuggestionsWrap').style.display='none';
+  closeModal('flightModal');
+  toast(flightData?`✅ ${lines} líneas de vuelos guardadas`:'Vuelos limpiados');
+}
+
+function clearFlightData(){
+  flightData='';
+  document.getElementById('flightTextInput').value='';
+  document.getElementById('flightCharCount').textContent='';
+  document.getElementById('flightFileStatus').style.display='none';
+  document.getElementById('flightSuggestionsWrap').style.display='none';
+  updateFlightBtn();
+  toast('Vuelos limpiados');
+}
+
+function updateFlightBtn(){
+  const btn=document.getElementById('flightBtn');
+  if(!btn) return;
+  if(flightData){btn.style.background='rgba(23,201,122,.15)';btn.style.borderColor='rgba(23,201,122,.4)';btn.style.color='var(--green)';btn.textContent='✈️ Vuelos ✓';}
+  else{btn.style.background='';btn.style.borderColor='';btn.style.color='';btn.textContent='✈️ Vuelos';}
+}
 function renderAirlines(){
   renderFlightPosPreview();
   // Airlines list
