@@ -281,6 +281,7 @@ input[type="date"]::-webkit-calendar-picker-indicator{
       <div style="display:flex;gap:6px;flex-wrap:wrap;">
         <button class="btn btn-outline" onclick="openVacModal()">🏖 Vacaciones</button>
         <button class="btn btn-outline" onclick="openOverrideModal(null,null)">🔧 Refuerzo / H. Extra</button>
+        <button class="btn btn-outline" onclick="openCambioTurnoModal()">🔀 Cambio de Turno</button>
         <button class="btn btn-outline" onclick="openPermisoModal()">📋 Permiso</button>
         <button class="btn btn-outline" onclick="openLicenciaModal()">🪪 Licencia</button>
         <button class="btn btn-outline" onclick="openSwapModal()">⇄ Cambio</button>
@@ -292,6 +293,9 @@ input[type="date"]::-webkit-calendar-picker-indicator{
 
     <div class="changes-section-label" style="margin-top:14px">🔧 Refuerzos / Horas Extra</div>
     <div id="overridesList"></div>
+
+    <div class="changes-section-label" style="margin-top:14px">🔀 Cambios de Turno</div>
+    <div id="cambioTurnoList"></div>
 
     <div class="changes-section-label" style="margin-top:14px">📋 Permisos / Días Libres</div>
     <div id="permisoList"></div>
@@ -603,6 +607,35 @@ input[type="date"]::-webkit-calendar-picker-indicator{
   <div class="mactions">
     <button class="btn btn-outline" onclick="closeModal('licenciaModal')">Cancelar</button>
     <button class="btn btn-primary" onclick="saveLicencia()">Guardar</button>
+  </div>
+</div>
+</div>
+
+<!-- ═══════ CAMBIO DE TURNO MODAL ═══════ -->
+<div class="overlay" id="cambioTurnoModal">
+<div class="modal">
+  <div class="modal-title">🔀 Cambio de Turno</div>
+  <p style="font-size:12px;color:var(--text3);margin-bottom:12px">Asigna un turno diferente al habitual para una fecha específica.</p>
+  <div class="form-group"><label class="fl">Persona</label><select class="fs" id="ctPerson"></select></div>
+  <div class="frow">
+    <div class="form-group"><label class="fl">Fecha</label><input type="date" class="fi" id="ctDate"></div>
+    <div class="form-group"><label class="fl">Turno habitual</label><div class="fi" id="ctOriginal" style="opacity:.6;font-size:12px;padding:7px 10px">—</div></div>
+  </div>
+  <div class="form-group"><label class="fl">Nuevo turno</label>
+    <select class="fs" id="ctShift">
+      <option value="A">A (08:00–17:00)</option>
+      <option value="T9">T9 (09:00–18:00)</option>
+      <option value="B">B (11:00–20:00)</option>
+      <option value="B+C">BC (11:00–00:00)</option>
+      <option value="C">C (15:00–00:00)</option>
+      <option value="D">D (23:00–08:00)</option>
+      <option value="LIBRE">LIBRE</option>
+    </select>
+  </div>
+  <div class="form-group"><label class="fl">Motivo</label><input class="fi" id="ctReason" placeholder="ej: Necesidad operacional…"></div>
+  <div class="mactions">
+    <button class="btn btn-outline" onclick="closeModal('cambioTurnoModal')">Cancelar</button>
+    <button class="btn btn-primary" onclick="saveCambioTurno()">Guardar</button>
   </div>
 </div>
 </div>
@@ -2408,14 +2441,19 @@ function deleteMember(id){
 function openScheduleModal(){
   const tbody=document.getElementById('schedBody');
   tbody.innerHTML=S.team.map(m=>{
-    let sched=(m.schedule||[]).map(s=>s==='B+C'?'BC':s);
+    // Normalize: B+C → BC for display
+    let sched=(m.schedule||[]).map(s=>{
+      if(!s||s==='LIBRE') return 'L';
+      if(s==='B+C') return 'BC';
+      return s;
+    });
     while(sched.length<7) sched.push('L');
     sched=sched.slice(0,7);
     const cells=sched.map((s,i)=>{
       const col=SCHED_COLORS[s]||SCHED_COLORS.L;
       return `<td style="padding:4px 3px;text-align:center">
         <select class="sched-sel" data-id="${m.id}" data-day="${i}" onchange="onSchedChange(this)"
-          style="background:${col}22;color:${col};border:1px solid ${col}66;border-radius:5px;padding:3px 2px;font-size:12px;font-weight:800;font-family:'IBM Plex Mono',monospace;width:50px;text-align:center;cursor:pointer;outline:none">
+          style="background:${col}22;color:${col};border:1px solid ${col}66;border-radius:5px;padding:3px 2px;font-size:12px;font-weight:800;font-family:'IBM Plex Mono',monospace;width:50px;text-align:center;cursor:pointer;outline:none;-webkit-appearance:auto;">
           ${SCHED_VALS.map(v=>`<option value="${v}"${v===s?' selected':''}>${v}</option>`).join('')}
         </select></td>`;
     }).join('');
@@ -2603,13 +2641,13 @@ function renderChanges(){
   renderRangeList('permisoList', S.permisos, '📋', 'openPermisoModal', 'deletePermiso', 'tipo');
   renderRangeList('licenciaList', S.licencias, '🪪', 'openLicenciaModal', 'deleteLicencia', 'tipo');
 
-  // Overrides (Refuerzos)
-  const rows=[];
-  for(const[mid,dates] of Object.entries(S.overrides||{})){ for(const[date,ov] of Object.entries(dates)) rows.push({m:S.team.find(t=>t.id===mid),date,ov,mid}); }
-  rows.sort((a,b)=>b.date.localeCompare(a.date));
+  // Overrides — split by type
+  const allRows=[];
+  for(const[mid,dates] of Object.entries(S.overrides||{})){ for(const[date,ov] of Object.entries(dates)) allRows.push({m:S.team.find(t=>t.id===mid),date,ov,mid}); }
+  allRows.sort((a,b)=>b.date.localeCompare(a.date));
   const SC=s=>({A:'var(--green)',T9:'var(--accent)',B:'var(--purple)','B+C':'#fb923c',C:'var(--red)',D:'var(--cyan)',LIBRE:'var(--text3)'}[s]||'var(--amber)');
-  const oc=document.getElementById('overridesList');
-  oc.innerHTML=rows.length?rows.map(({m,date,ov,mid})=>{
+
+  function renderOverrideRow({m,date,ov,mid}){
     const d=new Date(date+'T12:00:00').toLocaleDateString('es-DO',{weekday:'short',day:'numeric',month:'short'});
     return `<div class="swap-card" style="border-color:rgba(45,122,238,.2)">
       <div style="flex:1">
@@ -2618,10 +2656,19 @@ function renderChanges(){
           ${d} · <span style="font-weight:800;padding:1px 6px;border-radius:4px;background:${SC(ov.shift)}22;color:${SC(ov.shift)}">${ov.shift}</span>${ov.reason?' · '+ov.reason:''}
         </div>
       </div>
-      <button class="btn btn-outline" style="font-size:10px;padding:2px 7px" onclick="openOverrideModal('${mid}','${date}')">✏️</button>
+      <button class="btn btn-outline" style="font-size:10px;padding:2px 7px" onclick="${ov.type==='cambioTurno'?`openCambioTurnoModal('${mid}','${date}')`:`openOverrideModal('${mid}','${date}')`}">✏️</button>
       <button class="btn btn-danger" style="font-size:10px;padding:2px 7px" onclick="deleteOverride('${mid}','${date}')">✕</button>
     </div>`;
-  }).join(''):'<div style="color:var(--text3);font-size:12px">Sin refuerzos registrados.</div>';
+  }
+
+  const refuerzos=allRows.filter(r=>r.ov.type!=='cambioTurno');
+  const cambiosTurno=allRows.filter(r=>r.ov.type==='cambioTurno');
+
+  const oc=document.getElementById('overridesList');
+  oc.innerHTML=refuerzos.length?refuerzos.map(renderOverrideRow).join(''):'<div style="color:var(--text3);font-size:12px">Sin refuerzos registrados.</div>';
+
+  const ct=document.getElementById('cambioTurnoList');
+  ct.innerHTML=cambiosTurno.length?cambiosTurno.map(renderOverrideRow).join(''):'<div style="color:var(--text3);font-size:12px">Sin cambios de turno registrados.</div>';
 
   // Swaps
   const sw=document.getElementById('swapsList');
@@ -2645,6 +2692,39 @@ function renderChanges(){
       <button class="btn btn-danger" style="font-size:10px;padding:2px 7px" onclick="deleteSwap('${s.id}')">✕</button>
     </div>`;
   }).join(''):'<div style="color:var(--text3);font-size:12px">Sin cambios registrados.</div>';
+}
+
+function openCambioTurnoModal(mid, date){
+  const opts=S.team.map(m=>`<option value="${m.id}"${m.id===mid?' selected':''}>${m.name}</option>`).join('');
+  document.getElementById('ctPerson').innerHTML=opts;
+  document.getElementById('ctDate').value=date||S.activeDate;
+  document.getElementById('ctReason').value='';
+  document.getElementById('ctShift').value='C';
+  updateCtOriginal();
+  document.getElementById('ctPerson').onchange=updateCtOriginal;
+  document.getElementById('ctDate').onchange=updateCtOriginal;
+  document.getElementById('cambioTurnoModal').classList.add('open');
+}
+
+function updateCtOriginal(){
+  const mid=document.getElementById('ctPerson').value;
+  const date=document.getElementById('ctDate').value;
+  const m=S.team.find(t=>t.id===mid);
+  if(!m||!date){document.getElementById('ctOriginal').textContent='—';return;}
+  const s=m.schedule?.[dowIdx(date)];
+  document.getElementById('ctOriginal').textContent=(!s||s==='L'||s==='LIBRE')?'LIBRE':s;
+}
+
+function saveCambioTurno(){
+  const mid=document.getElementById('ctPerson').value;
+  const date=document.getElementById('ctDate').value;
+  const shift=document.getElementById('ctShift').value;
+  const reason=document.getElementById('ctReason').value.trim();
+  if(!mid||!date){toast('Completa todos los campos','error');return;}
+  if(!S.overrides) S.overrides={};
+  if(!S.overrides[mid]) S.overrides[mid]={};
+  S.overrides[mid][date]={shift,reason,type:'cambioTurno',ts:Date.now()};
+  save(); closeModal('cambioTurnoModal'); renderChanges(); renderBoard(); toast('✅ Cambio de turno guardado');
 }
 
 function openOverrideModal(mid,date){
@@ -2772,13 +2852,32 @@ function openAnalysis(){
     toast('⚠️ Carga los vuelos primero — botón ✈️ Vuelos','error');
     return;
   }
+  try{
+    const date=S.activeDate;
+    const d=new Date(date+'T12:00:00');
+    document.getElementById('analysisFecha').textContent=
+      d.toLocaleDateString('es-DO',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
+    document.getElementById('analysisBody').innerHTML='<div style="text-align:center;padding:20px;color:var(--text3)">Calculando…</div>';
+    document.getElementById('analysisModal').classList.add('open');
+    // Build async to not block modal open
+    setTimeout(()=>{
+      try{
+        document.getElementById('analysisBody').innerHTML=buildAnalysisBodyHTML();
+      }catch(e){
+        document.getElementById('analysisBody').innerHTML=`<div style="color:var(--red);padding:12px">❌ Error: ${e.message}</div>`;
+        console.error('Analysis error:',e);
+      }
+    },50);
+  }catch(e){
+    toast('❌ Error al abrir análisis: '+e.message,'error');
+    console.error(e);
+  }
+}
 
+function buildAnalysisBodyHTML(){
   const date=S.activeDate;
-  const d=new Date(date+'T12:00:00');
-  document.getElementById('analysisFecha').textContent=
-    d.toLocaleDateString('es-DO',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
-
   const flights=parseFlightList(flightData);
+  if(!flights.length) return '<div style="color:var(--text3);padding:12px;text-align:center">No se pudieron leer los vuelos del texto cargado.</div>';
 
   // 1. Count flights per zone — detailed breakdown
   const zc={
@@ -2950,8 +3049,7 @@ function openAnalysis(){
     });
   }
 
-  document.getElementById('analysisBody').innerHTML=html;
-  document.getElementById('analysisModal').classList.add('open');
+  return html;
 }
 
 // ═══════════════════════════════════════════════════════
