@@ -3002,9 +3002,9 @@ function buildAnalysisBodyHTML(){
     }
 
     // Fallback: suggest by zone load
-    const zoneMap={TA:'Terminal A',TB1:'Terminal B1',TB2A:'Terminal B2 (27–33)',TB2B:'Terminal B2 (34–37)',NB:'Remotos'};
-    const topZone=Object.entries(zoneCounts).sort((a,b)=>b[1]-a[1])[0]?.[0]||'TB1';
-    return {pos:'—',reason:`Sin vuelos de sus aerolíneas hoy — zona de mayor carga: ${zoneMap[topZone]}`,byAirline:false};
+    const zoneMap={TA_15:'Terminal A (1–5)',TA_68:'Terminal A (6–8)',TA_911:'Terminal A (9–11)',NA:'Rampa Norte A',TB1_par:'Terminal B1 pares',TB1_imp:'Terminal B1 impares',TB2_2729:'Terminal B2 (27–29)',TB2_3032:'Terminal B2 (30–32)',TB2_3337:'Terminal B2 (33–37)',NB:'Rampa Norte B'};
+    const topZone=Object.entries(zc).sort((a,b)=>b[1]-a[1])[0]?.[0]||'TB1_par';
+    return {pos:'—',reason:`Sin vuelos de sus aerolíneas hoy — zona de mayor carga: ${zoneMap[topZone]||topZone}`,byAirline:false};
   }
 
   html+=`<div style="font-size:10px;font-weight:800;letter-spacing:1px;color:var(--text3);text-transform:uppercase;margin-bottom:10px">Sugerencias por turno y persona</div>`;
