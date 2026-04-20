@@ -1630,27 +1630,94 @@ function getArr(prefix){
 
 function posToRange(arr){
   if(!arr||!arr.length) return '';
-  const nums=arr.filter(p=>!isNaN(p)).map(Number).sort((a,b)=>a-b);
-  const npos=arr.filter(p=>p.startsWith('N')).map(p=>parseInt(p.slice(1))).sort((a,b)=>a-b);
   const parts=[];
-  const makeRange=ns=>{ let s=ns[0],e=ns[0]; for(let i=1;i<ns.length;i++){ if(ns[i]<=e+2) e=ns[i]; else{parts.push(s===e?String(s):s+'/'+e);s=e=ns[i];} } parts.push(s===e?String(s):s+'/'+e); };
-  if(nums.length) makeRange(nums);
-  if(npos.length){ let s=npos[0],e=npos[0]; for(let i=1;i<npos.length;i++){ if(npos[i]===e+1) e=npos[i]; else{parts.push(s===e?'N'+s:'N'+s+'/N'+e);s=e=npos[i];} } parts.push(s===e?'N'+s:'N'+s+'/N'+e); }
+
+  // Terminal A (1-11): group consecutive
+  const ta=arr.filter(p=>!isNaN(p)&&parseInt(p)>=1&&parseInt(p)<=11).map(Number).sort((a,b)=>a-b);
+  if(ta.length){
+    let s=ta[0],e=ta[0];
+    for(let i=1;i<ta.length;i++){
+      if(ta[i]===e+1) e=ta[i];
+      else{ parts.push(s===e?String(s):s+'/'+e); s=e=ta[i]; }
+    }
+    parts.push(s===e?String(s):s+'/'+e);
+  }
+
+  // Terminal B1 pares (20,22,24,26): list individually or group only same-parity consecutive (step 2)
+  const b1par=arr.filter(p=>!isNaN(p)&&[20,22,24,26].includes(parseInt(p))).map(Number).sort((a,b)=>a-b);
+  if(b1par.length){
+    // Group consecutive even (step of 2)
+    let s=b1par[0],e=b1par[0];
+    for(let i=1;i<b1par.length;i++){
+      if(b1par[i]===e+2) e=b1par[i];
+      else{ parts.push(s===e?String(s):s+'/'+e); s=e=b1par[i]; }
+    }
+    parts.push(s===e?String(s):s+'/'+e);
+  }
+
+  // Terminal B1 impares (21,23,25): same
+  const b1imp=arr.filter(p=>!isNaN(p)&&[21,23,25].includes(parseInt(p))).map(Number).sort((a,b)=>a-b);
+  if(b1imp.length){
+    let s=b1imp[0],e=b1imp[0];
+    for(let i=1;i<b1imp.length;i++){
+      if(b1imp[i]===e+2) e=b1imp[i];
+      else{ parts.push(s===e?String(s):s+'/'+e); s=e=b1imp[i]; }
+    }
+    parts.push(s===e?String(s):s+'/'+e);
+  }
+
+  // Terminal B2 (27-37): group consecutive
+  const tb2=arr.filter(p=>!isNaN(p)&&parseInt(p)>=27&&parseInt(p)<=37).map(Number).sort((a,b)=>a-b);
+  if(tb2.length){
+    let s=tb2[0],e=tb2[0];
+    for(let i=1;i<tb2.length;i++){
+      if(tb2[i]===e+1) e=tb2[i];
+      else{ parts.push(s===e?String(s):s+'/'+e); s=e=tb2[i]; }
+    }
+    parts.push(s===e?String(s):s+'/'+e);
+  }
+
+  // Rampa Norte (N1-N13): group consecutive
+  const npos=arr.filter(p=>p.startsWith('N')).map(p=>parseInt(p.slice(1))).sort((a,b)=>a-b);
+  if(npos.length){
+    let s=npos[0],e=npos[0];
+    for(let i=1;i<npos.length;i++){
+      if(npos[i]===e+1) e=npos[i];
+      else{ parts.push(s===e?'N'+s:'N'+s+'/N'+e); s=e=npos[i]; }
+    }
+    parts.push(s===e?'N'+s:'N'+s+'/N'+e);
+  }
+
   return parts.join(', ');
 }
 
 function parseRange(str){
   if(!str||str==='—') return [];
-  const all=[...POS.TA,...POS.N_A,...POS.TB1_PAR,...POS.TB1_IMPAR,...POS.TB2A,...POS.TB2B,...POS.N_B];
   const out=[];
   str.split(',').forEach(part=>{
     part=part.trim();
+    if(!part) return;
     if(part.includes('/')){
       const[a,b]=part.split('/');
       const isN=a.startsWith('N');
-      const s=parseInt(isN?a.slice(1):a), e=parseInt(isN?b.replace('N',''):b);
-      for(let i=s;i<=e;i++){ const v=isN?'N'+i:String(i); if(all.includes(v)) out.push(v); }
-    } else if(part&&all.includes(part)) out.push(part);
+      const s=parseInt(isN?a.slice(1):a);
+      const e=parseInt(isN?b.replace('N',''):b);
+      if(isN){
+        // N positions: consecutive
+        for(let i=s;i<=e;i++) out.push('N'+i);
+      } else if(s>=20&&s<=26){
+        // B1: same parity only (step 2)
+        const step=2;
+        for(let i=s;i<=e;i+=step) out.push(String(i));
+      } else {
+        // Terminal A or B2: consecutive
+        const all=[...POS.TA,...POS.TB2A,...POS.TB2B];
+        for(let i=s;i<=e;i++){ if(all.includes(String(i))) out.push(String(i)); }
+      }
+    } else {
+      const allPos=[...POS.TA,...POS.N_A,...POS.TB1_PAR,...POS.TB1_IMPAR,...POS.TB2A,...POS.TB2B,...POS.N_B];
+      if(allPos.includes(part)) out.push(part);
+    }
   });
   return out;
 }
@@ -1679,6 +1746,9 @@ function openAssignModal(shiftId, editIdx, preselect){
   document.getElementById('coverRows').innerHTML='';
   document.getElementById('extraShiftSel').value='';
   document.getElementById('extraBadge').style.display='none';
+  // Always reset cubrir ops buttons
+  document.getElementById('cubrirTA')?.classList.remove('sel');
+  document.getElementById('cubrirTB')?.classList.remove('sel');
 
   // Show/hide delete button
   const delBtn=document.getElementById('assignDeleteBtn');
@@ -2103,7 +2173,12 @@ function parseFlightList(text){
       const ll=line.toLowerCase();
       for(const[k,v] of Object.entries(airlineMap)){ if(ll.includes(k)){airline=v;break;} }
     }
-    if(airline) flights.push({airline,pos});
+    if(airline){
+      // Extract time HH:MM from line
+      const timeMatch=line.match(/\b(\d{2}:\d{2})\b/);
+      const time=timeMatch?timeMatch[1]:null;
+      flights.push({airline,pos,time});
+    }
   });
   return flights;
 }
@@ -2971,13 +3046,53 @@ function buildAnalysisBodyHTML(){
   const shiftColors={A:'var(--green)',T9:'var(--accent)',B:'var(--purple)','B+C':'#fb923c',C:'var(--red)',D:'var(--cyan)'};
 
   // Find best position for a person based on their airlines and flight data
+  // Shift time windows in minutes from midnight for flight filtering
+  const SHIFT_WINDOWS={
+    'A':   [480,1020],  // 08:00–17:00
+    'T9':  [540,1080],  // 09:00–18:00
+    'B':   [690,1200],  // 11:30–20:00
+    'B+C': [690,1440],  // 11:30–00:00
+    'C':   [900,1440],  // 15:00–00:00
+    'D':   [1380,1980], // 23:00–08:00 next day
+    'A+B': [480,1200],
+    'A+C': [480,1440],
+    'T9+C':[540,1440],
+  };
+
+  function timeStrToMins(t){
+    if(!t||t==='OVER') return null;
+    const parts=t.split(':');
+    if(parts.length<2) return null;
+    return parseInt(parts[0])*60+parseInt(parts[1]);
+  }
+
+  // Build flight map with time info
+  const flightsByPosWithTime={};
+  flights.forEach(f=>{
+    const p=f.pos; if(!p) return;
+    if(!flightsByPosWithTime[p]) flightsByPosWithTime[p]={count:0,airlines:{},times:[]};
+    flightsByPosWithTime[p].count++;
+    flightsByPosWithTime[p].airlines[f.airline]=(flightsByPosWithTime[p].airlines[f.airline]||0)+1;
+    const t=timeStrToMins(f.time||'');
+    if(t!==null) flightsByPosWithTime[p].times.push(t);
+  });
+
+  function flightInShiftWindow(shiftId, times){
+    const win=SHIFT_WINDOWS[shiftId];
+    if(!win||!times.length) return true; // no time info → include
+    return times.some(t=>t>=win[0]&&t<=win[1]);
+  }
+
   function suggestForPerson(m){
+    const shiftId=resolvedShift(m,date);
     const airlines=(S.personAirlines||{})[m.id]||[];
     if(!airlines.length) return {pos:'—',reason:'Sin aerolíneas asignadas',byAirline:false};
 
-    // Find positions with most flights for their airlines today
+    // Find positions with most flights for their airlines — filtered by shift window
     let bestPos=null,bestCount=0,bestAirline='';
-    Object.entries(flightsByPos).forEach(([pos,data])=>{
+    Object.entries(flightsByPosWithTime).forEach(([pos,data])=>{
+      // Skip if no flights in this person's shift window
+      if(!flightInShiftWindow(shiftId,data.times)) return;
       airlines.forEach(al=>{
         const cnt=data.airlines[al]||0;
         if(cnt>bestCount){ bestCount=cnt; bestPos=pos; bestAirline=al; }
@@ -2985,20 +3100,18 @@ function buildAnalysisBodyHTML(){
     });
 
     if(bestPos&&bestCount>0){
-      // Check if same airline has adjacent positions — suggest range
       const adjacents=[bestPos];
       const bn=parseInt(bestPos.replace('N',''));
       const isN=bestPos.startsWith('N');
       [-1,1].forEach(d=>{
         const adj=isN?'N'+(bn+d):String(bn+d);
-        if(flightsByPos[adj]){
-          airlines.forEach(al=>{ if((flightsByPos[adj].airlines[al]||0)>0) adjacents.push(adj); });
+        if(flightsByPosWithTime[adj]&&flightInShiftWindow(shiftId,flightsByPosWithTime[adj].times)){
+          airlines.forEach(al=>{ if((flightsByPosWithTime[adj].airlines[al]||0)>0) adjacents.push(adj); });
         }
       });
       const uniqueAdj=[...new Set(adjacents)].sort((a,b)=>parseInt(a.replace('N',''))-parseInt(b.replace('N','')));
       const posStr=uniqueAdj.length>1?uniqueAdj[0]+'/'+uniqueAdj[uniqueAdj.length-1]:bestPos;
-      const totalAlFlights=airlines.reduce((sum,al)=>sum+Object.values(flightsByPos).reduce((s,d)=>s+(d.airlines[al]||0),0),0);
-      return {pos:posStr,reason:`${bestAirline} — ${bestCount} vuelo${bestCount>1?'s':''} en POS ${bestPos}`,byAirline:true};
+      return {pos:posStr,reason:`${bestAirline} — ${bestCount} vuelo${bestCount>1?'s':''} en POS ${bestPos} en su turno`,byAirline:true};
     }
 
     // Fallback: suggest by zone load
@@ -3049,11 +3162,41 @@ function buildAnalysisBodyHTML(){
     });
   }
 
+  // ── Detalle por posición (toggle) ──
+  const allPositions=[...POS.TA,...POS.N_A,...POS.TB1_PAR,...POS.TB1_IMPAR,...POS.TB2A,...POS.TB2B,...POS.N_B];
+  const posDetailRows=allPositions
+    .filter(p=>flightsByPosWithTime[p]&&flightsByPosWithTime[p].count>0)
+    .map(p=>{
+      const data=flightsByPosWithTime[p];
+      const topAirlines=Object.entries(data.airlines).sort((a,b)=>b[1]-a[1]).slice(0,3).map(([al,c])=>`${al}(${c})`).join(', ');
+      const times=data.times.sort((a,b)=>a-b).map(t=>String(Math.floor(t/60)).padStart(2,'0')+':'+String(t%60).padStart(2,'0')).join(', ');
+      return `<div style="display:flex;align-items:center;gap:8px;padding:5px 0;border-bottom:1px solid var(--border)">
+        <div style="font-family:'IBM Plex Mono',monospace;font-size:12px;font-weight:800;color:var(--accent);min-width:36px">POS ${p}</div>
+        <div style="flex:1">
+          <div style="font-size:11px;color:var(--text2)">${topAirlines}</div>
+          ${times?`<div style="font-size:10px;color:var(--text3);margin-top:1px">🕐 ${times}</div>`:''}
+        </div>
+        <div style="font-size:12px;font-weight:700;color:var(--text2);min-width:30px;text-align:right">${data.count}</div>
+      </div>`;
+    }).join('');
+
+  html+=`<div style="height:1px;background:var(--border);margin:14px 0"></div>
+  <div>
+    <button onclick="this.nextElementSibling.style.display=this.nextElementSibling.style.display==='none'?'block':'none';this.textContent=this.textContent.includes('▼')?'▶ Ver vuelos por posición':'▼ Ver vuelos por posición'"
+      style="background:none;border:none;color:var(--accent);font-size:12px;font-weight:700;cursor:pointer;padding:0;font-family:'Barlow',sans-serif">
+      ▶ Ver vuelos por posición
+    </button>
+    <div style="display:none;margin-top:10px">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px">
+        <div style="font-size:10px;font-weight:800;letter-spacing:1px;color:var(--text3);text-transform:uppercase">Posición · Aerolíneas · Horas</div>
+        <div style="font-size:10px;color:var(--text3)">vuelos</div>
+      </div>
+      ${posDetailRows||'<div style="color:var(--text3);font-size:12px">Sin datos de posición.</div>'}
+    </div>
+  </div>`;
+
   return html;
 }
-
-// ═══════════════════════════════════════════════════════
-// GEMINI API
 // ═══════════════════════════════════════════════════════
 function getApiKey(){ return localStorage.getItem('airops_gemini_key')||''; }
 
