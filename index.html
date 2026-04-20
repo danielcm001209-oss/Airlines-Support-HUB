@@ -328,6 +328,7 @@ input[type="date"]::-webkit-calendar-picker-indicator{
         <input id="knowSearch" class="fi" placeholder="🔍 Buscar aerolínea…" style="width:200px;font-size:12px;padding:6px 10px" oninput="renderKnowClient()">
         <button class="btn btn-outline" onclick="addNewAirline()" style="font-size:12px" title="Agregar una aerolínea nueva">+ Aerolínea</button>
         <button class="btn btn-outline" onclick="loadDiferenciasFromDoc()" style="font-size:12px" title="Carga diferencias y requerimientos de los documentos">📥 Cargar datos</button>
+        <button class="btn btn-outline" onclick="showPdfGuide()" style="font-size:12px" title="Ver cómo nombrar y subir los PDFs">📄 Guía PDFs</button>
         <button class="btn btn-outline" id="knowEditBtn" onclick="toggleKnowEditMode()" style="font-size:12px">✏️ Modo editar</button>
       </div>
     </div>
@@ -4018,24 +4019,128 @@ function renderKnowClient(){
   }).join('');
 }
 
+function airlineSlug(name){
+  return name.replace(/[^a-zA-Z0-9]/g,'');
+}
+
+function pdfUrl(airline, field){
+  return `pdfs/airlines/${airlineSlug(airline)}_${field}.pdf`;
+}
+
 function knowSection(title, icon, airline, field, content){
   const safeAirline=airline.replace(/'/g,"\\'");
+  const url=pdfUrl(airline,field);
+  const viewerId=`pdf_${airlineSlug(airline)}_${field}`;
+
+  // Edit mode: show textarea for text + info about PDF path
   if(knowEditMode){
     return `<div style="background:var(--s2);border:1px solid var(--border2);border-radius:8px;padding:12px">
       <div style="font-size:11px;font-weight:800;color:var(--accent);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px">${icon} ${title}</div>
+      <div style="background:var(--s1);border:1px solid var(--border);border-radius:6px;padding:10px;margin-bottom:10px;font-size:11px;color:var(--text2);line-height:1.6">
+        📄 <strong>PDF esperado en:</strong> <code style="color:var(--accent);font-family:'IBM Plex Mono',monospace;font-size:10px">${url}</code><br>
+        Sube el PDF al repo en esa ruta exacta (o texto debajo como fallback).
+      </div>
       <textarea
         class="fta"
-        style="min-height:140px;font-size:12px;font-family:'Barlow',sans-serif;line-height:1.5"
-        placeholder="Escribe aquí la información relevante…"
+        style="min-height:100px;font-size:12px;font-family:'Barlow',sans-serif;line-height:1.5"
+        placeholder="Texto fallback si no hay PDF…"
         onchange="saveAirlineInfo('${safeAirline}','${field}',this.value)"
       >${content||''}</textarea>
-      <div style="font-size:10px;color:var(--text3);margin-top:5px">💡 Puedes usar saltos de línea y viñetas con - al inicio de cada línea.</div>
+      <div style="font-size:10px;color:var(--text3);margin-top:5px">💡 El PDF tiene prioridad. Si no existe, se muestra este texto.</div>
     </div>`;
   }
-  return `<div style="background:var(--s2);border:1px solid var(--border2);border-radius:8px;padding:12px">
-    <div style="font-size:11px;font-weight:800;color:var(--accent);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px">${icon} ${title}</div>
-    ${content?`<div style="font-size:12px;color:var(--text2);line-height:1.6;white-space:pre-wrap">${formatKnowText(content)}</div>`:'<div style="color:var(--text3);font-size:12px;font-style:italic">Sin información registrada.</div>'}
+
+  // View mode: embed PDF with fallback to text
+  return `<div style="background:var(--s2);border:1px solid var(--border2);border-radius:8px;overflow:hidden">
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 12px;border-bottom:1px solid var(--border);background:var(--s1)">
+      <div style="font-size:11px;font-weight:800;color:var(--accent);text-transform:uppercase;letter-spacing:.5px">${icon} ${title}</div>
+      <div style="display:flex;gap:6px">
+        <button class="btn btn-outline" style="font-size:10px;padding:3px 8px" onclick="openPdfFullscreen('${url.replace(/'/g,"\\'")}')" title="Ver en pantalla completa">🔍 Ampliar</button>
+        <a href="${url}" target="_blank" rel="noopener" class="btn btn-outline" style="font-size:10px;padding:3px 8px;text-decoration:none;display:inline-flex;align-items:center" title="Descargar PDF">↓ Descargar</a>
+      </div>
+    </div>
+    <div id="${viewerId}" style="min-height:420px;position:relative;background:var(--s2)">
+      <div style="display:flex;align-items:center;justify-content:center;min-height:420px;color:var(--text3);font-size:12px">Cargando PDF…</div>
+    </div>
+  </div>
+  <script>(function(){
+    const v=document.getElementById('${viewerId}');
+    if(!v) return;
+    fetch('${url}',{method:'HEAD'}).then(r=>{
+      if(r.ok){
+        v.innerHTML='<iframe src="${url}#view=FitH" style="width:100%;height:600px;border:none;background:#f5f5f0" title="${title}"></iframe>';
+      } else {
+        v.innerHTML=${JSON.stringify(content?`<div style="padding:14px"><div style="font-size:10px;color:var(--amber);margin-bottom:8px">⚠️ PDF no disponible — mostrando texto</div><div style="font-size:12px;color:var(--text2);line-height:1.6;white-space:pre-wrap">${formatKnowText(content)}</div></div>`:'<div style="padding:30px;text-align:center;color:var(--text3);font-size:12px">📄 Sin documento registrado aún.</div>')};
+      }
+    }).catch(()=>{
+      v.innerHTML='<div style="padding:14px;color:var(--red);font-size:12px">❌ Error al cargar el PDF.</div>';
+    });
+  })();<\/script>`;
+}
+
+function showPdfGuide(){
+  const als=Object.keys(S.airlines||{}).sort();
+  if(!als.length){ toast('Sin aerolíneas','error'); return; }
+  const rows=als.map(name=>{
+    const slug=airlineSlug(name);
+    return `<tr style="border-bottom:1px solid var(--border)">
+      <td style="padding:5px 8px;font-size:11px;font-weight:700">${name}</td>
+      <td style="padding:5px 8px;font-size:10px;font-family:'IBM Plex Mono',monospace;color:var(--accent)">pdfs/airlines/${slug}_diferencias.pdf</td>
+      <td style="padding:5px 8px;font-size:10px;font-family:'IBM Plex Mono',monospace;color:var(--green)">pdfs/airlines/${slug}_requerimientos.pdf</td>
+    </tr>`;
+  }).join('');
+  const modal=document.getElementById('pdfGuideModal')||(()=>{
+    const m=document.createElement('div');
+    m.id='pdfGuideModal';
+    m.className='overlay';
+    document.body.appendChild(m);
+    return m;
+  })();
+  modal.innerHTML=`<div class="modal" style="width:min(94vw,700px);max-height:92vh">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+      <div class="modal-title" style="margin:0">📄 Guía de nombres de PDFs</div>
+      <button class="btn btn-outline" style="font-size:14px;padding:4px 10px" onclick="closeModal('pdfGuideModal')">✕</button>
+    </div>
+    <div style="font-size:12px;color:var(--text2);line-height:1.6;margin-bottom:12px">
+      Sube los PDFs al repo en la carpeta <code style="color:var(--accent);font-family:'IBM Plex Mono',monospace;font-size:11px">pdfs/airlines/</code> con los nombres exactos de abajo. Después haz commit y push — todos los dispositivos lo verán al recargar.
+    </div>
+    <div style="overflow-x:auto;max-height:60vh;overflow-y:auto">
+      <table style="width:100%;border-collapse:collapse;font-size:11px">
+        <thead>
+          <tr style="background:var(--s1);position:sticky;top:0">
+            <th style="padding:7px 8px;text-align:left;font-size:10px;font-weight:800;color:var(--text3);text-transform:uppercase;letter-spacing:.5px">Aerolínea</th>
+            <th style="padding:7px 8px;text-align:left;font-size:10px;font-weight:800;color:var(--text3);text-transform:uppercase;letter-spacing:.5px">🔄 Diferencias</th>
+            <th style="padding:7px 8px;text-align:left;font-size:10px;font-weight:800;color:var(--text3);text-transform:uppercase;letter-spacing:.5px">📋 Requerimientos</th>
+          </tr>
+        </thead>
+        <tbody>${rows}</tbody>
+      </table>
+    </div>
   </div>`;
+  modal.classList.add('open');
+}
+
+function openPdfFullscreen(url){
+  // Open the PDF in a modal with max viewport size  let modal=document.getElementById('pdfFsModal');
+  if(!modal){
+    modal=document.createElement('div');
+    modal.id='pdfFsModal';
+    modal.className='overlay';
+    modal.innerHTML=`<div class="modal" style="width:min(96vw,1100px);max-width:1100px;max-height:94vh;padding:12px">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+        <div class="modal-title" style="margin:0">📄 Vista de documento</div>
+        <div style="display:flex;gap:6px">
+          <a id="pdfFsDownload" href="#" target="_blank" rel="noopener" class="btn btn-outline" style="font-size:11px;padding:4px 10px;text-decoration:none">↓ Descargar</a>
+          <button class="btn btn-outline" style="font-size:14px;padding:4px 10px" onclick="closeModal('pdfFsModal')">✕</button>
+        </div>
+      </div>
+      <iframe id="pdfFsFrame" style="width:100%;height:80vh;border:none;background:#f5f5f0;border-radius:6px" title="PDF"></iframe>
+    </div>`;
+    document.body.appendChild(modal);
+  }
+  document.getElementById('pdfFsFrame').src=url+'#view=FitH';
+  document.getElementById('pdfFsDownload').href=url;
+  modal.classList.add('open');
 }
 
 function formatKnowText(t){
