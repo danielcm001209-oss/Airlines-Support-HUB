@@ -841,7 +841,7 @@ const POS = {
 const AIRLINE_COLORS = ['#2d7aee','#17c97a','#f0a500','#e84545','#8b5cf6','#0eb8c9','#ec4899','#f87171','#34d399','#fb923c','#a78bfa','#38bdf8','#fbbf24','#4ade80','#22d3ee'];
 
 const AIRLINE_DIFERENCIAS_PRELOAD = {
-  "LATAM": { diferencias: `- CUANDO EL APU DEL AVION B787 ESTA INOPERATIVO, LA AEROLINEA REQUIERE QUE SE APLIQUE LA OPCION CON LOS EQUIPOS
+  "Latam": { diferencias: `- CUANDO EL APU DEL AVION B787 ESTA INOPERATIVO, LA AEROLINEA REQUIERE QUE SE APLIQUE LA OPCION CON LOS EQUIPOS
 DE TIERRA COMO SIGUE A CONTINUACION:
 - ES OBLIGATORIO PONER LOS ANIMALES VIVOS ENCIMA DE LA CAJA DEL FLIGHT KIT EN EL BULK (COMPARTIMIENTO 5). SI EL AVION
 NO TRAE FLIGHT KIT ENTONCES HAY QUE PONER CUATRO PALETAS DE MADERA, PONERLAS EN EL 5 Y AMARRRARLAS. ENCIMA DE
@@ -1391,7 +1391,7 @@ SE QUITAN (ESTO ES OBLIGATORIO)
 COMPUERTA DE AVIONICA ESTE ABIERTA PARA EVITAR PRESURIZACION DEL AVION
 - REQUIEREN DOS UNIDADES DE GPU Y EL AIRE ACONDICIONADO SIEMPRE EN LA OPERACION
 FLAIR "DIFERENCIAS EN RAMPA" REVISION 20231026`, requerimientos: "" },
-  "Flair": { diferencias: `- NO ACEPTAN MERCANCIAS PELIGROSAS
+  "Flair Airlines": { diferencias: `- NO ACEPTAN MERCANCIAS PELIGROSAS
 - NO ACEPTAN ANIMALES EN LOS COMPARTIMIENTOS DE EQUIPAJE
 - TRAEN UN FLIGHT KIT EN EL COMPARTIMIENTO C1 EN EL QUE TRAEN SOGAS
 - NO REQUIEREN AGUA POTABLE
@@ -1400,7 +1400,7 @@ FLAIR "DIFERENCIAS EN RAMPA" REVISION 20231026`, requerimientos: "" },
 - TICKETS USADOS
 - CALZOS COMO EN LA GRAFICA
 - HOJA DE CARGA`, requerimientos: "" },
-  "Frontier": { diferencias: `- EN EL SIGUIENTE LINK CHEQUEAR LA SENALIZACION A LA LLEGADA:
+  "Frontier Airlines": { diferencias: `- EN EL SIGUIENTE LINK CHEQUEAR LA SENALIZACION A LA LLEGADA:
 FRONTIER LLEGADA.mp4
 - SOLAMENTE PERSONAL EN EL SISTEMA DE FRONTIER PUEDE PROCEDER
 A OPERAR EL JETBRIDGE
@@ -1603,7 +1603,7 @@ UNOS PRECINTOS: ROJO PARA LAS QUE ESTAN USADAS, Y VERDES PARA LAS QUE ESTAN
 SIN USAR. LOS PRECINTOS VIENEN EN UN BOLSILLO EN EL MISMO SACO.
 - EL AGUA POTABLE SE PONE AL 100% SI SE REQUIERE.
 REVISIÓN: 20250501`, requerimientos: "" },
-  "Southwest": { diferencias: `- PARA EL B737-MAX SE REQUIERE DESCARGAR PRIMERO POR LA PARTE
+  "Southwest Airlines": { diferencias: `- PARA EL B737-MAX SE REQUIERE DESCARGAR PRIMERO POR LA PARTE
 TRASERA DEL AVION Y ESPERAR QUE OPERACIONES AVISE DE QUE
 DESEMBARCARON LOS PASAJEROS PARA DESCARGAR LA PARTE
 DELANTERA. LOS COCHES DE BB Y LAS SILLAS DE RUEDA SE PUEDEN
@@ -1777,7 +1777,7 @@ const AIRLINE_REQUERIMIENTOS_PRELOAD = {
 - 360
 - Tres paradas
 - Vagones con los equineros`,
-  "Southwest": `**Requerimientos fijos:**
+  "Southwest Airlines": `**Requerimientos fijos:**
 - Covers
 - Tail Stand (Barra de Cola) 737-800, para la descarga y carga de equipajes
 
@@ -1802,7 +1802,7 @@ const AIRLINE_REQUERIMIENTOS_PRELOAD = {
 **Procesos operacionales claves:**
 - Colocación de los conos correctamente
 - Escalera manual para abrir compartimientos`,
-  "Frontier": `**Procesos operacionales claves:**
+  "Frontier Airlines": `**Procesos operacionales claves:**
 - No pegar los equipos al avión`,
   "Air Caraibes": `**Requerimientos fijos:**
 - Esperar Ok del Mecánico para realizar 360 y acoplar equipos
@@ -1827,7 +1827,7 @@ const AIRLINE_REQUERIMIENTOS_PRELOAD = {
 
 **Procesos operacionales claves:**
 - Solo 3 vagones máximo juntos`,
-  "Discover": `**Procesos operacionales claves:**
+  "Discover Airlines": `**Procesos operacionales claves:**
 - Aviramp en posición`,
   "WestJet": `**Requerimientos fijos:**
 - Colocar 3 calzos en las cintas
@@ -3938,20 +3938,31 @@ function loadDiferenciasFromDoc(){
   const difCount=Object.keys(AIRLINE_DIFERENCIAS_PRELOAD||{}).length;
   const reqCount=Object.keys(AIRLINE_REQUERIMIENTOS_PRELOAD||{}).length;
   if(!difCount&&!reqCount){ toast('❌ No hay datos precargados','error'); return; }
-  showConfirm(`¿Cargar datos precargados?`,`Diferencias: ${difCount} aerolíneas · Requerimientos: ${reqCount} aerolíneas. Esto reemplazará la información actual.`,()=>{
+  showConfirm(`¿Cargar datos precargados?`,`Diferencias: ${difCount} aerolíneas · Requerimientos: ${reqCount} aerolíneas. Esto reemplazará la información actual y creará las aerolíneas que no existan.`,()=>{
     if(!S.airlineInfo) S.airlineInfo={};
+    if(!S.airlines) S.airlines={};
+    const colors=['#2d7aee','#17c97a','#f0a500','#e84545','#8b5cf6','#0eb8c9','#ec4899','#f87171','#34d399','#fb923c','#a78bfa','#38bdf8','#fbbf24','#4ade80','#22d3ee'];
+    let createdCount=0;
     // Load diferencias
     for(const[name,data] of Object.entries(AIRLINE_DIFERENCIAS_PRELOAD||{})){
+      if(!S.airlines[name]){
+        S.airlines[name]={color:colors[Object.keys(S.airlines).length%colors.length]};
+        createdCount++;
+      }
       if(!S.airlineInfo[name]) S.airlineInfo[name]={diferencias:'',requerimientos:''};
       S.airlineInfo[name].diferencias=data.diferencias;
     }
     // Load requerimientos
     for(const[name,text] of Object.entries(AIRLINE_REQUERIMIENTOS_PRELOAD||{})){
+      if(!S.airlines[name]){
+        S.airlines[name]={color:colors[Object.keys(S.airlines).length%colors.length]};
+        createdCount++;
+      }
       if(!S.airlineInfo[name]) S.airlineInfo[name]={diferencias:'',requerimientos:''};
       S.airlineInfo[name].requerimientos=text;
     }
     save(); renderKnowClient();
-    toast(`✅ Datos cargados`);
+    toast(`✅ Datos cargados${createdCount?' · '+createdCount+' aerolíneas nuevas':''}`);
   });
 }
 
