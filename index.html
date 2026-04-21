@@ -4094,15 +4094,22 @@ async function renderPdfInline(viewerId){
         <span>📄 ${numPages} página${numPages>1?'s':''}</span>
         <span style="font-family:'IBM Plex Mono',monospace" id="${viewerId}_page">1 / ${numPages}</span>
       </div>
-      <div id="${viewerId}_pages" style="max-height:560px;overflow-y:auto;background:#2a2a2a;padding:8px 0"></div>
+      <div id="${viewerId}_pages" style="max-height:560px;overflow-y:auto;background:#2a2a2a;padding:8px"></div>
     `;
 
     const pagesWrap=document.getElementById(`${viewerId}_pages`);
     const pageLabel=document.getElementById(`${viewerId}_page`);
 
-    // HiDPI rendering — keep CSS size small but paint at actual device resolution
-    const containerWidth=Math.min(pagesWrap.clientWidth-16, 900);
-    const outputScale=Math.min(window.devicePixelRatio||1, 3);
+    // Robust width detection — try multiple sources
+    let containerWidth = pagesWrap.clientWidth - 16;
+    if (!containerWidth || containerWidth < 100) {
+      containerWidth = (el.clientWidth || el.parentElement?.clientWidth || 600) - 20;
+    }
+    // Clamp between reasonable mobile/desktop bounds
+    containerWidth = Math.min(Math.max(containerWidth, 280), 900);
+
+    // HiDPI output scale
+    const outputScale = Math.min(window.devicePixelRatio || 1, 3);
 
     for(let i=1;i<=numPages;i++){
       const page=await pdf.getPage(i);
@@ -4111,11 +4118,17 @@ async function renderPdfInline(viewerId){
       const viewport=page.getViewport({scale:cssScale});
 
       const canvas=document.createElement('canvas');
+      // Backing store at device pixel ratio
       canvas.width=Math.floor(viewport.width*outputScale);
       canvas.height=Math.floor(viewport.height*outputScale);
+      // Display size (no max-width to preserve aspect ratio)
       canvas.style.width=Math.floor(viewport.width)+'px';
       canvas.style.height=Math.floor(viewport.height)+'px';
-      canvas.style.cssText+=';display:block;margin:0 auto 8px;max-width:calc(100% - 16px);background:#fff;box-shadow:0 2px 8px rgba(0,0,0,.4);border-radius:2px';
+      canvas.style.display='block';
+      canvas.style.margin='0 auto 8px';
+      canvas.style.background='#fff';
+      canvas.style.boxShadow='0 2px 8px rgba(0,0,0,.4)';
+      canvas.style.borderRadius='2px';
       canvas.dataset.pageNum=i;
       pagesWrap.appendChild(canvas);
 
@@ -4127,7 +4140,6 @@ async function renderPdfInline(viewerId){
       }).promise;
     }
 
-    // Update page indicator on scroll
     pagesWrap.addEventListener('scroll',()=>{
       const canvases=pagesWrap.querySelectorAll('canvas');
       const scrollTop=pagesWrap.scrollTop;
@@ -4140,7 +4152,8 @@ async function renderPdfInline(viewerId){
     });
   } catch(e){
     console.error('PDF render error:',e);
-    handlePdfError(viewerId);
+    const el2=document.getElementById(viewerId);
+    if(el2) el2.innerHTML=`<div style="padding:20px;color:var(--red);font-size:12px;text-align:center">❌ Error: ${e.message||'desconocido'}<br><button class="btn btn-outline" style="font-size:11px;margin-top:8px" onclick="delete this.closest('[data-pdf-url]').dataset.pdfRendered;renderPdfInline('${viewerId}')">🔄 Reintentar</button></div>`;
   }
 }
 
@@ -4244,7 +4257,9 @@ async function renderPdfToFullscreen(url, container){
     const numPages=pdf.numPages;
 
     container.innerHTML='';
-    const containerWidth=Math.min(container.clientWidth-16, 1040);
+    let containerWidth = container.clientWidth - 16;
+    if(!containerWidth||containerWidth<100) containerWidth = window.innerWidth - 60;
+    containerWidth = Math.min(Math.max(containerWidth, 280), 1040);
     const outputScale=Math.min(window.devicePixelRatio||1, 3);
 
     for(let i=1;i<=numPages;i++){
@@ -4258,7 +4273,11 @@ async function renderPdfToFullscreen(url, container){
       canvas.height=Math.floor(viewport.height*outputScale);
       canvas.style.width=Math.floor(viewport.width)+'px';
       canvas.style.height=Math.floor(viewport.height)+'px';
-      canvas.style.cssText+=';display:block;margin:0 auto 10px;max-width:calc(100% - 16px);background:#fff;box-shadow:0 2px 12px rgba(0,0,0,.5);border-radius:3px';
+      canvas.style.display='block';
+      canvas.style.margin='0 auto 10px';
+      canvas.style.background='#fff';
+      canvas.style.boxShadow='0 2px 12px rgba(0,0,0,.5)';
+      canvas.style.borderRadius='3px';
       container.appendChild(canvas);
 
       const transform = outputScale !== 1 ? [outputScale, 0, 0, outputScale, 0, 0] : null;
