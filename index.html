@@ -4017,6 +4017,8 @@ function renderKnowClient(){
       </div>`:''}
     </div>`;
   }).join('');
+  // Process any PDFs that need rendering
+  setTimeout(processPdfQueue,50);
 }
 
 function airlineSlug(name){
@@ -4031,7 +4033,6 @@ function knowSection(title, icon, airline, field, content){
   const safeAirline=airline.replace(/'/g,"\\'");
   const url=pdfUrl(airline,field);
   const viewerId=`pdf_${airlineSlug(airline)}_${field}`;
-  const fallbackId=`${viewerId}_fb`;
 
   // Edit mode: show textarea for text + info about PDF path
   if(knowEditMode){
@@ -4051,38 +4052,109 @@ function knowSection(title, icon, airline, field, content){
     </div>`;
   }
 
-  // View mode: build fallback HTML as data for JS
+  // Fallback HTML (text if provided, or empty message)
   const fallbackHtml=content
     ? `<div style="padding:14px"><div style="font-size:10px;color:var(--amber);margin-bottom:8px">⚠️ PDF no disponible — mostrando texto</div><div style="font-size:12px;color:var(--text2);line-height:1.6;white-space:pre-wrap">${formatKnowText(content)}</div></div>`
     : `<div style="padding:30px;text-align:center;color:var(--text3);font-size:12px">📄 Sin documento registrado aún.<br><span style="font-size:10px;color:var(--text3);opacity:.7">Esperado en: ${url}</span></div>`;
-
-  // Store fallback in a data attr so JS can switch to it if PDF fails
   const encodedFallback=encodeURIComponent(fallbackHtml);
 
   return `<div style="background:var(--s2);border:1px solid var(--border2);border-radius:8px;overflow:hidden" data-pdf-section>
-    <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 12px;border-bottom:1px solid var(--border);background:var(--s1)">
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 12px;border-bottom:1px solid var(--border);background:var(--s1);flex-wrap:wrap;gap:6px">
       <div style="font-size:11px;font-weight:800;color:var(--accent);text-transform:uppercase;letter-spacing:.5px">${icon} ${title}</div>
-      <div style="display:flex;gap:6px">
+      <div style="display:flex;gap:6px;flex-wrap:wrap">
         <button class="btn btn-outline" style="font-size:10px;padding:3px 8px" onclick="openPdfFullscreen('${url.replace(/'/g,"\\'")}')" title="Ver en pantalla completa">🔍 Ampliar</button>
         <a href="${url}" target="_blank" rel="noopener" class="btn btn-outline" style="font-size:10px;padding:3px 8px;text-decoration:none;display:inline-flex;align-items:center" title="Descargar PDF">↓ Descargar</a>
       </div>
     </div>
     <div id="${viewerId}" data-pdf-url="${url}" data-fallback="${encodedFallback}" style="min-height:420px;position:relative;background:var(--s2)">
-      <iframe src="${url}#view=FitH&toolbar=0" style="width:100%;height:600px;border:none;background:#f5f5f0;display:block" onload="handlePdfLoad('${viewerId}')" onerror="handlePdfError('${viewerId}')" title="${title}"></iframe>
+      <div style="display:flex;align-items:center;justify-content:center;min-height:420px;color:var(--text3);font-size:12px">⏳ Cargando documento…</div>
     </div>
-  </div>`;
+  </div>
+  <script>(function(){var __vid=${JSON.stringify(viewerId)};if(typeof window.__pdfQueue==='undefined')window.__pdfQueue=[];window.__pdfQueue.push(__vid);if(window.processPdfQueue)setTimeout(window.processPdfQueue,10);})();<\/script>`;
 }
 
-function handlePdfLoad(viewerId){
-  // iframe loaded — could still be a 404 page though
-  const el=document.getElementById(viewerId);
-  if(!el) return;
-  const url=el.dataset.pdfUrl;
-  // Do a lightweight HEAD check to confirm the PDF actually exists
-  fetch(url,{method:'HEAD'}).then(r=>{
-    if(!r.ok) handlePdfError(viewerId);
-  }).catch(()=>handlePdfError(viewerId));
+// Detect mobile / small screens
+function isMobilePdf(){
+  return window.innerWidth < 760 || /Mobi|Android|iPhone|iPad/i.test(navigator.userAgent||'');
 }
+
+// Render a PDF into a div using PDF.js (works on mobile)
+async function renderPdfInline(viewerId){
+  const el=document.getElementById(viewerId);
+  if(!el||el.dataset.pdfRendered) return;
+  el.dataset.pdfRendered='1';
+  const url=el.dataset.pdfUrl;
+  if(!url){ handlePdfError(viewerId); return; }
+
+  try {
+    // First check it exists
+    const headRes=await fetch(url,{method:'HEAD',cache:'no-cache'});
+    if(!headRes.ok){ handlePdfError(viewerId); return; }
+
+    if(!window.pdfjsLib){ handlePdfError(viewerId); return; }
+
+    const loadingTask=pdfjsLib.getDocument({url});
+    const pdf=await loadingTask.promise;
+    const numPages=pdf.numPages;
+
+    // Build pages container
+    el.innerHTML=`
+      <div style="display:flex;align-items:center;justify-content:space-between;padding:6px 10px;background:var(--s1);border-bottom:1px solid var(--border);font-size:11px;color:var(--text3)">
+        <span>📄 ${numPages} página${numPages>1?'s':''}</span>
+        <span style="font-family:'IBM Plex Mono',monospace" id="${viewerId}_page">1 / ${numPages}</span>
+      </div>
+      <div id="${viewerId}_pages" style="max-height:560px;overflow-y:auto;background:#2a2a2a;padding:8px 0"></div>
+    `;
+
+    const pagesWrap=document.getElementById(`${viewerId}_pages`);
+    const pageLabel=document.getElementById(`${viewerId}_page`);
+
+    // Render each page as a canvas
+    const containerWidth=Math.min(el.clientWidth-16, 900);
+
+    for(let i=1;i<=numPages;i++){
+      const page=await pdf.getPage(i);
+      const viewport=page.getViewport({scale:1});
+      const scale=containerWidth/viewport.width;
+      const scaledVp=page.getViewport({scale});
+
+      const canvas=document.createElement('canvas');
+      canvas.width=scaledVp.width;
+      canvas.height=scaledVp.height;
+      canvas.style.cssText=`display:block;margin:0 auto 8px;max-width:100%;height:auto;background:#fff;box-shadow:0 2px 8px rgba(0,0,0,.4);border-radius:2px`;
+      canvas.dataset.pageNum=i;
+      pagesWrap.appendChild(canvas);
+
+      const ctx=canvas.getContext('2d');
+      await page.render({canvasContext:ctx, viewport:scaledVp}).promise;
+    }
+
+    // Track scroll position to update page indicator
+    pagesWrap.addEventListener('scroll',()=>{
+      const canvases=pagesWrap.querySelectorAll('canvas');
+      const scrollTop=pagesWrap.scrollTop;
+      const wrapHeight=pagesWrap.clientHeight;
+      let currentPage=1;
+      canvases.forEach(c=>{
+        if(c.offsetTop <= scrollTop + wrapHeight/3) currentPage=parseInt(c.dataset.pageNum);
+      });
+      if(pageLabel) pageLabel.textContent=`${currentPage} / ${numPages}`;
+    });
+  } catch(e){
+    console.error('PDF render error:',e);
+    handlePdfError(viewerId);
+  }
+}
+
+// Process queue of PDFs that need rendering — avoids race condition with DOM insertion
+function processPdfQueue(){
+  if(!window.__pdfQueue) return;
+  while(window.__pdfQueue.length){
+    const vid=window.__pdfQueue.shift();
+    renderPdfInline(vid);
+  }
+}
+window.processPdfQueue=processPdfQueue;
 
 function handlePdfError(viewerId){
   const el=document.getElementById(viewerId);
@@ -4138,26 +4210,62 @@ function showPdfGuide(){
 }
 
 function openPdfFullscreen(url){
-  // Open the PDF in a modal with max viewport size  let modal=document.getElementById('pdfFsModal');
+  let modal=document.getElementById('pdfFsModal');
   if(!modal){
     modal=document.createElement('div');
     modal.id='pdfFsModal';
     modal.className='overlay';
     modal.innerHTML=`<div class="modal" style="width:min(96vw,1100px);max-width:1100px;max-height:94vh;padding:12px">
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
-        <div class="modal-title" style="margin:0">📄 Vista de documento</div>
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;flex-wrap:wrap;gap:6px">
+        <div class="modal-title" style="margin:0;font-size:14px">📄 Vista de documento</div>
         <div style="display:flex;gap:6px">
           <a id="pdfFsDownload" href="#" target="_blank" rel="noopener" class="btn btn-outline" style="font-size:11px;padding:4px 10px;text-decoration:none">↓ Descargar</a>
           <button class="btn btn-outline" style="font-size:14px;padding:4px 10px" onclick="closeModal('pdfFsModal')">✕</button>
         </div>
       </div>
-      <iframe id="pdfFsFrame" style="width:100%;height:80vh;border:none;background:#f5f5f0;border-radius:6px" title="PDF"></iframe>
+      <div id="pdfFsContent" style="width:100%;height:80vh;background:#2a2a2a;border-radius:6px;overflow-y:auto;padding:10px 0">
+        <div style="text-align:center;color:#888;padding:30px;font-size:13px">⏳ Cargando…</div>
+      </div>
     </div>`;
     document.body.appendChild(modal);
   }
-  document.getElementById('pdfFsFrame').src=url+'#view=FitH';
-  document.getElementById('pdfFsDownload').href=url;
+  const download=document.getElementById('pdfFsDownload');
+  const content=document.getElementById('pdfFsContent');
+  if(download) download.href=url;
   modal.classList.add('open');
+  renderPdfToFullscreen(url, content);
+}
+
+async function renderPdfToFullscreen(url, container){
+  container.innerHTML='<div style="text-align:center;color:#888;padding:30px;font-size:13px">⏳ Cargando PDF…</div>';
+  try{
+    if(!window.pdfjsLib){ container.innerHTML='<div style="color:#e84545;padding:20px;text-align:center">PDF.js no disponible</div>'; return; }
+    const headRes=await fetch(url,{method:'HEAD',cache:'no-cache'});
+    if(!headRes.ok){ container.innerHTML='<div style="color:#888;padding:30px;text-align:center">📄 PDF no disponible</div>'; return; }
+
+    const loadingTask=pdfjsLib.getDocument({url});
+    const pdf=await loadingTask.promise;
+    const numPages=pdf.numPages;
+
+    container.innerHTML='';
+    const containerWidth=Math.min(container.clientWidth-16, 1040);
+
+    for(let i=1;i<=numPages;i++){
+      const page=await pdf.getPage(i);
+      const viewport=page.getViewport({scale:1});
+      const scale=containerWidth/viewport.width;
+      const scaledVp=page.getViewport({scale});
+      const canvas=document.createElement('canvas');
+      canvas.width=scaledVp.width;
+      canvas.height=scaledVp.height;
+      canvas.style.cssText='display:block;margin:0 auto 10px;max-width:100%;height:auto;background:#fff;box-shadow:0 2px 12px rgba(0,0,0,.5);border-radius:3px';
+      container.appendChild(canvas);
+      await page.render({canvasContext:canvas.getContext('2d'), viewport:scaledVp}).promise;
+    }
+  }catch(e){
+    console.error(e);
+    container.innerHTML=`<div style="color:#e84545;padding:20px;text-align:center;font-size:13px">❌ Error al cargar PDF</div>`;
+  }
 }
 
 function formatKnowText(t){
