@@ -78,4 +78,3159 @@ header{background:var(--s1);border-bottom:1px solid var(--border);padding:0 14px
 .uchip{font-size:11px;font-weight:700;padding:2px 8px;border-radius:12px;border:1px solid var(--border2);color:var(--text2);cursor:pointer;transition:all .15s;}
 .uchip:hover{border-color:var(--accent);color:var(--accent);}
 .obs-sec{background:var(--s1);border:1px solid var(--border);border-radius:8px;padding:10px 12px;margin-top:10px;}
-.obs-item{
+.obs-item{display:flex;align-items:center;justify-content:space-between;font-size:12px;color:var(--text2);padding:4px 0;border-bottom:1px solid var(--border);}
+.obs-item:last-child{border-bottom:none;}
+.overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:400;align-items:center;justify-content:center;padding:16px;}
+.overlay.open{display:flex;}
+.modal{background:var(--s1);border:1px solid var(--border2);border-radius:14px;padding:20px;width:520px;max-width:96vw;max-height:90vh;overflow-y:auto;}
+.modal-title{font-size:16px;font-weight:900;margin-bottom:14px;}
+.form-group{display:flex;flex-direction:column;gap:5px;flex:1;margin-bottom:10px;}
+.fl{font-size:10px;font-weight:800;letter-spacing:.5px;color:var(--text3);text-transform:uppercase;}
+.fi{background:var(--s2);border:1px solid var(--border2);border-radius:7px;padding:7px 10px;color:var(--text);font-size:13px;font-family:'Barlow',sans-serif;outline:none;}
+.fi:focus{border-color:var(--accent);}
+.fs{background:var(--s2);border:1px solid var(--border2);border-radius:7px;padding:7px 10px;color:var(--text);font-size:13px;font-family:'Barlow',sans-serif;outline:none;width:100%;}
+.fta{background:var(--s2);border:1px solid var(--border2);border-radius:7px;padding:8px 10px;color:var(--text);font-size:12px;font-family:'Barlow',sans-serif;outline:none;width:100%;resize:vertical;min-height:60px;}
+.frow{display:flex;gap:10px;flex-wrap:wrap;}
+.divider{display:flex;align-items:center;gap:8px;margin:10px 0 6px;}
+.divider span{font-size:10px;font-weight:800;letter-spacing:1px;color:var(--text3);text-transform:uppercase;white-space:nowrap;}
+.divider::before,.divider::after{content:'';flex:1;height:1px;background:var(--border);}
+.mactions{display:flex;gap:8px;justify-content:flex-end;margin-top:14px;flex-wrap:wrap;}
+.pos-section{background:var(--s2);border:1px solid var(--border);border-radius:7px;padding:8px 10px;margin-bottom:5px;}
+.pos-section-label{font-size:10px;font-weight:800;letter-spacing:.5px;color:var(--text3);text-transform:uppercase;margin-bottom:5px;}
+.pos-buttons{display:flex;flex-wrap:wrap;gap:4px;}
+.pos-btn{background:var(--s1);border:1px solid var(--border2);border-radius:5px;color:var(--text3);padding:4px 7px;font-size:11px;font-weight:700;cursor:pointer;font-family:'IBM Plex Mono',monospace;transition:all .15s;}
+.pos-btn:hover{border-color:var(--accent);color:var(--accent);}
+.pos-btn.sel{background:rgba(45,122,238,.2);border-color:var(--accent);color:var(--accent);}
+.pos-btn.occ{border-color:rgba(240,165,0,.4);color:var(--amber);background:rgba(240,165,0,.05);}
+.pos-btn.occ:hover{border-color:var(--amber);}
+.task-buttons{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px;}
+.task-btn{padding:5px 11px;border-radius:6px;font-size:12px;font-weight:700;cursor:pointer;border:1px solid var(--border2);background:var(--s2);color:var(--text2);transition:all .15s;}
+.task-btn.sel{background:rgba(23,201,122,.15);border-color:var(--green);color:var(--green);}
+.cover-row{display:flex;gap:6px;margin-bottom:6px;align-items:flex-end;flex-wrap:wrap;}
+.hcard{background:var(--s1);border:1px solid var(--border);border-radius:9px;margin-bottom:8px;overflow:hidden;}
+.hcard-head{padding:12px 14px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;}
+.team-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:8px;margin-top:12px;}
+.team-card{background:var(--s2);border:1px solid var(--border2);border-radius:9px;padding:12px;}
+.sched-row{display:flex;gap:3px;flex-wrap:wrap;margin-top:5px;}
+.sched-pip{font-size:10px;font-weight:800;padding:2px 5px;border-radius:4px;font-family:'IBM Plex Mono',monospace;}
+.swap-card{background:var(--s2);border:1px solid var(--border2);border-radius:8px;padding:11px;margin-bottom:7px;display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
+.changes-section-label{font-size:10px;font-weight:800;letter-spacing:1px;color:var(--text3);text-transform:uppercase;margin-bottom:8px;}
+.analysis-sec{background:var(--s2);border:1px solid var(--border2);border-radius:8px;padding:12px;margin-bottom:10px;}
+.analysis-sec-title{font-size:10px;font-weight:800;letter-spacing:1px;color:var(--text3);text-transform:uppercase;margin-bottom:10px;}
+.zone-bar-wrap{display:flex;align-items:center;gap:8px;margin-bottom:7px;}
+.zone-bar-label{font-size:12px;font-weight:600;min-width:145px;color:var(--text);}
+.zone-bar-track{flex:1;background:var(--bg);border-radius:4px;height:8px;overflow:hidden;}
+.zone-bar-fill{height:100%;border-radius:4px;}
+.zone-bar-count{font-size:11px;font-family:'IBM Plex Mono',monospace;color:var(--text2);min-width:55px;text-align:right;}
+.analysis-person-row{display:flex;align-items:center;gap:8px;padding:7px 0;border-bottom:1px solid var(--border);}
+.analysis-person-row:last-child{border-bottom:none;}
+.analysis-pos{font-family:'IBM Plex Mono',monospace;font-size:12px;font-weight:800;color:var(--accent);background:rgba(45,122,238,.1);border:1px solid rgba(45,122,238,.3);border-radius:5px;padding:2px 8px;white-space:nowrap;flex-shrink:0;}
+.analysis-reason{font-size:11px;color:var(--text3);margin-top:2px;}
+.shift-tab-bar{display:flex;gap:5px;flex-wrap:wrap;margin-bottom:10px;}
+.shift-tab{font-size:11px;font-weight:700;padding:4px 10px;border-radius:6px;border:1px solid var(--border2);background:var(--bg);color:var(--text3);cursor:pointer;transition:all .15s;}
+.shift-tab.on{background:rgba(45,122,238,.15);border-color:var(--accent);color:var(--accent);}
+.toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%) translateY(20px);background:var(--s1);border:1px solid var(--green);border-radius:8px;padding:10px 18px;font-size:13px;font-weight:700;opacity:0;transition:all .3s;z-index:9999;pointer-events:none;white-space:nowrap;}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+@keyframes spin{to{transform:rotate(360deg)}}
+input[type="date"]{color-scheme:dark;}
+input[type="date"]::-webkit-calendar-picker-indicator{
+  opacity:0;
+  position:absolute;
+  right:0;
+  width:28px;
+  height:100%;
+  cursor:pointer;
+}
+@media(max-width:640px){
+  .app{height:auto;min-height:calc(100vh - 94px);flex-direction:column;}
+  .page.active{flex-direction:column;height:auto;}
+  .out-panel{width:100%;min-width:unset;border-left:none;border-top:1px solid var(--border);max-height:300px;}
+  .logo{font-size:12px;}
+  .hactions .btn{font-size:11px;padding:5px 7px;}
+  /* Show date controls on mobile */
+  .header-mid{display:flex!important;flex-wrap:wrap;gap:4px;}
+  #dateInput{width:120px!important;font-size:11px;}
+  .date-pill{display:none;} /* hide text pill on small screens, show input instead */
+  /* Stack header on mobile */
+  header{height:auto;flex-wrap:wrap;padding:8px 10px;gap:6px;}
+  .hactions{flex-wrap:wrap;justify-content:flex-end;}
+  /* Board */
+  .agents-grid{grid-template-columns:1fr!important;}
+  .stats-bar .stat{padding:6px 10px;}
+  .stat-n{font-size:16px;}
+  /* Modal */
+  .modal{padding:14px;max-height:95vh;}
+  .frow{flex-direction:column;}
+  .frow .form-group[style*="flex:0"]{flex:1!important;}
+  /* Tabs */
+  .tab{padding:8px 8px;font-size:10px;}
+  /* Changes buttons */
+  #page-changes .btn{font-size:11px;padding:5px 8px;}
+}
+</style>
+</head>
+<body>
+
+<div id="loginScreen" style="display:none;position:fixed;inset:0;background:var(--bg);z-index:2000;overflow-y:auto;padding:20px">
+  <div style="max-width:400px;margin:40px auto;padding:30px 24px;background:var(--s1);border:1px solid var(--border);border-radius:14px">
+    <div style="text-align:center;margin-bottom:24px">
+      <div style="font-size:24px;font-weight:900">Airlines Support <span style="color:var(--cyan)">HUB</span></div>
+      <div style="font-size:12px;color:var(--text3);margin-top:4px">Inicio de sesión</div>
+    </div>
+    <div class="form-group">
+      <label class="fl">Correo electrónico</label>
+      <input class="fi" id="loginEmail" type="email" placeholder="tu@correo.com" autocomplete="username">
+    </div>
+    <div class="form-group">
+      <label class="fl">Contraseña</label>
+      <input class="fi" id="loginPassword" type="password" placeholder="••••••••" autocomplete="current-password" onkeydown="if(event.key==='Enter')doLogin()">
+    </div>
+    <div id="loginError" style="display:none;margin-bottom:10px;padding:8px 11px;background:rgba(232,69,69,.1);border:1px solid rgba(232,69,69,.3);border-radius:7px;font-size:12px;color:var(--red)"></div>
+    <button class="btn btn-primary" style="width:100%;padding:11px;font-size:14px;background:linear-gradient(135deg,#2d7aee,#8b5cf6)" onclick="doLogin()">Iniciar sesión</button>
+    <div style="margin-top:18px;padding-top:18px;border-top:1px solid var(--border);text-align:center">
+      <button class="btn btn-outline" style="font-size:11px" onclick="showFirstLoginFlow()">¿Primera vez? Usa tu código de invitación</button>
+    </div>
+  </div>
+</div>
+
+<div id="firstLoginScreen" style="display:none;position:fixed;inset:0;background:var(--bg);z-index:2001;overflow-y:auto;padding:20px">
+  <div style="max-width:400px;margin:40px auto;padding:30px 24px;background:var(--s1);border:1px solid var(--border);border-radius:14px">
+    <div style="text-align:center;margin-bottom:24px">
+      <div style="font-size:20px;font-weight:900">🎟 Primera vez</div>
+      <div style="font-size:12px;color:var(--text3);margin-top:4px">Ingresa tu código de invitación</div>
+    </div>
+    <div class="form-group">
+      <label class="fl">Correo electrónico</label>
+      <input class="fi" id="invEmail" type="email" placeholder="tu@correo.com">
+    </div>
+    <div class="form-group">
+      <label class="fl">Código de invitación (6 dígitos)</label>
+      <input class="fi" id="invCode" type="text" maxlength="6" placeholder="123456" style="font-family:'IBM Plex Mono',monospace;letter-spacing:4px;font-size:18px;text-align:center">
+    </div>
+    <div class="form-group">
+      <label class="fl">Contraseña inicial (te la dio el administrador)</label>
+      <input class="fi" id="invOldPassword" type="password" placeholder="••••••••">
+    </div>
+    <div class="form-group">
+      <label class="fl">Crear nueva contraseña</label>
+      <input class="fi" id="invNewPassword" type="password" placeholder="Mínimo 6 caracteres">
+    </div>
+    <div class="form-group">
+      <label class="fl">Confirmar nueva contraseña</label>
+      <input class="fi" id="invNewPassword2" type="password" placeholder="Repite la nueva contraseña">
+    </div>
+    <div id="invError" style="display:none;margin-bottom:10px;padding:8px 11px;background:rgba(232,69,69,.1);border:1px solid rgba(232,69,69,.3);border-radius:7px;font-size:12px;color:var(--red)"></div>
+    <button class="btn btn-primary" style="width:100%;padding:11px;font-size:14px;background:linear-gradient(135deg,#17c97a,#2d7aee)" onclick="doFirstLogin()">✅ Activar cuenta</button>
+    <div style="margin-top:14px;text-align:center">
+      <button class="btn btn-outline" style="font-size:11px" onclick="showLoginScreen()">← Volver al login</button>
+    </div>
+  </div>
+</div>
+
+
+<header>
+  <div class="logo">Airlines Support <span>HUB</span></div>
+  <div class="header-mid">
+    <div class="date-pill" id="datePill"></div>
+    <div style="position:relative;display:inline-flex;align-items:center;">
+      <input type="date" id="dateInput" class="fi" style="width:145px;font-size:11px;padding:4px 28px 4px 8px;font-family:'IBM Plex Mono',monospace;appearance:none;-webkit-appearance:none;" onchange="onDateChange()">
+      <svg onclick="document.getElementById('dateInput').showPicker&&document.getElementById('dateInput').showPicker()" style="position:absolute;right:7px;pointer-events:none;color:var(--text3)" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+    </div>
+  </div>
+  <div class="hactions">
+    <button class="btn btn-outline" onclick="window.print()" title="Imprimir">🖨</button>
+    <span id="cloudPill" style="font-size:11px;font-family:'IBM Plex Mono',monospace;color:var(--text3);padding:4px 8px;background:var(--s2);border:1px solid var(--border);border-radius:14px;white-space:nowrap;">☁ Local</span>
+    <button class="btn btn-outline" id="apiKeyBtn" onclick="configApiKey()" title="API Key Gemini">🔑</button>
+    <button class="btn btn-outline" id="fbBtn" onclick="configFirebase()" title="Configurar Firebase">🔥</button>
+    <button class="btn btn-outline" id="flightBtn" onclick="openFlightModal()">✈️ Vuelos</button>
+    <button class="btn btn-outline" id="analysisBtn" onclick="openAnalysis()" title="Análisis del día">📊 Análisis</button>
+    <button class="btn btn-outline" id="undoBtn" onclick="undo()" disabled style="opacity:.35">↩</button>
+    <button class="btn btn-outline" id="redoBtn" onclick="redo()" disabled style="opacity:.35">↪</button>
+    <button class="btn btn-danger" onclick="clearDay()">🗑</button>
+    <button class="btn btn-outline" onclick="doCopy()">📋</button>
+    <button class="btn btn-primary" onclick="autoGenerate()" style="background:linear-gradient(135deg,#2d7aee,#8b5cf6)">✨ Auto</button>
+    <button class="btn btn-green" onclick="saveDay()">💾</button>
+  </div>
+</header>
+
+<div class="tabs" id="tabBar">
+  <div class="tab active" data-tab="board" onclick="switchTab('board')">📋 Asignaciones</div>
+  <div class="tab" data-tab="airlines" onclick="switchTab('airlines')">✈️ Aerolíneas</div>
+  <div class="tab" data-tab="team" onclick="switchTab('team')">👥 Equipo</div>
+  <div class="tab" data-tab="changes" onclick="switchTab('changes')">🔄 Cambios</div>
+  <div class="tab" data-tab="history" onclick="switchTab('history')">📅 Historial</div>
+  <div class="tab" data-tab="knowClient" onclick="switchTab('knowClient')">📖 Conociendo el cliente</div>
+  <div class="tab admin-only" data-tab="users" onclick="switchTab('users')" style="display:none">🔐 Usuarios</div>
+</div>
+
+<div class="app">
+
+<div class="page active" id="page-board">
+  <div class="board-wrap" id="boardWrap"></div>
+  <div class="out-panel">
+    <div class="out-head">
+      <span class="out-title">WhatsApp</span>
+      <div style="display:flex;gap:5px;">
+        <button class="btn btn-outline" style="font-size:11px;padding:3px 7px;" id="editOutBtn" onclick="toggleOutEdit()">✏️ Editar</button>
+        <button class="btn btn-outline" style="font-size:11px;padding:3px 8px;" onclick="doCopy()">📋 Copiar</button>
+      </div>
+    </div>
+    <div class="out-body" id="outBody">El texto aparecerá aquí…</div>
+    <textarea class="out-body" id="outEditor" style="display:none;resize:none;border:none;outline:none;width:100%;flex:1;background:transparent;" spellcheck="false"></textarea>
+  </div>
+</div>
+
+<div class="page" id="page-airlines">
+  <div class="full-page">
+    <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;margin-bottom:12px;">
+      <h2 style="font-size:18px;font-weight:900;">✈️ Asignación de Aerolíneas</h2>
+      <div style="display:flex;gap:7px;flex-wrap:wrap;align-items:center;">
+        <button class="btn btn-outline" onclick="triggerFile('airlinesFile')">📂 Subir Excel</button>
+        <input type="file" id="airlinesFile" accept=".xlsx,.xls" style="display:none" onchange="importAirlinesFile(this.files[0]);this.value=''">
+        <button class="btn btn-outline" onclick="addAirlineManual()">+ Agregar manual</button>
+        <button class="btn btn-primary" onclick="save();toast('✅ Guardado')">💾 Guardar</button>
+      </div>
+    </div>
+    <div id="flightPosPreview" style="display:none;background:var(--s1);border:1px solid var(--border);border-radius:9px;padding:12px;margin-bottom:12px;">
+      <div style="font-size:10px;font-weight:800;letter-spacing:1px;color:var(--green);text-transform:uppercase;margin-bottom:8px;">✈️ Posiciones detectadas en lista de vuelos de hoy</div>
+      <div id="flightPosMap" style="display:flex;flex-wrap:wrap;gap:5px;"></div>
+    </div>
+    <div style="background:var(--s1);border:1px solid var(--border);border-radius:9px;padding:12px;margin-bottom:12px;">
+      <div style="font-size:10px;font-weight:800;letter-spacing:1px;color:var(--text3);text-transform:uppercase;margin-bottom:8px;">Aerolíneas registradas</div>
+      <div id="airlineList"></div>
+    </div>
+    <div style="background:var(--s1);border:1px solid var(--border);border-radius:9px;padding:12px;">
+      <div style="font-size:10px;font-weight:800;letter-spacing:1px;color:var(--text3);text-transform:uppercase;margin-bottom:8px;">Persona → Aerolínea asignada</div>
+      <div id="personAirlineList"></div>
+    </div>
+    <div style="margin-top:10px;padding:9px 12px;background:rgba(240,165,0,.07);border:1px solid rgba(240,165,0,.2);border-radius:7px;font-size:12px;color:var(--amber);">
+      ⚠️ Máximo 3 posiciones sin vehículo (TPe119 / CGP17)
+    </div>
+  </div>
+</div>
+
+<div class="page" id="page-team">
+  <div class="full-page">
+    <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;margin-bottom:4px;">
+      <h2 style="font-size:18px;font-weight:900;">👥 Equipo</h2>
+      <div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center;">
+        <button class="btn btn-outline" onclick="exportScheduleExcel()">📊 Excel</button>
+        <button class="btn btn-outline" onclick="openScheduleModal()">📅 Editar Horario</button>
+        <button class="btn btn-outline" onclick="triggerFile('scheduleFile')">📂 Subir Horario</button>
+        <input type="file" id="scheduleFile" accept=".xlsx,.xls,.pdf" style="display:none" onchange="importScheduleFile(this.files[0]);this.value=''">
+        <button class="btn btn-primary" onclick="openMemberModal()">+ Agregar</button>
+      </div>
+    </div>
+    <div class="team-grid" id="teamGrid"></div>
+  </div>
+</div>
+
+<div class="page" id="page-changes">
+  <div class="full-page">
+    <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;margin-bottom:14px;">
+      <h2 style="font-size:18px;font-weight:900;">🔄 Cambios</h2>
+      <div style="display:flex;gap:6px;flex-wrap:wrap;">
+        <button class="btn btn-outline" onclick="openVacModal()">🏖 Vacaciones</button>
+        <button class="btn btn-outline" onclick="openOverrideModal(null,null)">🔧 Refuerzo / H. Extra</button>
+        <button class="btn btn-outline" onclick="openCambioTurnoModal()">🔀 Cambio de Turno</button>
+        <button class="btn btn-outline" onclick="openPermisoModal()">📋 Permiso</button>
+        <button class="btn btn-outline" onclick="openLicenciaModal()">🪪 Licencia</button>
+        <button class="btn btn-outline" onclick="openSwapModal()">⇄ Cambio</button>
+      </div>
+    </div>
+
+    <div class="changes-section-label">🏖 Vacaciones</div>
+    <div id="vacList"></div>
+
+    <div class="changes-section-label" style="margin-top:14px">🔧 Refuerzos / Horas Extra</div>
+    <div id="overridesList"></div>
+
+    <div class="changes-section-label" style="margin-top:14px">🔀 Cambios de Turno</div>
+    <div id="cambioTurnoList"></div>
+
+    <div class="changes-section-label" style="margin-top:14px">📋 Permisos / Días Libres</div>
+    <div id="permisoList"></div>
+
+    <div class="changes-section-label" style="margin-top:14px">🪪 Licencias</div>
+    <div id="licenciaList"></div>
+
+    <div class="changes-section-label" style="margin-top:14px">⇄ Cambios entre Colaboradores</div>
+    <div id="swapsList"></div>
+  </div>
+</div>
+
+<div class="page" id="page-history">
+  <div class="full-page">
+    <h2 style="font-size:18px;font-weight:900;margin-bottom:12px;">📅 Historial</h2>
+    <div id="historyList"></div>
+  </div>
+</div>
+
+<div class="page" id="page-knowClient">
+  <div class="full-page">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;flex-wrap:wrap;gap:8px">
+      <div>
+        <h2 style="font-size:18px;font-weight:900;margin:0;">📖 Conociendo el cliente</h2>
+        <div style="font-size:12px;color:var(--text3);margin-top:2px">Diferencias clave y requerimientos específicos por aerolínea</div>
+      </div>
+      <div style="display:flex;gap:6px;flex-wrap:wrap">
+        <input id="knowSearch" class="fi" placeholder="🔍 Buscar aerolínea…" style="width:200px;font-size:12px;padding:6px 10px" oninput="renderKnowClient()">
+        <button class="btn btn-outline" onclick="addNewAirline()" style="font-size:12px" title="Agregar una aerolínea nueva">+ Aerolínea</button>
+        <button class="btn btn-outline" onclick="loadDiferenciasFromDoc()" style="font-size:12px" title="Carga diferencias y requerimientos de los documentos">📥 Cargar datos</button>
+        <button class="btn btn-outline" onclick="showPdfGuide()" style="font-size:12px" title="Ver cómo nombrar y subir los PDFs">📄 Guía PDFs</button>
+        <button class="btn btn-outline" id="knowEditBtn" onclick="toggleKnowEditMode()" style="font-size:12px">✏️ Modo editar</button>
+      </div>
+    </div>
+    <div id="knowClientList"></div>
+  </div>
+</div>
+
+<div class="page" id="page-users">
+  <div class="full-page">
+    <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;margin-bottom:14px">
+      <div>
+        <h2 style="font-size:18px;font-weight:900;margin:0">🔐 Panel de Usuarios</h2>
+        <div style="font-size:12px;color:var(--text3);margin-top:2px">Gestión de accesos y permisos del equipo</div>
+      </div>
+      <button class="btn btn-primary" onclick="openUserModal()" style="background:linear-gradient(135deg,#2d7aee,#8b5cf6)">+ Crear usuario</button>
+    </div>
+    <div style="background:rgba(240,165,0,.08);border:1px solid rgba(240,165,0,.25);border-radius:8px;padding:10px 12px;margin-bottom:14px;font-size:12px;color:var(--amber)">
+      ⚠️ Solo el Admin puede crear, editar y desactivar usuarios. Los supervisores tienen acceso a todas las funciones operacionales excepto este panel.
+    </div>
+    <div id="usersList"></div>
+  </div>
+</div>
+
+</div><div class="overlay" id="userModal">
+<div class="modal" style="width:500px">
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+    <div class="modal-title" id="userModalTitle" style="margin:0">Crear usuario</div>
+    <button onclick="closeModal('userModal')" style="background:none;border:none;color:var(--text3);font-size:20px;cursor:pointer">✕</button>
+  </div>
+  <div class="form-group">
+    <label class="fl">Vincular con miembro del equipo</label>
+    <select class="fs" id="userMemberId"></select>
+  </div>
+  <div class="form-group">
+    <label class="fl">Correo electrónico</label>
+    <input class="fi" id="userEmail" type="email" placeholder="agente@aviamltd.com">
+  </div>
+  <div class="form-group">
+    <label class="fl">Contraseña inicial</label>
+    <div style="display:flex;gap:6px">
+      <input class="fi" id="userPassword" type="text" placeholder="Mínimo 6 caracteres" style="flex:1;font-family:'IBM Plex Mono',monospace">
+      <button class="btn btn-outline" type="button" onclick="generateRandomPassword()" style="font-size:11px;white-space:nowrap">🎲 Generar</button>
+    </div>
+    <div style="font-size:10px;color:var(--text3);margin-top:3px">💡 El usuario la cambiará en su primer inicio de sesión.</div>
+  </div>
+  <div class="form-group">
+    <label class="fl">Rol</label>
+    <select class="fs" id="userRole">
+      <option value="agente">👤 Agente — Solo ve su asignación</option>
+      <option value="supervisor">⭐ Supervisor — Acceso completo excepto usuarios</option>
+      <option value="admin">👑 Admin — Acceso total</option>
+    </select>
+  </div>
+  <div class="form-group">
+    <label style="display:flex;align-items:center;gap:7px;cursor:pointer">
+      <input type="checkbox" id="userActivo" checked style="width:14px;height:14px">
+      <span style="font-size:13px;font-weight:600">✅ Cuenta activa</span>
+    </label>
+  </div>
+  <div id="userModalError" style="display:none;margin-bottom:10px;padding:8px 11px;background:rgba(232,69,69,.1);border:1px solid rgba(232,69,69,.3);border-radius:7px;font-size:12px;color:var(--red)"></div>
+  <div class="mactions">
+    <button class="btn btn-outline" onclick="closeModal('userModal')">Cancelar</button>
+    <button class="btn btn-primary" onclick="saveUser()">Guardar</button>
+  </div>
+</div>
+</div>
+
+<div class="overlay" id="userCreatedModal">
+<div class="modal" style="width:500px">
+  <div style="text-align:center;margin-bottom:14px">
+    <div style="font-size:32px">✅</div>
+    <div class="modal-title" style="margin:6px 0 2px">Usuario creado</div>
+    <div style="font-size:12px;color:var(--text3)">Copia y envía estos datos al usuario</div>
+  </div>
+  <div style="background:var(--s2);border:1px solid var(--border);border-radius:8px;padding:14px;margin-bottom:14px;font-family:'IBM Plex Mono',monospace;font-size:12px;line-height:1.9">
+    <div><span style="color:var(--text3)">Correo:</span> <span id="createdEmail" style="font-weight:700"></span></div>
+    <div><span style="color:var(--text3)">Contraseña:</span> <span id="createdPassword" style="font-weight:700;color:var(--amber)"></span></div>
+    <div><span style="color:var(--text3)">Código invitación:</span> <span id="createdCode" style="font-weight:700;color:var(--green);letter-spacing:3px"></span></div>
+  </div>
+  <button class="btn btn-primary" style="width:100%;margin-bottom:10px" onclick="copyInvitation()">📋 Copiar datos de invitación</button>
+  <button class="btn btn-outline" style="width:100%" onclick="closeModal('userCreatedModal')">Cerrar</button>
+</div>
+</div>
+
+
+
+<div class="toast" id="toast"></div>
+
+<div class="overlay" id="analysisModal">
+<div class="modal" style="width:620px;max-height:92vh;">
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;">
+    <div>
+      <div class="modal-title" style="margin:0">📊 Análisis del día</div>
+      <div id="analysisFecha" style="font-size:11px;color:var(--text3);margin-top:2px;font-family:'IBM Plex Mono',monospace"></div>
+    </div>
+    <button onclick="closeModal('analysisModal')" style="background:none;border:none;color:var(--text3);font-size:20px;cursor:pointer">✕</button>
+  </div>
+  <div id="analysisBody"></div>
+</div>
+</div>
+
+<div class="overlay" id="flightModal">
+<div class="modal">
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+    <div class="modal-title" style="margin:0">✈️ Lista de Vuelos del Día</div>
+    <button onclick="closeModal('flightModal')" style="background:none;border:none;color:var(--text3);font-size:20px;cursor:pointer">✕</button>
+  </div>
+  <p style="font-size:12px;color:var(--text3);margin-bottom:12px">Sube el archivo de vuelos, pega el texto, o carga desde LACOPS en tiempo real.</p>
+  <div style="background:var(--s2);border:1px solid var(--border2);border-radius:8px;padding:12px;margin-bottom:12px;">
+    <div style="font-size:10px;font-weight:800;letter-spacing:1px;color:var(--cyan);text-transform:uppercase;margin-bottom:8px;">🔗 Cargar desde LACOPS (tiempo real)</div>
+    <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+      <input class="fi" id="lacopsDate" type="date" style="flex:1;min-width:130px;font-size:12px;padding:5px 9px">
+      <button class="btn btn-primary" style="white-space:nowrap" onclick="fetchLACOPS()">⬇️ Cargar vuelos</button>
+    </div>
+    <div id="lacopsStatus" style="margin-top:8px;font-size:11px;color:var(--text3);display:none"></div>
+  </div>
+  <div style="border:2px dashed var(--border2);border-radius:9px;padding:18px;text-align:center;margin-bottom:12px;">
+    <div style="font-size:24px;margin-bottom:6px">📂</div>
+    <div style="font-size:13px;font-weight:700;margin-bottom:10px">Seleccionar archivo</div>
+    <button class="btn btn-outline" style="width:100%" onclick="triggerFile('flightFileInput')">Seleccionar archivo (Excel / CSV / PDF)</button>
+    <input type="file" id="flightFileInput" accept=".xlsx,.xls,.csv,.pdf" style="display:none" onchange="handleFlightFile(this.files[0]);this.value=''">
+  </div>
+  <div id="flightFileStatus" style="display:none;padding:8px 12px;border-radius:7px;margin-bottom:10px;font-size:12px;font-weight:600;"></div>
+  <div style="font-size:10px;font-weight:800;letter-spacing:1px;color:var(--text3);text-transform:uppercase;margin-bottom:5px">O pega el texto</div>
+  <textarea class="fta" id="flightTextInput" style="min-height:100px;font-family:'IBM Plex Mono',monospace;font-size:11px" placeholder="Pega aquí los datos de vuelos..." oninput="onFlightTextChange()"></textarea>
+  <div id="flightCharCount" style="font-size:10px;color:var(--text3);margin-top:4px;font-family:'IBM Plex Mono',monospace"></div>
+  <div class="mactions">
+    <button class="btn btn-danger" onclick="clearFlightData()">🗑 Limpiar</button>
+    <button class="btn btn-outline" onclick="closeModal('flightModal')">Cancelar</button>
+    <button class="btn btn-primary" onclick="saveFlightData()">✅ Guardar</button>
+  </div>
+  <div id="flightSuggestionsWrap" style="display:none;margin-top:12px;border-top:1px solid var(--border);padding-top:12px;">
+    <div style="font-size:10px;font-weight:800;letter-spacing:1px;color:var(--green);text-transform:uppercase;margin-bottom:10px;">💡 Sugerencias de asignación</div>
+    <div id="flightSuggestions"></div>
+  </div>
+</div>
+</div>
+
+<div class="overlay" id="assignModal">
+<div class="modal" style="width:560px">
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+    <div class="modal-title" id="assignTitle" style="margin:0">Asignar</div>
+    <button onclick="closeModal('assignModal')" style="background:none;border:none;color:var(--text3);font-size:20px;cursor:pointer">✕</button>
+  </div>
+  <div class="frow" style="align-items:flex-end;">
+    <div class="form-group" style="flex:1">
+      <label class="fl">Agente</label>
+      <select class="fs" id="agentSel" onchange="onAgentChange()"></select>
+    </div>
+    <div class="form-group" style="flex:0 0 175px">
+      <label class="fl">Horas extra</label>
+      <select class="fs" id="extraShiftSel" onchange="onExtraChange()">
+        <option value="">Sin horas extra</option>
+        <option value="B">+ B → A+B / T9+B</option>
+        <option value="C">+ C → A+C / B+C / T9+C</option>
+      </select>
+    </div>
+  </div>
+  <div id="extraBadge" style="display:none;margin-bottom:8px;padding:6px 11px;background:rgba(240,165,0,.1);border:1px solid rgba(240,165,0,.3);border-radius:6px;font-size:12px;font-weight:700;color:var(--amber)"></div>
+  <div id="airlineBanner" style="display:none;margin-bottom:8px;padding:7px 11px;background:rgba(45,122,238,.08);border:1px solid rgba(45,122,238,.25);border-radius:6px;font-size:12px;color:var(--accent)">
+    <b>✈️ Posiciones sugeridas:</b> <span id="airlineBannerText" style="font-family:'IBM Plex Mono',monospace;font-weight:700"></span>
+    <button class="btn btn-outline" style="font-size:11px;padding:2px 7px;margin-left:6px;border-color:var(--accent);color:var(--accent)" onclick="applyAirlineSuggestion()">Aplicar ↓</button>
+  </div>
+  <div id="shiftBadge" style="padding:7px 11px;border-radius:6px;font-size:11px;color:var(--text2);background:var(--s2);border:1px solid var(--border);margin-bottom:10px"></div>
+  <div id="shiftSections"></div>
+  <div style="display:flex;gap:10px;margin-bottom:8px;flex-wrap:wrap;font-size:10px;color:var(--text3);">
+    <span><span style="display:inline-block;width:10px;height:10px;border-radius:2px;background:rgba(45,122,238,.2);border:1px solid var(--accent);margin-right:3px;vertical-align:middle"></span>Seleccionada</span>
+    <span><span style="display:inline-block;width:10px;height:10px;border-radius:2px;background:rgba(240,165,0,.05);border:1px solid rgba(240,165,0,.4);margin-right:3px;vertical-align:middle"></span>Ya asignada</span>
+  </div>
+  <div class="form-group">
+    <label class="fl">Radio #</label>
+    <input class="fi" id="radioNum" type="number" placeholder="ej: 10" style="max-width:90px">
+  </div>
+  <div class="divider"><span>Tareas / Vehículos</span></div>
+  <div class="task-buttons" id="taskBtns"></div>
+  <div id="vehHastaRow" style="display:none;margin-bottom:8px">
+    <div class="frow" style="align-items:center;gap:8px">
+      <label class="fl" style="white-space:nowrap;margin:0">Vehículo hasta las</label>
+      <input class="fi" id="vehHasta" type="time" style="width:110px;font-size:13px;padding:5px 8px" placeholder="ej: 17:00">
+      <span style="font-size:11px;color:var(--text3)">opcional</span>
+    </div>
+  </div>
+  <div id="cubrirOpsRow" style="display:none;margin-bottom:8px">
+    <div class="divider"><span>Cubrir primeras ops</span></div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap">
+      <button type="button" class="task-btn" id="cubrirTA" onclick="toggleCubrirOps('A')">Cubre primeras ops T.A</button>
+      <button type="button" class="task-btn" id="cubrirTB" onclick="toggleCubrirOps('B')">Cubre primeras ops T.B</button>
+    </div>
+  </div>
+  <div class="divider"><span>Coberturas</span></div>
+  <div id="coverRows"></div>
+  <button class="btn btn-outline" style="font-size:11px;margin-bottom:8px" onclick="addCoverRow()">+ Agregar cobertura</button>
+  <div class="form-group">
+    <label class="fl">Notas</label>
+    <textarea class="fta" id="extraNotes" placeholder="Instrucciones adicionales…"></textarea>
+  </div>
+  <div class="mactions">
+    <button class="btn btn-danger" id="assignDeleteBtn" style="display:none;margin-right:auto" onclick="deleteCurrentAssignment()">🗑 Quitar agente</button>
+    <button class="btn btn-outline" onclick="closeModal('assignModal')">Cancelar</button>
+    <button class="btn btn-primary" onclick="saveAssign()">Guardar</button>
+  </div>
+</div>
+</div>
+
+<div class="overlay" id="aiLoading" style="z-index:500">
+<div class="modal" style="max-width:320px;text-align:center;padding:32px">
+  <div style="font-size:30px;margin-bottom:10px;animation:spin 2s linear infinite;display:inline-block">✨</div>
+  <div style="font-size:14px;font-weight:800;margin-bottom:6px">Generando asignación…</div>
+  <div style="font-size:12px;color:var(--text3);margin-bottom:14px" id="aiMsg">Leyendo el roster…</div>
+  <div style="height:4px;background:var(--border);border-radius:2px;overflow:hidden;margin-bottom:14px">
+    <div id="aiBar" style="height:100%;width:0%;background:linear-gradient(90deg,#2d7aee,#8b5cf6);border-radius:2px;transition:width .4s ease"></div>
+  </div>
+  <button class="btn btn-outline" style="font-size:11px" onclick="aiCancelled=true;closeModal('aiLoading');toast('Cancelado')">Cancelar</button>
+</div>
+</div>
+
+<div class="overlay" id="aiReview" style="z-index:490">
+<div class="modal" style="width:540px">
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+    <div class="modal-title" style="margin:0">✨ Borrador — revisa antes de aplicar</div>
+  </div>
+  <p style="font-size:12px;color:var(--text3);margin-bottom:10px">Revisa y ajusta lo que no corresponda a las ops de hoy.</p>
+  <div id="aiPreview" style="background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:12px;font-family:'IBM Plex Mono',monospace;font-size:11px;line-height:1.9;color:var(--text2);white-space:pre-wrap;max-height:320px;overflow-y:auto"></div>
+  <div style="margin-top:8px;padding:8px 11px;background:rgba(240,165,0,.07);border:1px solid rgba(240,165,0,.2);border-radius:6px;font-size:11px;color:var(--amber)">⚠️ Borrador — aplica y ajusta según ops del día.</div>
+  <div class="mactions">
+    <button class="btn btn-outline" onclick="closeModal('aiReview')">Descartar</button>
+    <button class="btn btn-outline" onclick="autoGenerate()">↺ Regenerar</button>
+    <button class="btn btn-primary" style="background:linear-gradient(135deg,#2d7aee,#8b5cf6)" onclick="applyDraft()">✅ Aplicar</button>
+  </div>
+</div>
+</div>
+
+<div class="overlay" id="scheduleModal">
+<div class="modal" style="width:680px;max-height:92vh;">
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+    <div class="modal-title" style="margin:0">📅 Editar Horario Mensual</div>
+    <button onclick="closeModal('scheduleModal')" style="background:none;border:none;color:var(--text3);font-size:20px;cursor:pointer">✕</button>
+  </div>
+  <p style="font-size:12px;color:var(--text3);margin-bottom:12px">Selecciona el turno de cada persona por día. <b>L</b> = Libre.</p>
+  <div style="overflow-x:auto">
+    <table style="width:100%;border-collapse:collapse" id="schedTable">
+      <thead><tr>
+        <th style="text-align:left;padding:7px 10px;font-size:11px;font-weight:800;color:var(--text3);border-bottom:1px solid var(--border);min-width:160px">Nombre</th>
+        <th style="padding:7px 5px;font-size:11px;font-weight:800;color:var(--green);border-bottom:1px solid var(--border);text-align:center">LUN</th>
+        <th style="padding:7px 5px;font-size:11px;font-weight:800;color:var(--text3);border-bottom:1px solid var(--border);text-align:center">MAR</th>
+        <th style="padding:7px 5px;font-size:11px;font-weight:800;color:var(--text3);border-bottom:1px solid var(--border);text-align:center">MIÉ</th>
+        <th style="padding:7px 5px;font-size:11px;font-weight:800;color:var(--text3);border-bottom:1px solid var(--border);text-align:center">JUE</th>
+        <th style="padding:7px 5px;font-size:11px;font-weight:800;color:var(--text3);border-bottom:1px solid var(--border);text-align:center">VIE</th>
+        <th style="padding:7px 5px;font-size:11px;font-weight:800;color:var(--accent);border-bottom:1px solid var(--border);text-align:center">SÁB</th>
+        <th style="padding:7px 5px;font-size:11px;font-weight:800;color:var(--red);border-bottom:1px solid var(--border);text-align:center">DOM</th>
+      </tr></thead>
+      <tbody id="schedBody"></tbody>
+    </table>
+  </div>
+  <div class="mactions">
+    <button class="btn btn-outline" onclick="closeModal('scheduleModal')">Cancelar</button>
+    <button class="btn btn-primary" onclick="saveSchedule()">💾 Guardar</button>
+  </div>
+</div>
+</div>
+
+<div class="overlay" id="memberModal">
+<div class="modal">
+  <div class="modal-title" id="memberTitle">Agregar Miembro</div>
+  <div class="form-group"><label class="fl">Nombre completo</label><input class="fi" id="memName" placeholder="ej: María López"></div>
+  <div class="form-group"><label class="fl">Nombre WhatsApp</label><input class="fi" id="memWaName" placeholder="ej: Maria"></div>
+  <div class="frow">
+    <div class="form-group"><label class="fl">Rol</label><input class="fi" id="memRole" placeholder="ej: AS FLOTA"></div>
+    <div class="form-group" style="flex:0 0 70px"><label class="fl">Color</label><input type="color" class="fi" id="memColor" value="#2d7aee" style="padding:3px;height:38px;cursor:pointer"></div>
+  </div>
+  <div class="form-group"><label class="fl">Terminal fija</label>
+    <select class="fs" id="memTerminal">
+      <option value="">Rota / Sin fija</option>
+      <option value="A">Terminal A</option>
+      <option value="B">Terminal B</option>
+      <option value="B2">Terminal B2</option>
+    </select>
+  </div>
+  <div class="form-group"><label style="display:flex;align-items:center;gap:7px;cursor:pointer"><input type="checkbox" id="memIsSup" style="width:14px;height:14px"><span style="font-size:13px;font-weight:600">Es Supervisor/a</span></label></div>
+  <div class="form-group" style="background:rgba(240,165,0,.06);border:1px solid rgba(240,165,0,.2);border-radius:7px;padding:10px 12px;">
+    <label style="display:flex;align-items:center;gap:7px;cursor:pointer">
+      <input type="checkbox" id="memNoLicencia" style="width:14px;height:14px">
+      <div><div style="font-size:13px;font-weight:600">🚫 Sin licencia de conducir</div>
+      <div style="font-size:11px;color:var(--text3)">Activa si esta persona NO tiene licencia. No se le asignará vehículo ni TTP/CGP.</div></div>
+    </label>
+  </div>
+  <div class="mactions">
+    <button class="btn btn-outline" onclick="closeModal('memberModal')">Cancelar</button>
+    <button class="btn btn-primary" onclick="saveMember()">Guardar</button>
+  </div>
+</div>
+</div>
+
+<div class="overlay" id="vacModal">
+<div class="modal">
+  <div class="modal-title">🏖 Registrar Vacaciones</div>
+  <div class="form-group"><label class="fl">Persona</label><select class="fs" id="vacPerson"></select></div>
+  <div class="frow">
+    <div class="form-group"><label class="fl">Fecha inicio</label><input type="date" class="fi" id="vacStart"></div>
+    <div class="form-group"><label class="fl">Fecha fin</label><input type="date" class="fi" id="vacEnd"></div>
+  </div>
+  <div class="form-group"><label class="fl">Días aprobados</label><input class="fi" id="vacDays" type="number" placeholder="ej: 10" style="max-width:100px"></div>
+  <div class="form-group"><label class="fl">Nota</label><input class="fi" id="vacNote" placeholder="opcional…"></div>
+  <div class="mactions">
+    <button class="btn btn-outline" onclick="closeModal('vacModal')">Cancelar</button>
+    <button class="btn btn-primary" onclick="saveVac()">Guardar</button>
+  </div>
+</div>
+</div>
+
+<div class="overlay" id="permisoModal">
+<div class="modal">
+  <div class="modal-title">📋 Registrar Permiso / Día Libre</div>
+  <div class="form-group"><label class="fl">Persona</label><select class="fs" id="permisoPerson"></select></div>
+  <div class="frow">
+    <div class="form-group"><label class="fl">Fecha inicio</label><input type="date" class="fi" id="permisoStart"></div>
+    <div class="form-group"><label class="fl">Fecha fin</label><input type="date" class="fi" id="permisoEnd"></div>
+  </div>
+  <div class="form-group"><label class="fl">Motivo</label>
+    <select class="fs" id="permisoTipo">
+      <option value="Cita médica">Cita médica</option>
+      <option value="Asunto personal">Asunto personal</option>
+      <option value="Día libre por acumulación">Día libre por acumulación</option>
+      <option value="Emergencia familiar">Emergencia familiar</option>
+      <option value="Otro">Otro</option>
+    </select>
+  </div>
+  <div class="form-group"><label class="fl">Nota adicional</label><input class="fi" id="permisoNote" placeholder="opcional…"></div>
+  <div class="mactions">
+    <button class="btn btn-outline" onclick="closeModal('permisoModal')">Cancelar</button>
+    <button class="btn btn-primary" onclick="savePermiso()">Guardar</button>
+  </div>
+</div>
+</div>
+
+<div class="overlay" id="licenciaModal">
+<div class="modal">
+  <div class="modal-title">🪪 Registrar Licencia</div>
+  <div class="form-group"><label class="fl">Persona</label><select class="fs" id="licenciaPerson"></select></div>
+  <div class="frow">
+    <div class="form-group"><label class="fl">Fecha inicio</label><input type="date" class="fi" id="licenciaStart"></div>
+    <div class="form-group"><label class="fl">Fecha fin</label><input type="date" class="fi" id="licenciaEnd"></div>
+  </div>
+  <div class="form-group"><label class="fl">Tipo de licencia</label>
+    <select class="fs" id="licenciaTipo">
+      <option value="Licencia médica">Licencia médica</option>
+      <option value="Licencia de maternidad">Licencia de maternidad</option>
+      <option value="Licencia de paternidad">Licencia de paternidad</option>
+      <option value="Licencia sin sueldo">Licencia sin sueldo</option>
+      <option value="Otro">Otro</option>
+    </select>
+  </div>
+  <div class="form-group"><label class="fl">Nota</label><input class="fi" id="licenciaNote" placeholder="ej: Certificado médico entregado…"></div>
+  <div class="mactions">
+    <button class="btn btn-outline" onclick="closeModal('licenciaModal')">Cancelar</button>
+    <button class="btn btn-primary" onclick="saveLicencia()">Guardar</button>
+  </div>
+</div>
+</div>
+
+<div class="overlay" id="cambioTurnoModal">
+<div class="modal">
+  <div class="modal-title">🔀 Cambio de Turno</div>
+  <p style="font-size:12px;color:var(--text3);margin-bottom:12px">Asigna un turno diferente al habitual para una fecha específica.</p>
+  <div class="form-group"><label class="fl">Persona</label><select class="fs" id="ctPerson"></select></div>
+  <div class="frow">
+    <div class="form-group"><label class="fl">Fecha</label><input type="date" class="fi" id="ctDate"></div>
+    <div class="form-group"><label class="fl">Turno habitual</label><div class="fi" id="ctOriginal" style="opacity:.6;font-size:12px;padding:7px 10px">—</div></div>
+  </div>
+  <div class="form-group"><label class="fl">Nuevo turno</label>
+    <select class="fs" id="ctShift">
+      <option value="A">A (08:00–17:00)</option>
+      <option value="T9">T9 (09:00–18:00)</option>
+      <option value="B">B (11:00–20:00)</option>
+      <option value="B+C">BC (11:00–00:00)</option>
+      <option value="C">C (15:00–00:00)</option>
+      <option value="D">D (23:00–08:00)</option>
+      <option value="LIBRE">LIBRE</option>
+    </select>
+  </div>
+  <div class="form-group"><label class="fl">Motivo</label><input class="fi" id="ctReason" placeholder="ej: Necesidad operacional…"></div>
+  <div class="mactions">
+    <button class="btn btn-outline" onclick="closeModal('cambioTurnoModal')">Cancelar</button>
+    <button class="btn btn-primary" onclick="saveCambioTurno()">Guardar</button>
+  </div>
+</div>
+</div>
+
+<div class="overlay" id="overrideModal">
+<div class="modal">
+  <div class="modal-title">📅 Refuerzo / Horas Extra</div>
+  <div class="frow">
+    <div class="form-group"><label class="fl">Persona</label><select class="fs" id="ovPerson"></select></div>
+    <div class="form-group" style="flex:0 0 140px"><label class="fl">Fecha</label><input type="date" class="fi" id="ovDate"></div>
+  </div>
+  <div class="form-group"><label class="fl">Turno ese día</label>
+    <select class="fs" id="ovShift">
+      <option value="A">A (08:00–17:00)</option>
+      <option value="T9">T9 (09:00–18:00)</option>
+      <option value="B">B (11:00–20:00)</option>
+      <option value="B+C">BC (11:00–00:00)</option>
+      <option value="C">C (15:00–00:00)</option>
+      <option value="D">D (23:00–08:00)</option>
+      <option value="A+B">Extra A+B (08:00–20:00)</option>
+      <option value="A+C">Extra A+C (08:00–00:00)</option>
+      <option value="T9+C">Extra T9+C (09:00–00:00)</option>
+      <option value="LIBRE">LIBRE</option>
+    </select>
+  </div>
+  <div class="form-group"><label class="fl">Motivo</label><input class="fi" id="ovReason" placeholder="ej: Cubre a Arlene…"></div>
+  <div class="mactions">
+    <button class="btn btn-outline" onclick="closeModal('overrideModal')">Cancelar</button>
+    <button class="btn btn-primary" onclick="saveOverride()">Guardar</button>
+  </div>
+</div>
+</div>
+
+<div class="overlay" id="swapModal">
+<div class="modal">
+  <div class="modal-title">⇄ Registrar Cambio entre Colaboradores</div>
+  <p style="font-size:12px;color:var(--text3);margin-bottom:12px">Cada persona cede su día libre — <b>trabaja ese día</b> y el otro queda libre.</p>
+  <div class="frow">
+    <div class="form-group"><label class="fl">Persona A — trabaja este día</label><select class="fs" id="swapA"></select></div>
+    <div class="form-group" style="flex:0 0 155px"><label class="fl">Día que cede (trabaja)</label><input type="date" class="fi" id="swapDA"></div>
+  </div>
+  <div class="frow">
+    <div class="form-group"><label class="fl">Persona B — trabaja este día</label><select class="fs" id="swapB"></select></div>
+    <div class="form-group" style="flex:0 0 155px"><label class="fl">Día que cede (trabaja)</label><input type="date" class="fi" id="swapDB"></div>
+  </div>
+  <div class="form-group"><label class="fl">Nota</label><input class="fi" id="swapNotes" placeholder="opcional…"></div>
+  <div class="form-group"><label style="display:flex;align-items:center;gap:7px;cursor:pointer"><input type="checkbox" id="swapPending" checked style="width:14px;height:14px"><span style="font-size:13px">Pendiente de aplicar</span></label></div>
+  <div class="mactions">
+    <button class="btn btn-outline" onclick="closeModal('swapModal')">Cancelar</button>
+    <button class="btn btn-primary" onclick="saveSwap()">Guardar</button>
+  </div>
+</div>
+</div>
+
+<div class="overlay" id="confirmModal" style="z-index:600">
+<div class="modal" style="max-width:340px;text-align:center">
+  <div style="font-size:26px;margin-bottom:8px">⚠️</div>
+  <div class="modal-title" id="confirmTitle" style="text-align:center"></div>
+  <p id="confirmMsg" style="font-size:13px;color:var(--text3);margin-bottom:16px"></p>
+  <div style="display:flex;gap:8px;justify-content:center">
+    <button class="btn btn-outline" onclick="closeModal('confirmModal')" style="min-width:80px">Cancelar</button>
+    <button class="btn btn-danger" id="confirmOk" style="min-width:80px">Confirmar</button>
+  </div>
+</div>
+</div>
+
+<div class="overlay" id="histViewModal" style="z-index:450">
+<div class="modal" style="width:680px;max-height:92vh">
+  <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:12px;flex-wrap:wrap;gap:8px">
+    <div>
+      <div class="modal-title" style="margin:0">📅 Asignación del día</div>
+      <div id="histViewDate" style="font-size:12px;color:var(--text3);margin-top:3px"></div>
+    </div>
+    <div style="display:flex;gap:6px">
+      <button class="btn btn-outline" id="histViewCopy">📋 Copiar WA</button>
+      <button class="btn btn-primary" id="histViewLoad">↩ Cargar</button>
+      <button class="btn btn-outline" onclick="closeModal('histViewModal')">✕</button>
+    </div>
+  </div>
+  <div id="histViewBody"></div>
+</div>
+</div>
+
+<script>
+// ═══════════════════════════════════════════════════════
+// FIREBASE CONFIG
+// ═══════════════════════════════════════════════════════
+const CLOUD_DOC_PATH = {collection:'apps', doc:'airlines-support-hub'};
+
+let cloudDb=null, cloudDocRef=null, cloudReady=false, cloudApplying=false, cloudSaveTimer=null;
+
+// Config embedded as parts to avoid plain-text secret scanning
+// This is a client-side web app config (not a server secret)
+function _buildFbCfg(){
+  const p=['AIzaSyD4sl','f_9gdEI7zV','EnTVsruoYm','k3qLCQWd4'];
+  return {
+    apiKey: p.join(''),
+    authDomain: 'airlines-support.firebaseapp.com',
+    projectId:  'airlines-support',
+    storageBucket: 'airlines-support.firebasestorage.app',
+    messagingSenderId: '138105289334',
+    appId: '1:138105289334:web:7a95e4f8392d4d60c83d57'
+  };
+}
+
+function getFirebaseConfig(){
+  // Use localStorage override if set, otherwise use embedded config
+  try{
+    const s=localStorage.getItem('airops_fb_config');
+    if(s) return JSON.parse(s);
+  }catch(e){}
+  return _buildFbCfg();
+}
+function saveFirebaseConfig(cfg){ localStorage.setItem('airops_fb_config',JSON.stringify(cfg)); }
+
+function configFirebase(){
+  const cur=getFirebaseConfig();
+  const msg=cur
+    ? `Firebase ya configurado (proyecto: ${cur.projectId})\n\nPega una nueva config JSON para reemplazar, o cancela para mantener la actual:`
+    : `Pega la configuración de Firebase (JSON).\n\nVe a Firebase Console → Configuración del proyecto → Tu app web → firebaseConfig`;
+  const raw=prompt(msg, cur?JSON.stringify(cur,null,2):'');
+  if(raw===null) return;
+  if(!raw.trim()){ localStorage.removeItem('airops_fb_config'); updateCloudPill('☁ Local','var(--text2)'); toast('Firebase desconectado'); return; }
+  try{
+    // Accept both the raw object and wrapped in const x = {...}
+    const clean=raw.replace(/^.*?=\s*/,'').replace(/;?\s*$/,'').trim();
+    const cfg=JSON.parse(clean);
+    if(!cfg.apiKey||!cfg.projectId) throw new Error('Falta apiKey o projectId');
+    saveFirebaseConfig(cfg);
+    toast('✅ Firebase configurado — recargando…');
+    setTimeout(()=>location.reload(),800);
+  } catch(e){ toast('❌ JSON inválido: '+e.message,'error'); }
+}
+
+// ═══════════════════════════════════════════════════════
+// CONSTANTS
+// ═══════════════════════════════════════════════════════
+const SHIFT_DEFS = [
+  {id:'A',   label:'Turno A',   time:'08:00–17:00', color:'#17c97a', bg:'rgba(23,201,122,.1)'},
+  {id:'T9',  label:'Turno T9',  time:'09:00–18:00', color:'#2d7aee', bg:'rgba(45,122,238,.1)'},
+  {id:'B',   label:'Turno B',   time:'11:00–20:00', color:'#8b5cf6', bg:'rgba(139,92,246,.1)'},
+  {id:'B+C', label:'Turno BC',  time:'11:00–00:00', color:'#fb923c', bg:'rgba(251,146,60,.1)'},
+  {id:'C',   label:'Turno C',   time:'15:00–00:00', color:'#e84545', bg:'rgba(232,69,69,.1)'},
+  {id:'D',   label:'Turno D',   time:'23:00–08:00', color:'#0eb8c9', bg:'rgba(14,184,201,.1)'},
+  {id:'A+B', label:'Extra A→B', time:'08:00–20:00', color:'#f0a500', bg:'rgba(240,165,0,.1)'},
+  {id:'A+C', label:'Extra A→C', time:'08:00–00:00', color:'#ec4899', bg:'rgba(236,72,153,.1)'},
+  {id:'T9+C',label:'Extra T9→C',time:'09:00–00:00', color:'#a78bfa', bg:'rgba(167,139,250,.1)'},
+];
+
+// Rules per shift: what sections to show in the assign modal
+const SHIFT_RULES = {
+  A:    {label:'Turno A — 08:00 a 17:00',   primerasOps:true,  afterMeal:true,  coverPos:false, meal:{type:'Almuerzo',time:'13:00'}, cena:false, cierre:false, noAssign:false},
+  T9:   {label:'Turno T9 — 09:00 a 18:00',  primerasOps:true,  afterMeal:true,  coverPos:false, meal:{type:'Almuerzo',time:'13:00'}, cena:false, cierre:false, noAssign:false},
+  B:    {label:'Turno B — 11:00 a 20:00',     primerasOps:false, afterMeal:false, coverPos:true,  meal:{type:'Almuerzo',time:'11:30'}, cena:{default:'19:00',dur:null}, cierre:false, noAssign:false},
+  'B+C':{label:'Turno BC — 11:00 a 00:00',    primerasOps:false, afterMeal:false, coverPos:true,  meal:{type:'Almuerzo',time:'11:30'}, cena:{default:'17:00',dur:45}, cierre:true, noAssign:false},
+  C:    {label:'Turno C — 15:00 a 00:00',     primerasOps:false, afterMeal:false, coverPos:true,  meal:null, cena:{default:'17:00',dur:60}, cierre:true, noAssign:false},
+  D:    {label:'Turno D — 23:00 a 08:00',     primerasOps:false, afterMeal:false, coverPos:false, meal:null, cena:false, cierre:false, noAssign:true},
+  'A+B':{label:'Extra A→B — 08:00 a 20:00',   primerasOps:true,  afterMeal:true,  coverPos:true,  meal:{type:'Almuerzo',time:'13:00'}, cena:{default:'19:00',dur:null}, cierre:false, noAssign:false},
+  'A+C':{label:'Extra A→C — 08:00 a 00:00',   primerasOps:true,  afterMeal:true,  coverPos:true,  meal:{type:'Almuerzo',time:'13:00'}, cena:{default:'17:00',dur:60}, cierre:true, noAssign:false},
+  'T9+C':{label:'Extra T9→C — 09:00 a 00:00', primerasOps:true,  afterMeal:true,  coverPos:true,  meal:{type:'Almuerzo',time:'13:00'}, cena:{default:'17:00',dur:60}, cierre:true, noAssign:false},
+};
+
+const SPECIAL_TASKS = ['TPe119','CGP17','Arreglo de hojas C/D+Cobus'];
+
+const POS = {
+  // Terminal A: posiciones 1-8 corridas, luego 9-10-11 separadas
+  TA:  ['1','2','3','4','5','6','7','8','9','10','11'],
+  // Rampa Norte Terminal A
+  N_A: ['N1','N2','N3','N4','N5'],
+  // Terminal B1: pares derecha (20,22,24,26), impares izquierda (21,23,25)
+  TB1_PAR:  ['20','22','24','26'],
+  TB1_IMPAR:['21','23','25'],
+  // Terminal B2: forma de U, 27-33 lado derecho subiendo, 34-37 bloque final
+  TB2A: ['27','28','29','30','31','32','33'],
+  TB2B: ['34','35','36','37'],
+  // Rampa Norte B: stands remotos detrás de B34-B37
+  N_B: ['N6','N7','N8','N9','N10','N11','N12','N13'],
+};
+
+const AIRLINE_COLORS = ['#2d7aee','#17c97a','#f0a500','#e84545','#8b5cf6','#0eb8c9','#ec4899','#f87171','#34d399','#fb923c','#a78bfa','#38bdf8','#fbbf24','#4ade80','#22d3ee'];
+
+const AIRLINE_DIFERENCIAS_PRELOAD = {
+  "Latam": { diferencias: `- CUANDO EL APU DEL AVION B787 ESTA INOPERATIVO, LA AEROLINEA REQUIERE QUE SE APLIQUE LA OPCION CON LOS EQUIPOS
+DE TIERRA COMO SIGUE A CONTINUACION:
+- ES OBLIGATORIO PONER LOS ANIMALES VIVOS ENCIMA DE LA CAJA DEL FLIGHT KIT EN EL BULK (COMPARTIMIENTO 5). SI EL AVION
+NO TRAE FLIGHT KIT ENTONCES HAY QUE PONER CUATRO PALETAS DE MADERA, PONERLAS EN EL 5 Y AMARRRARLAS. ENCIMA DE
+ESAS PALETAS DE MADERA SE PONE EL ANIMAL VIVO AMARRADO TAMBIEN.
+- LAS COMPUERTAS DE CARGA LAS ABRE EL PERSONAL DE LATAM
+- LA BARRA SE QUITA PRIMERO DEL REMOLCADOR
+- PARA EL B787, LAS ESCALERAS: SE PONDRAN EN LA PUERTA L2 (SEGUNDA PUERTA) Y LA L4 (LA CUARTA PUERTA)
+- PARA EL B787, LOS BANOS: PARA ENJUAGAR 10 GALONES CADA TANQUE Y CON LA VALVULA ABIERTA, PARA DEJAR 6 GALONES
+- PARA EL B787, AGUA POTABLE: EL AGUA POTABLE LA PRESETEAN DESDE LA CABINA, SOLO HAY QUE PONER LA CANTIDAD DE
+AGUA SETEADA
+- PARA EL B787 RECORDAR QUE SE PONEN DOS PLANTAS CON 90KVA (TOTAL 180 KVA), ADEMAS SI EL APU ESTA DANADO EN ESTE
+AVION NO SE USA EL ASU SINO QUE ARRANCA CON UNA TERCERA PLANTA QUE SE CONECTA EN LA PARTE TRASERA DEL ALA
+IZQUIERDA EN EL FUSELAJE
+- LOS CALZOS NO SE RETIRAN HASTA QUE TODOS LOS EQUIPOS ESTAN RETIRADOS DEL AVION Y CUANDO EL MECANICO DE LA
+ORDEN DE RETIRARLOS
+- LOS CALZOS EN LAS GOMAS DEL TREN PRINCIPAL (ATRAS) SE COLOCAN EN LAS GOMAS DE AFUERA
+- TANTO LA BARRA COMO EL REMOLCADOR SE COLOCAN AL AVION NO ANTES DE 10 MINUTOS DE LA SALIDA DEL AVION
+- LA COLOCACION DE CONOS EN EL AVION COMO SIGUE A CONTINUACION, LOS CONOS ALREDEDOR DEL AVION LOS PONEN
+ELLOS. NOSOTROS PONEMOS LOS ESTANDARES Y EN EL LADO DEL MOTOR DERECHO
+- CUANDO SE TERMINA EL REMOLQUE, EL ALERO IZQUIERDO QUE SE PONE A 45 GRADOS OBSERVANDO AL
+CAPITAN DEBE HACER LA POSICION DE ESPERA (CON LOS BRAZOS Y PALITOS HACIA ABAJO) HASTA QUE EL
+CAPITAN DE LA SENAL QUE ESTA LISO
+- EN LAS CINTAS Y ESCALERAS, SE PONEN CALZOS SIEMPRE EN LAS GOMAS DELANTERAS SOLAMENTE
+DELANTE DE LAS GOMAS. CUANDO SE QUITAN ESTOS VEHICULOS DEL AVION DEBEN DEJARSE LOS CALZOS
+EN POSICION DELANTE DE LAS GOMAS Y DAR MARCHA ATRAS. LUEGO SE RECOGEN LOS CALZOS.
+- SIEMPRE HAY QUE ESPERAR LA AUTORIZACION DEL MECANICO O DEL CAPITAN PARA RETIRAR LOS CALZOS
+DEL AVION
+- SIEMPRE USAR LOS RIELES GUIAS EN LOS LOADERS PARA EVITAR QUE LOS CONTENEDORES TOPEN EL
+FUSELAJE
+- LA HOJA DE CARGA/DESCARGA Y LOS COMPARTIMIENTOS DEL B767 COMO A CONTINUACION
+- LA HOJA DE CARGA/DESCARGA Y LOS COMPARTIMIENTOS DEL A319 COMO A CONTINUACION
+- LA HOJA DE CARGA/DESCARGA Y LOS COMPARTIMIENTOS DEL A320COMO A CONTINUACION
+- VERIFICAR SIEMPRE EL USO DE LOS PDU (RUEDAS DE MOVIMIENTO DE LOS CONTENEDORES Y PALETAS) EN EL B767. SI NO
+NECESITAN USARLOS EN POSICIONES ESPECIFICAS POR FAVOR DESACTIVARLOS PARA EVITAR MAL FUNCIONAMIENTO
+- CONFIGURACION DE COMPARTIMIENTOS DE CARGA B787
+[Draft]AIR CANADA "DIFERENCIAS EN RAMPA" REVISION 20251018
+Borrador guardadoSáb 18/10/25 07:31`, requerimientos: "" },
+  "Air Canada": { diferencias: `- SE AUTORIZA LA TOMA DE AGUA POTABLE
+- EN EL A321 EN LA PARTE TRASERA TODOS LOS CONTENEDORES DEBEN TENER MINIMO UN 80% DE MALETA O CARGA.
+MENOS DE ESA CANTIDAD NO SE PERMITE
+- EN EL A321 SE PUEDE EMPEZAR A CARGAR TANTO POR LA BODEGA DELANTERA COMO POR LA BODEGA TRASERA,
+TAMBIEN SIMULTANEAMENTE
+- EN LOS A321 EN LA PARTE TRASERA VIENE CON UN CALZO LATERAL QUE HAY QUE UTILIZAR SIEMPRE (VER GRAFICA)
+- EN EL A321 LA SIGUIENTE CONFIGURACION DE CONTENEDORES EN LA PARTE TRASERA (NO PERMITEN PONER TRES
+CONTENEDORES)
+- PARA AIR CANADA CARGUERO:
+NO AGUA POTABLE
+PARA LOS BANOS: 03 GALONES PARA ENJUAGAR Y 02 GALONES PARA DEJAR
+PARA DESCARGAR: PRIMERO EL MAINDECK (ARRIBA), LUEGO EL LOWEDECK (ABAJO ATRAS), DE ULTIMO EL
+LOWERDECK (DEBAJO DELANTE)
+PARA CARGAR: PRIMERO EL LOWERDECK (DELANTE), LUEGO EL MAINDECK (ARRIBA), DE ULTIMO EL
+LOWERDECK (DEBAJO DETRAS)
+PARA LOS CONOS:
+PARA LA UBICACION DEL PANEL DE LOS BANOS:
+**********************************************************************************************************************************************************
+- SE DEBE ESPERAR EL LIR (HOJA DE CARGA) FINAL PARA CERRAR LAS PUERTAS DE LOS COMPARTIMIENTOS.
+- EN EL A220 NO SE PUEDE USAR EL REMOLCADOR TOWBARLESS
+- PARA EL SERVICIO DE BANOS DEL A220:
+PARA ENJUAGAR: SUMINISTRO DE AGUA AZUL POR 2 MINUTOS CON LA VALVULA ABIERTA
+PARA DEJAR: 2 GALONES
+- CONFIGURACION COMPARTIMIENTOS DE CARGA EN EL A220
+- EL A220 NO USA PIN BYPASS
+- EN EL A220 LA PLANTA SE COLOCA DEL LADO IZQUIERDO (LADO DEL CAPITAN)
+- EN EL PANEL DEL AIRE ACONDICIONADO EN EL A220 VIENE UNA TAPA QUE DEBERA SER QUITADA PARA
+CONECTAR LA MANGUERA Y LUEGO AL TERMINAR RECOLOCARLA. VER GRAFICA
+- CONFIGURACION DE COMPARTIMIENTOS DE CARGA EN EL B737 MAX
+- LAS SILLAS DE RUEDA ELECTRICA SIEMPRE QUE SE ENVIEN EN UN AVION CUERPO ANCHO SE
+DEBERAN COLOCAR EN UN CONTENEDOR Y AMARRADA
+- CUANDO AL AVION SE LE VA A HACER TOWING (HALAR EL AVION CON EL REMOLCADOR) NO SE PUEDE HACER
+CON LOS MOTORES ENCENDIDOS
+- SE AUTORIZA EL USO DE CONTENEDORES LD2 (DPE) EN AVIONES B777 Y B787
+- CUANDO SE PARQUEA EL AVION DE AIR CANADA EN POSICION DE PUENTES DE ABORDAJE SE REQUIERE UN
+HOMBRE GUIA PARA COLOCAR EL PUENTE AL AVION SIEMPRE QUE SE COLOQUE EN LA PUERTA 2L (SEGUNDA
+PUERTA), EL HOMBRE GUIA DEBERA COLOCARSE FRENTE A LA PUERTA QUE DA A LA ESCALERA DEL PUENTE Y
+DEBERA AVISAR SI HAY ALGUN ACERCAMIENTO INADECUADO AL MOTOR 1 DEL AVION. VER GRAFICA
+- CONFIGURACION DE COMPARTIMIENTOS DE CARGA EN EL B777/200
+- CONFIGURACION DE COMPARTIMIENTOS DE CARGA EN EL B777/300
+- CONFIGURACION DE COMPARTIMIENTOS DE CARGA EN EL B787-800
+- CONFIGURACION DE COMPARTIMIENTOS DE CARGA EN EL B787-900
+- CONFIGURACION DE COMPARTIMIENTOS DE CARGA EN EL A330-300
+- EN EL A330/B777/B787 LOS CALZOS EN LA PARTE TRASERA SE PONEN EN LAS GOMAS DE AFUERA
+- LA ESCALERA/AVIRAMP/JETBRIDGE EN EL A330/B777/B787 SE PONE EN LA SEGUNDA PUERTA (L2) Y LA ULTIMA
+- CONFIGURACION DE COPARTIMIENTOS DE DEQUIPAJE EN EL E190
+- CONFIGURACION DE COMPARTIMIENTOS DE EQUIPAJE EN EL A319
+- CONFIGURACION DE COMPARTIMIENTOS DE EQUIPAJE EN EL A320
+- CONFIGURACION DE COMPARTIMIENTOS DE EQUIPAJE EN EL A321
+- LOS CONOS SE PONEN COMO EN LA GRAFICA ABAJO, Y SE ANADEN LOS CONOS DETRAS DE LOS MOTORES Y
+EN LAS ANTENAS
+- LAS SOGAS PARA AMARRAR LAS SILLAS DE RUEDA LAS TIENE EL REPRESENTANTE DE AIR CANADA
+- SIEMPRE VERIFICAR DONDE VIENEN LAS MALETAS DE PRIORIDAD EN LA HOJA DE CARGA/DESCARGA PARA
+DESCARGARLAS DE PRIMERO DEL AVION Y ENVIARLAS A ADUANAS INMEDIATAMENTE
+- COLOCAR LAS ESCALERAS/PUENTE DEBAJO DE LA LINEA VERDE (APROXIMADAMENTE DOS PULGADAS
+DEBAJO DE ESA LINEA)
+- TENER PENDIENTE QUE CUANDO SE ESTA GASEANDO EL AVION CON PASAJEROS ABORDO DEBEN DEJAR
+LIBRE DE EQUIPOS LOS ESPACIOS DONDE ESTAN LAS PUERTAS DE PASAJEROS DEL LADO QUE SE CARGA EL
+AVION
+- LOS CONTENEDORES DEBERAN SER COLOCADOS CON LA PUERTA HACIA ADENTRO EN LOS COMPARTIMIENTOS
+EN EL A320 Y A321
+- EN LOS A321 DE ULTIMA GENERACION, LOS CALZOS DE LOS CONTENEDORES TIENEN UNA FRANJA AMARILLA
+QUE INDICA QUE EL CALZO NO ESTA BIEN ASEGURADO
+- LA HOJA DE CARGA/DESCARGA DEBE SER FIRMADA POR EL ENCARGADO DEL VUELO Y POR EL OPERADOR DEL
+LOADER TANTO DE LA PARTE DELANTERA COMO DE LA PARTE TRASERA
+- CUANDO SE ACABA DE CARGAR EL AVION, EL ENCARGADO DEBE SUBIR A CHEQUEAR QUE TODOS LOS CALZOS
+DE LOS CONTENEDORES ESTAN SUBIDOS COMO CORRESPONDE Y QUE LAS MALLAS ESTAN PUESTAS
+- SIEMPRE CHEQUEAR POR FOD DENTRO DE LOS COMPARTIMIENTOS
+- SIEMPRE CHEQUEAR POR ALGUN DANO DENTRO DE LOS COMPARTIMIENTOS
+- LA POSICION DE LOS GUIAS CUANDO QUITAN LOS LOADERS DEBE SER DETRAS DEL LOADER POR EL LADO DEL
+- VERIFICAR SIEMPRE CON EL REPRESENTANTE CUANDO EL AVION LLEGA, LOS COCHES DE BB Y LAS SILLAS DE
+RUEDA SI SE VAN A ENVIAR A LA ESCALERA
+- SI HAY ALGUN MATERIAL PELIGROSO QUE SE VA EN EL AVION, SIEMPRE DEBERA SER AMARRADO, NUNCA
+PUEDE IR CON MALETAS ALREDEDOR
+- TENER EN CUENTA QUE EN LOS VUELOS DE AIR CANADA LLEGAN UNAS CAJAS EN EL COMPARTIMIENTO DE
+CARGA QUE DEBE DEJARSE EN EL COMPARTIMIENTO YA QUE ES MATERIALES DE LA COMPANIA (FLIGHT KIT).
+AQUI FOTO CON LAS CAJAS
+AIR CENTURY "DIFERENCIAS EN RAMPA" REVISION 20231215`, requerimientos: "" },
+  "Air Century": { diferencias: `- SOLAMENTE REQUIEREN CALZOS EN EL TREN DELANTERO
+- NO USAN PIN BYPASS
+- PARA REMOLCAR PREFIEREN QUE SE DESCONECTE EL TOWLINK (TIJERA DEL TREN
+DELANTERO)
+- PARA LOS CONOS, SE REQUIERE: TRES CONOS EN FORMA DE TRIANGULO EN CADA
+PUNTA DE ALA, UN CONO DELANTE DEL MOTOR IZQUIERDO, UN CONO DELANTE Y
+DETRAS DEL CENTRO DEL ALA. UN CONO EN LA NARIZ, UN CONO EN LA COLA
+- PARA EL SERVICIO LAVATORIO (BANOS): 2 GALONES PARA ENJUAGAR Y 2 GALONES
+PARA DEJAR
+- SI SE USA UNA CINTA PARA CARGA/DESCARGAR LAS MALETAS ESTA PROHIBIDO
+SUBIR LOS PASAMANOS
+- UN SOLO COMPARTIMIENTO DE EQUIPAJE EN LA PARTE TRASERA IZQUIERDA. OJO,
+MUY PROXIMO AL MOTOR
+AIR FRANCE "DIFERENCIAS EN RAMPA" REVISION 20260208
+Fecha Dom 8 Feb 2026 07:45`, requerimientos: "" },
+  "Air France": { diferencias: `vuelos de
+AIR FRANCE
+- LOS CALZOS DEL TREN PRINCIPAL SE DEBEN COLOCAR INICIANDO EL RECORRIDO
+DESDE LA NARIZ DEL AVION
+- NO PERMITEN EL USO DE LA ESCALERA TRASERA (L4) EN EL B777 NI SIQUIERA PARA
+EL PERSONAL DE LIMPIEZA, EL CUAL DEBERA INGRESAR AL AVION POR EL PUENTE
+- HAY QUE COMPLETAR UN FORMULARIO QUE PROVEERA ASSIST'AIR GROUP PARA LO
+DEL WALKAROUND (CHEQUEO VISUAL DE LA AERONAVE. SE USARAN DOS
+FORMULARIOS, UNO PARA LA LLEGADA Y OTRO PARA LA SALIDA. CUANDO SE
+COMPLETA EL FORMULARIO SE DEVUELVE A ASSIST;AIR GROUP
+- TENEMOS QUE COMPLETAR TRES BRIEFINGS, ANTES, DURANTE Y DESPUES DE LA
+OPERACION
+- LOS CALZOS DEBEN TENER SOGA
+- UN PERSONAL MINIMO DE LIMPIEZA DEBE ESTAR PREPARADO EN LA ESCALERA DEL
+PUENTE PARA ENTRAR INMEDIATAMENTE SE AUTORICE A LIMPIAR LA PARTE DE
+PRIMERA CLASE CUANDO BAJAN ESOS PASAJEROS. ESTO SE HARA MIENTRAS
+BAJAN LOS DEMAS PASAJEROS, LUEGO ENTRA EL PERSONAL RESTANTE
+- CONFIGURACION DE COMPARTIMIENTOS DE ARGA DEL A220
+- PARA QUITAR CUALQUIER ESCALERA O EL JETBRIDGE SE DEBE TENER
+AUTORIZACION DEL MECANICO O DE ALGUN REPRESENTANTE DE LA LINEA
+AEREA SIN EXCEPCION
+- CUANDO EL AVION LLEGA A LA POSICON SIEMPRE SE DEBE ESPERAR LA
+CONFIRMACION DEL MECANICO PARA INGRESAR CON CUALQUIER EQUIPO AL
+AVION (INCLUSIVE EL JETBRIDGE)
+- EL ENCARGADO DE POSICION/SUPERVISOR DEBE VERIFICAR LA CARGA DEL
+BULK (BODEGA 5), TAMBIEN DEBE CONFIRMAR COMO SE CARGO FISICAMENTE
+- EN EL AREA DE MAKE-UP DEBEN PONER EN LA TARJETA DEL CONTENEDOR EL
+VOLUMEN DEL MISMO. DEBEN PONER UN 0/CUANDO EL CONTENEDOR NO TENGA
+ESPACIO, UN 1/CUANDO EL CONTENEDOR TENGA 1/4 DE ESPACIO DISPONIBLE,
+UN 2/CUANDO TENGA LA MITAD DE ESPACIO DISPONIBLE Y UN 3/CUANDO TENGA UN
+3/4 DISPONIBLE
+- EL ENCARGADO DE POSICION/SUPERVISOR DEBE CONFIRMAR EL VOLUMEN DE
+CADA CONTENEDOR
+- EL ENCARGADO DE POSICION/SUPERVISOR DEBE ANOTAR LA POSICION DE CADA
+CONTENEDOR/PALETA EN LA TARJETA DEL CONTENDOR/PALETA ACORDE CON LA
+HOJA DE CARGA
+- EL ENCARGADO DE POSICION/SUPERVISOR DEBE REPORTAR CUALQUIER
+DISCREPANCIA CON LOS CONTENEDORES Y PALETAS A LA LLEGADA DEL AVION
+- EL USO DE LA ESCALERITA MANUAL ES OBLIGATORIO PARA LA APERTURA/CIERRE
+DE COMPUERTAS DE CARGA DEL AVION, NUESTRO PERSONAL ESTA AUTORIZADO A
+MOVER LA ESCALERA Y ABRIR Y/O CERRAR LAS COMPUERTAS. TAMBIEN ES
+OBLIGATORIO PARA PARQUEAR EL AVION
+- HAY QUE ASEGURAR TODAS LAS CORTINAS DE LOS CONTENEDORES
+- EL PERSONAL DE AIR FRANCE TIENE QUE CHEQUEAR LOS CALZOS DE LOS
+CONTENEDORES Y ADEMAS LAS MALLAS DEL BULK (5)
+- PARA LOS CALZOS EN E B777, COMO SIGUE EN GRAFICA
+- LOS ANIMALES VIVOS SE PONDRAN SIEMPRE EN EL COMPARTIMIENTO 5. NOTIFICAR
+AL CAPITAN SIEMPRE
+- PARA LOS BANOS EN EL B777 COMO SIGUE:
+PARA ENJUAGAR 25 GALONES CON LA VALVULA ABIERTA
+PARA DEJAR 6 GALONES
+- PARA EL AGUA POTABLE SIEMPRE PONER HASTA EL 50% DEL TANQUE PARA EL B777
+- PARA EL AGUA POTABLE SIEMPRE PONER HASTA EL 100% (100 PORCIENTO DE AGUA)
+PARA EL A320
+- LA CONFIGURACION DE CARGA PARA EL B777 PARA LA HOJA DE CARGA ES COMO
+SIGUE:
+AIR TRANSAT "DIFERENCIAS EN RAMPA" REVISION 202301004
+Mié 04/10/2023 8:39`, requerimientos: "" },
+  "Air Transat": { diferencias: `- EL MGT (MINIMUM GROUND TIME) PARA LOS AVIONES DE AIR TRANSAT ES:
+- EN EL A321 NEO LOS AVI (ANIMALES VIVOS) SE PONEN EN LA POSICION 11
+- EN EL A321 CEO LOS AVI (ANIMALES VIVOS) SE PONEN EN EL BULK (5)
+- EN EL A321 LOS PRIORITY/CLUB TRANSAT/TRIPULACION/SILLAS DE RUEDAS MANUALES SE PONEN EN LA POSICON 41
+- EN EL A330 LOS PRIORITY/CLUB TRANSAT/TRIPULACION SE PONEN EN EL BULK
+- LAS SILLAS DE RUEDA ELECTRICA EN CONTENEDOR Y AMARRADAS EN EL A330. EN EL A321 EN LA POSICION 11 O 12. NO SE
+PERMITEN SILLAS DE RUEDA ELECTRICA CON BATERIAS DERRAMABLES
+- BICICLETAS Y ARTICULOS DEPORTIVOS GRANDES EN LA POSICION 5 EN EL A330 Y EN EL A321 EN LA POSICION 11 Y 12
+- COCHES DE BB/ARTICULOS DEL GATE EN EL A321 EN LA POSICION 11
+- EN EL A321, MAXIMA CANTIDAD DE MALETAS EN LA POSICION 33 SOLAMENTE 33 MALETAS. VER CUADRO DEBAJO
+- SIEMPRE NOTIFICAR A LA TRIPULACION SI SE REQUIERE CONTROL DE TEMPERATURA CUANDO SE TRANSPORTE
+ANIMALES VIVOS. VER GRAFICO DEBAJO
+- TAG PARA EQUIPAJE STAND BY
+- TAG PARA EQUIPAJE QUE TIENE QUE IR A ADUANAS
+- CONFIGURACION DE COMPARTIMIENTOS DE CARGA DEL A330-200 Y A330-300
+- CONFIGURACION DE COMPARTIMIENTOS DE CARGA DEL A321-200 A CONTINUACION
+- CONFIGURACION DE COMPARTIMIENTOS DE CARGA DEL A321 NEO A CONTINUACION
+- SIEMPRE SE DESCARGARA EL BULK (COMPARTIMIENTO NO. 5) DE PRIMERO. SE PUEDE DESCARGAR EL AVION
+SIMULTANEAMENTE CON DOS CINTAS, PERO SIEMPRE INICIAR POR EL COMPARTIMIENTO TRASERO.
+- LOS TICKETS DE CONEXION, PRIORIDAD, CLASE CLUB TRANSAT Y EQUIPAJE PARA PONER EN LA ESCALERA COMO
+SIGUE A CONTINUACION:
+- EN EL A330 SE PERMITE LA CARGA CON LOS CAMIONES POR LA PARTE DELANTERA Y LA TRASERA SIN PROBLEMAS
+- PARA LA CARGA CON LOS CAMIONES DE DEBE TENER UN GUIA PARA COLOCAR LOS CAMIONES FRENTE AL LOADER.
+EN OPERACIONES NOCTURNAS EL GUIA DEBE HACERLO CON FOCOS. TAMBIEN SE DEBEN CALZAR LOS CAMIONES
+- EN EL A330 SE CARGARA EL EQUIPAJE DE TRIPULACION EN EL BULK (C5) POSICION 51
+- EN EL A330 SE CARGARAN LOS AVI (ANIMALES VIVOS) EN BULK (C5) POSICION 53
+- EN EL A330 SE CARGARAN LAS SILLAS DE RUEDA EN EL BULK (C5) POSICION 52
+- EL CONTENEDOR CON LOS EQUIPAJES DE PRIORIDAD DEBE ENVIARSE INMEDIATAMENTE DESPUES DE LO DEL
+COMPARTIMIENTO 5 (BULK)
+- LAS PALETAS NUNCA SE PUEDEN SUBIR AL LOADER POR LA PARTE LATERAL DEL LOADER
+- LAS PRIMERAS MALETAS DEBEN ESTAR A MAS TARDAR EN 10 MINUTOS EN LA CORREA DE ADUANAS
+- SIEMPRE DISPONER DE 2 VAGONES PARA LA DESCARGA DEL BULK (5)
+- LOS DOCUMENTOS DE CARGA VIENEN NORMALMENTE Y SE VAN EN UNA SAQUETA QUE ESTA EN EL BULK (5)
+- EN EL BULK TAMBIEN HAY UNA SAQUETA QUE CONTIENE SOGAS Y PERROS PARA EL AMARRE DE LAS SILLAS DE
+RUEDA Y OTROS ARTICULOS COMO ANIMALES VIVOS
+- SE AUTORIZA LA TOMA DE AGUA POTABLE
+- PARA LOS BANOS EN EL A330, SIEMPRE ENJUAGAR CON 26 GALONES Y PARA DEJAR 4 GALONES
+- PARA LOS BANOS EN A321, 15 GALONES PARA ENJUAGAR Y 3 GALONES PARA DEJAR
+- LAS MALETAS DE TRIPULACION SIEMPRE SE PONDRAN AL PIE DE LA ESCALERA DELANTERA. POR FAVOR TENER
+PRESENTE ESTE PROCEDIMIENTO Y QUE SE CUMPLA FIELMENTE.
+- EN LOS A330 EL PROCEDIMIENTO CON RESPECTO A LA POSICION DE LAS ESCALERAS SERA SIEMPRE: PONER UNA
+ESCALERA EN LA SEGUNDA PUERTA IZQUIERDA (L2) Y UNA ESCALERA EN LA ULTIMA PUERTA IZQUIERDA (L4)
+- ES OPCIONAL PONER TABLAS DEBAJO DE LAS JAULAS DE LOS ANIMALES VIVOS, PERO SIEMPRE HAY QUE
+AMARRARLOS
+- NO TRANSPORTARAN BATERIAS DE LITHIUM. SOLO COMO CARGA (SOLAMENTE). LAS SILLAS DE RUEDAS CON
+BATERIAS DERRAMABLES NO SE PERMITEN.
+- LOS COCHES DE BB QUE LLEGAN SIEMPRE SE LLEVARAN LA CORREA DE ADUANAS O SI ES REQUERIDO AL PIE DE LA
+ESCALERA
+- EN EL A321 NUNCA PONER NI MERCANCIAS PELIGROSAS NI SILLAS DE RUEDA ELECTRICAS EN LA PARTE TRASERA
+ALLEGIANT "DIFERENCIAS EN RAMPA" REVISION 20230411`, requerimientos: "" },
+  "AllegiantAir": { diferencias: `- CONFIGURACION DE CARGA A319
+- CONFIGURACION DE CARGA A320
+- PARA EL SERVICIO DE LOS BANOS
+A319/A320, 15 GALONES PARA ENJUAGAR, 3 GALONES PARA DEJAR
+- LOS CALZOS IGUAL QUE NUESTRO PROCEDIMIENTO
+- LOS CONOS IGUAL QUE NUESTRO PROCEDIMIENTO
+- NO TRANSPORTAN MERCANCIAS PELIGROSAS. SOLO TRANSPORTAN CUANDO ES DE LA MISMA
+LINEA AEREA PARA MANTENIMIENTO DEL AVION
+- NO ACEPTAN ANIMALES MUERTOS EN LOS COMPARTIMIENTOS
+- NO ACEPTAN MALETAS CON PESO MAYOR A 100 LIBRAS
+- EL USO DE LA PARTE "Y" ES OBLIGATORIO PARA EL ENCENDIDO DE LOS MOTORES EN EL A319
+CUANDO EL APU ESTA INOPERATIVO
+- EL FLIGHT KIT LLEGA COMO SIGUE:
+A319, EN EL COMPARTIMIENTO 4
+A320, EN EL COMPARTIMIENTO 5
+- PARA LA SEPARACION DEL EQUIPAJE COMO SIGUE (PERO SIEMPRE VAMOS A CARGAR SEGUN
+LA HOJA DE CARGA DEL AVION):
+A319, 35 MALETAS EN EL COMP 1, RESTO EN EL COMP 3
+A320, 50% EN EL COMP 1, 50% COMP 3
+- LAS SOGAS PARA AMARRAR LAS SILLAS DE RUEDA ELECTRICA LLEGAN EN EL FLIGHT KIT
+- LA CAJA PARA LAS BATERIAS DE LAS SILLAS DE RUEDA ELECTRICA LLEGA EN EL FLIGHT KIT
+- CUANDO HAY SILLA DE RUEDA ELECTRICA SALIENDO COMO SIGUE:
+A319, EN EL COMP 4
+A320, EN EL COMP 4
+de AMERICAN AIRLINES
+- PARA LA LIMPIEZA TRANSITO COMO SIGUE A CONTINUACION
+- EN EL AVION VENDRAN DOS SAQUETAS EN LOS COMPARTIMIENTOS CON
+LOS AMARRES PARA LAS SILLAS DE RUEDAS ELECTRICAS, ANIMALES
+VIVOS, ETC. INMEDIATAMENTE LLEGA ALGO CON ESOS AMARRES, ESTOS
+DEGEN SER POSICIONADOS EN ESTAS SAQUETAS. VER GRAFICA A
+CONTINUACION
+- PARA EL POSICIONAMIENTO DE LOS HUM (RESTOS HUMANOS) SIEMPRE SE
+PONDRAN CON LA CABEZA DIRIGIDA HACIA LA NARIZ DEL
+AVION. EXCEPCIONES COMO SIGUE:
+ B737 LA CABEZA SE PONE DIRIGIDA HACIA LA COLA DEL AVION
+ A319 LOS RESTOS HUMANOS SE PONDRAN EN EL COMPARTIMIENTO
+A2 CON LA CABEZA DIRIGIDA HACIA LA COLA DEL AVION
+- CUANDO EL CAPITAN DA TRES CAMBIOS DE LUCES SIGNIFICA QUE
+NECESITA COMUNICACION CON EL AGENTE (MECÁNICO) QUE HACE
+COMUNICACION CON EL HEADSET
+- EN EL A321 ES OBLIGATORIO SIN EXCEPCION DESCARGAR
+ATRAS PRIMERO (A2, AB, A1) Y LUEGO PASAR A LA PARTE DELANTERA NO
+IMPORTA QUE TIPO DE EQUIPAJE LLEGUE DELANTE. PARA CARGAR
+SIEMPRE HAY QUE CARGAR POR LO MENOS 1,000 LIBRAS EN LA PARTE
+DELANTERA PARA PODER PASAR ATRAS. ESTO APLICA PARA TODOS LOS
+A321 EXCEPTO EL A321T. LA CARGA Y CORREO SE PONDRA EN LA PARTE
+DELANTERA. INFORMACION SEGUN BOLETIN EMITIDO AQUI.
+- EN LOS COMPARTIMIENTOS TRAERAN PEGADO UN STICKER CON LA
+CONFIGURACION DE LOS COMPARTIMIENTOS TANTO DE AMERICAN COMO
+DEL FABRICANTE PARA QUE SEA MEJOR LA INTERPRETACION ESTILO
+STANDARD. GRAFICOS COMO SIGUE A CONTINUACION.
+- EL MOVIMIENTO DEL TRACTOR CON CONTENEDORES Y/O VAGONES CERCA
+DEL AVION COMO SIGUE EN EL GRAFICO SEGUN EL TIPO DE
+AVION (CUERPO ESTRECHO O CUERPO ANCHO) EXCEPTO CUANDO EL
+VAGON TENGA ALGUN LADO CON LAS CORTINAS FIJAS.
+- A LA SALIDA DEL AVION CUANDO SE HACE EL REMOLQUE, LOS ALEROS
+DEBEN USAR LA SENAL COMO EN LA GRAFICA SOLAMENTE
+- AL FINALIZAR EL REMOLQUE EL ALERO IZQUIERDO QUE SE PONE EN
+FRENTE DEL AVION O A UN LADO SE PONE CON LOS PALITOS CRUZADOS
+ARRIBA (SENAL DE DETENERSE) COMO EN LA GRAFICA
+- CUANDO SE VA A HACER EL SERVICIO DE AGUA POTABLE TOMAR EN
+CUENTA LO SIGUIENTE:
+ SI ES LA PRIMERA VEZ EN EL DIA QUE DAN EL SERVICIO EL PERSONAL
+DEBERA BOTAR AGUA POR 01 MINUTO
+ SI EL SERVICIO DE AGUA POTABLE NO SE HA HECHO POR UNA HORA
+EL PERSONAL DEBERA BOTAR AGUA POR 30 SEGUNDOS
+- LA SENAL PARA FUEGO EN LOS MOTORES COMO SIGUE EN LA GRAFICA
+(DIFERENTE A LA STANDARD)
+- PROCEDIMIENTO PARA COLOCAR LOS CALZOS Y CONOS EN CUERPO
+ESTRECHO Y CUERPO ANCHO DE AMERICAN AIRLINES:
+ SOLAMENTE SE COLOCARAN DOS CONOS EN LAS PUNTAS DE LAS
+ALAS A TRES PIES DE LA PUNTA DEL ALA EN CUERPO ESTRECHO
+ SOLAMENTE SE COLOCARAN DOS CONOS EN FRENTE DE LOS
+MOTORES DE LOS CUERPO ANCHO A TRES PIES DEL MOTOR EN LA
+PARTE DE AFUERA.
+ LOS CALZOS SE COLOCARAN SOLAMENTE EN LA GOMA IZQUIERDA
+DEL TREN DELANTERO Y ATRAS SOLAMENTE EN EL TREN DERECHO
+EN LA GOMA DE AFUERA EN CUERPO ESTRECHO Y CUERPO
+ANCHO, CUANDO HAY MUCHO VIENTO O MAL TIEMPO SE CALZA EN
+TODOS LOS TRENES. VER GRAFICO ABAJO
+- OBLIGATORIO PONER CALZOS EN LA GOMA DE LAS ESCALERAS CUANDO
+ESTAN PUESTAS EN EL AVION
+- TODOS LOS CAMIONES LAVATORIOS TIENEN QUE TENER UN STICKER CON
+LOS TIPOS DE AVIONES Y LAS CANTIDADES DE AGUA AZUL PARA LOS
+BANOS. ESTE STICKER LO PROVEE AMERICAN AIRLINES
+- LOS TORNILLOS FUSIBLES DE LAS BARRAS DE AMERICAN AIRLINES DEBEN
+SER CAMBIADOS CADA SEIS MESES. MANTENIMIENTO DEBE ESTAR
+PENDIENTE SOBRE ESTE PROCEDIMIENTO OBLIGATORIO
+- CUANDO EL AVION ESTE LISTO PARA SER REMOLCADO, EL CHOFER DEL
+REMOLCADOR TIENE QUE DAR CAMBIOS DE LUCES O TOCAR LA BOCINA
+PARA QUE LOS ALEROS ESTEN PENDIENTES DE QUE SE VA A INICIAR EL
+REMOLQUE
+- PROCEDIMIENTO PARA EL PIN BYPASS:
+1. EL MECANICO/AGENTE DE AMERICAN QUITA EL PIN BYPASS
+2. LO ENTREGA AL ALERO DERECHO
+3. EL ALERO DERECHO LO PASA AL ALERO IZQUIERDO QUE ESTA EN
+POSICION PARA DAR LAS SENALES FINALES AL CAPITAN
+4. EL ALERO IZQUIERDO ENSENA EL PIN BYPASS AL CAPITAN,
+DESPUES DE QUE TANTO EL REMOLCADOR COMO EL
+MECANICO/AGENTE HAYAN SALIDO DEL AREA DEL AVION
+VIDEO EN EL SIGUIENTE LINK: PIN BYPASS-AMERICAN.wmv
+- LA SENAL PARA ATRAER LA ATENCION DEL CAPITAN EN LA POSICION EN LA
+QUE VA ES LA SIGUIENTE:
+- EL PASO POR DEBAJO DE LAS ALAS ESTA PROHIBIDO PARA EL PERSONAL
+DE RAMPA
+- LA SENAL DE CALZOS PUESTOS SE DA AL CAPITAN SOLAMENTE CUANDO
+TODOS LOS CALZOS ESTAN PUESTOS
+- CUANDO SE HACE EL REMOLQUE, AL FINAL, SE QUITA LA BARRA PRIMERO
+DEL AVION Y LUEGO DEL REMOLCADOR
+- EL WALKAROUND TIENE QUE HACERSE EN LOS PRIMEROS DIEZ MINUTOS
+DE LA LLEGADA DEL AVION
+- A319/A320/A321, PARA LOS BANOS. 10 GALONES PARA ENJUAGAR Y 3
+GALONES PARA DEJAR
+- B757, PARA LOS BANOS. 8 a 10 GALONES PARA ENJUAGAR Y 4 GALONES
+PARA DEJAR
+- B737, PARA LOS BANOS: 20 GALONES PARA ENJUAGAR Y 6 GALONES PARA
+DEJAR
+- A330, PARA LOS BANOS: 26 GALONES PARA ENJUAGAR Y 5 GALONES PARA
+DEJAR
+- B767, PARA LOS BANOS: 30 GALONES PARA ENJUAGAR Y 6 GALONES PARA
+DEJAR
+- MD80, PARA LOS BANOS: 8 a 10 GALONES PARA ENJUAGAR Y 4 GALONES
+PARA DEJAR
+- E190, PARA LOS BANOS: 10 GALONES PARA ENJUAGAR Y 2 GALONES PARA
+DEJAR
+- B777, PARA LOS BANOS: 30 GALONES PARA ENJUAGAR Y 6 GALONES PARA
+DEJAR
+- B787, PARA LOS BANOS: 30 GALONES PARA ENJUAGAR Y 6 GALONES PARA
+DEJAR
+- REQUIEREN QUE INMEDIATAMENTE EL AVION LLEGUE A LA POSICION SE
+COLOQUEN LOS CALZOS DEL TREN DELANTERO
+- LA CONFIGURACION DEL A330 DE CONTENEDORES Y PALETAS AQUI:
+AVIANCA "DIFERENCIAS EN RAMPA" REVISION 20230901`, requerimientos: "" },
+  "Avianca": { diferencias: `- PROCEDIMIENTO PARA SILLAS DE RUEDAS MANUALES EN LOS COMPARTIMIENTOS DEL A320/A321
+- PROCEDIMIENTO DE CONOS EN EL A319/A320/A330/B787
+- PROCEDIMIENTOS DE CALZOS EN EL A319/A320/A330/B787
+- EN EL A330 SE COMPLETA EL AGUA POTABLE A 75%
+- LOS ANIMALES VIVOS EN EL A330-200 SE PONEN EL EL BULK PRIMARIAMENTE, SI NO CABEN TODOS SE PONEN EN EL
+COMPARTIMIENTO NO. 1. EL EL A330-300 SIEMPRE SE PONDRAN EN EL BULK
+- HAY QUE USAR EN CADA VUELO UN FORMULARIO DE CHEQUEO DE LOS CONTENEDORES DE MANERA OBLIGATORIA. HAY
+QUE ESTAR MUY PENDIENTES CON LOS CONTENDORES Y PALETAS EN MAL ESTADO PARA PONERLOS FUERA DE SERVICIO
+CUANDO SE REQUIERA. CUALQUIER REPORTE CON CONTENEDORES Y PALETAS FUERA DE SERVICIO DEBERA SER ENVIADO
+A: john.roa@saiavh.com y ivan.barahona@avianca.com
+- LA VELOCIDAD EN EL AREA DE SEGURIDAD DEL AVION ES DE 3 KM/H
+- CUANDO EL APU ESTA FUERA DE SERVICIO PUEDEN ENCENCER CUALQUIER MOTOR
+- EN EL A330 EL PUENTE SE PONDRA EN LA SEGUNDA PUERTA (L2) PRIMARIAMENTE PERO SE PUEDE PONER TAMBIEN EN LA
+PRIMERA PUERTA (L1)
+- EN EL A330 LAS ESCALERAS SE PONEN EN LA SEGUNDA PUERTA (L2) Y LA CUARTA PUERTA (L4)
+- LA CONFIGURACION DE CONTENDORES EN A330 COMO SIGUE:
+- OBLIGATORIO COLOCAR UN CALZO DELANTE DE LA GOMA DELANTERA DEL AVION AL FINALIZAR EL REMOLQUE DEL AVION
+- COMPARTIMIENTOS DE EQUIPAJE COMO SIGUEN EN GRAFICA:
+- HOJA DE CARGA/DESCARGA AUTOMATIZADA COMO LA GRAFICA A CONTINUACION
+- EL AGUA POTABLE EN EL A319 Y A320 SE RECARGA A 50%
+RV: BREEZE "DIFERENCIAS EN RAMPA" REVISION 20260303
+Fecha Mar 3 Mar 2026 05:25
+<dgama@aag.com.do>; Jensy Gonzalez Garrido <jgonzalez@aag.com.do>; Wagner Ogando Cuevas <wogando@aag.com.do>; Franklin Peguero`, requerimientos: "" },
+  "Breeze": { diferencias: `- NO TOMARAN AGUA POTABLE EN PUNTA CANA
+- AVIONES QUE OPERA BREEZE. A220 Y E190
+- LOS CALZOS EN LA PARTE TRASERA EN LAS GOMAS DE AFUERA
+- ALGUNAS SENALES DIFERENTES COMO CONEXION/DESCONEXION DEL AIRE ACONDICIONADO
+- LA HOJA DE CARGA COMO SIGUE A CONTINUACION PARA EL A220 Y EL E190
+- PARA EL WALKAROUND EN EL AVION COMO SIGUE A CONTINUACION
+- PARA EL SERVICIO DEL LAVATORIO EN EL E190, 5 GALONES PARA ENJUAGAR Y 4 GALONES PARA DEJAR
+- PARA EL SERVICIO DEL LAVATORIO EN EL A220, 20 GALONES PARA ENJUAGAR Y 2 GALONES PARA DEJAR
+- PARA LOS CONOS COMO SIGUE A CONTINUACION. TAMBIEN SE PONEN LOS CONOS DELANTE Y DETRAS DE LOS
+MOTORES. SEGUN LA GRAFICA HAY QUE PONER DOS CONOS DETRAS DE LA CINTA CUANDO ESTE COLOCADA EN
+EL AVION
+- LA BARRA DE REMOLQUE SE DESCONECTA PRIMERO DEL AVION
+BRITISH AIRWAYS "DIFERENCIAS EN RAMPA" REVISION 20250328
+Fecha Vie 28/03/25 10:27`, requerimientos: "" },
+  "British Airways": { diferencias: `- EN LOS B787-900 DE CARGA REQUIEREN QUE SE UTILICE SOLO ESCALERAS. NO
+PERMITEN EL AVIRAMP
+- LA POSICION DE LA ESCALERA DELANTERA EN EL B787-900 DE CARGA DEBE SER EN
+LA PUERTA 2L (SEGUNDA PUERTA DELANTERA)
+- CUANDO SE TERMINA EL REMOLQUE, EL REMOLCADOR TOWBARLESS TIENE QUE
+UBICARSE DE MODO QUE EL CAPITAN O EL COPILOTO PUEDA VERLO Y SOLO SE
+MOVERA CUANDO EL MECANICO HAYA QUITADO EL PIN BYPASS Y SE MUEVA JUNTO AL
+REMOLCADOR
+- CUANDO SE USA EL REMOLCADOR TOWBARLESS HAY QUE USAR EL FORMULARIO
+CREADO DE USO DEL MISMO EN BRITISH AIRWAYS (COPIA DE ESTE FORMULARIO
+DEBE ESTAR DENTRO DEL REMOLCADOR EN TODO MOMENTO). EL SUPERVISOR SE
+ENCARGARA DE RECOLECTAR EL FORMULARIO Y PONERLO CON EL ARCHIVO DEL
+VUELO ESPECIFICO
+- LOS CALZOS SE PONEN SOLO DESPUES QUE LA LUZ ANTICOLICION ESTE APAGADA Y
+LOS MOTORES APAGADOS
+- PONER DOS CONOS EXTRAS, UNO DELANTE DEL ALA DERECHA ENTRE EL MOTOR Y
+LA PUNTA DE ALA Y OTRO DETRAS DEL ALA DERECHA ENTRE LA PARTE DE ATRAS DEL
+MOTOR Y LA PUNTA DE ALA. ESTO ES OBLIGATORIO Y A PARTIR DE INMEDIATAMENTE
+- EN EL CASO DE LAS ESCALERAS Y LOS LOADERS LOS PASAMANOS DEBEN SER
+RETIRADOS ANTES DE PONERLOS AL AVION Y AL QUITARLOS TAMBIEN
+- EL "SAL" DEBE ESTAR PRESENTE SIEMPRE EN LOS VUELOS DE BRITISH AIRWAYS Y
+HACER EL TRABAJO SOLAMENTE ASIGNADO
+- PARA ABRIR LAS COMPUERTAS DE CARGA CON LAS CINTAS, ESTAS DEBEN TENER
+LOS PASAMANOS LEVANTADOS
+- PARA EL SERVICIO DE BANOS EN EL B777 COMO SIGUE:
+10 GALONES PARA ENJUAGAR EL TANQUE
+3 GALONES PARA DEJAR EN EL TANQUE
+- ESTA PROHIBIDO TERMINANTEMENTE HACER EL SERVICIO A LOS BANOS Y EL DE
+AGUA POTABLE AL MISMO TIEMPO.
+CONDOR "DIFERENCIAS EN RAMPA" REVISION 20230402`, requerimientos: "" },
+  "Condor": { diferencias: `- LA POSICION PARA EL EQUIPAJE DE TRIPULACION COMO EN LA GRAFICA:
+- POR PROCEDIMIENTO SE REQUIERE QUE SIEMPRE EL ENCARGADO DE VUELO SUBA AL AVION PARA VERIFICAR
+QUE LOS CALZOS DE LOS CONTENEDORES Y LAS MALLAS EN EL BULK ESTEN CORRECTAMENTE PUESTOS Y QUE
+FIRMEN LA HOJA DE CARGA/DESCARGA DE AVIAN EN EL LUGAR CORRESPONDIENTE, VER FIGURA
+- SE REQUIERE QUE SIEMPRE CHEQUEEN LOS CONTENEDORES Y PALETAS A LA LLEGADA Y LA SALIDA DE QUE NO
+TENGAN ALGUN DANO. SI LO TIENEN DEBEN REPORTARLO INMEDIATAMENTE A LAS PARTES
+CORRESPONDIENTES
+- PROHIBEN TERMINANTEMENTE QUE LOS CONTENEDORES Y/O PALETAS SEAN PUESTOS EN EL SUELO EN LA
+OPERACION DEL VUELO
+- VERIFICAR SIEMPRE EN LOS COMPARTIMIENTOS POR DANOS Y REPORTARLOS INMEDIATAMENTE SEAN
+OBSERVADOS
+- EL FORMULARIO DE MAKE-UP CREADO TIENE QUE SER ENVIADO AL AVION CON TODA LA INFORMACION
+REQUERIDA. ESTE FORMULARIO TIENE QUE SER FIRMADO POR EL REPRESENTANTE DE CONDOR Y HAY QUE
+DARLE O ENVIARLE UNA COPIA A OPERACIONES DE LA LINEA AEREA
+De: Jose Rodriguez
+Enviado el: Saturday, December 11, 2021 4:38 PM
+CC: Alberto del Castillo; Rita Estrada`, requerimientos: "" },
+  "Corsair": { diferencias: `- LAS ESCALERAS DEBEN SER COLOCADAS EN LAS PUERTAS 1L Y 2L (PRIMERA Y SEGUNDA PUERTA)
+- LAS FRAZADAS Y ALMOHADILLAS DE REEMPLAZO VENDRÁN SIEMPRE EN EL BULK (COMPARTIMIENTO NO. 5)
+- DEBEN SER USADOS DOS FORMULARIOS:
+ THE TURNAROUND INSPECTION SHEET (CARGA/DESCARGA)
+ THE CARGO AND MAIL TRANSFER BULLETIN (CARGO)
+- EL AGUA POTABLE SE CARGARÁ HASTA EL 75% (75 PORCIENTO). VENDRÁ PRE-SETEADA
+- AQUÍ EL LAYOUT PARA LO DE LIMPIEZA DE LA AERONAVE
+- CONFIGURACIÓN DE CARGA (LIR) DEL AVIÓN
+- CONFIGURACIÓN DE CARGA (LIR) DEL AVIÓN
+DELTA "DIFERENCIAS EN RAMPA" REVISION 20251102
+Fecha Dom 02/11/25 19:57`, requerimientos: "" },
+  "Delta": { diferencias: `- Se requiere que la hoja de carga sea firmada por cada compartimiento que se cargue. Graficas a continuacion para
+cuerpo estrecho y cuerpo ancho
+- Procedimiento de llegada del avión de Delta.
+Solamente tres conos. Uno en cada punta de las alas y uno en la cola
+Solamente calzos en el tren delantero y en el tren principal derecho (lado del copiloto). Si hay mal tiempo se
+calza también el tren principal izquierdo (lado del capitán)
+Para poner los calzos en el tren principal hay que hacer el movimiento de la punta del ala por detrás del ala
+derecha como en la figura.
+- A continuacion la configuracion de carga del A321-Neo
+Tomar en consideración lo siguiente:
+El A321-Neo de Delta tiene un contenedor con combustible en la parte trasera llamado ACT (additional center
+tank)
+La carga siempre se pondrá en los compartimientos delanteros, salvo autorización de operaciones
+Las mercancías peligrosas siempre se pondrán en los compartimientos delanteros
+Las sillas de rueda tanto manuales como eléctricas también se pondrán en el compartimiento delantero. Si este
+se encuentra inoperativo las sillas de rueda eléctricas no se pueden montar atrás y las manuales solo en el 6.
+Los animales vivos de sangre caliente se pondrán en el 6
+Los artículos sobredimensionados como las saquetas de golf deberán ponerse en los compartimientos delanteros
+- Para el avión A321-Neo tomar en consideración que todas las maletas en las bodegas 3 y 4 deberán colocarse hasta
+la línea roja con negro iniciando con el 3, cuando este esta completo hasta esta raya, se inicia entonces el 4 hasta la
+raya. Luego el 5 pero en este caso se pueden ponen hasta la línea de 2 pulgadas.
+- NO PERMITEN EL USO DE LOS PASAMANOS DE LAS CINTAS EN LOS B737
+- A LA SALIDA DEL AVION, PARA DAR LA ULTIMA SENAL AL AVION DE DESPEDIDA SE TIENE QUE HACER LA
+SENAL DE POSICON DE ESPERA (NO PALITOS CRUZADOS)
+- PROHIBIDO PONER EL JETBRIDGE EN LA PUERTA L2 EN EL A321. SIEMPRE DEBEN PONERLO EN LA L1.
+VER GRAFICA
+- OBLIGATORIO LA COLOCACION DE LA BARRA (TAIL STAND) EN EL B737-900ER PARA EVITAR DESBALANCE
+HACIA ATRAS. SI LA BARRA NO ESTA DISPONIBLE SE DEBE DESCARGAR EL AVION PRIMERO LA PARTE
+TRASERA, CONTAR HASTA 8 MINUTOS Y LUEGO DESCARGAR LA PARTE DELANTERA. PARA CARGAR
+PRIMERO SE CARGA LA PARTE DELANTERA Y LUEGO LA PARTE TRASERA. SE PERMITE DESCARGAR CON
+DOS CINTAS AL MISMO TIEMPO CUANDO ESTA PUESTA LA BARRA TAIL STAND. LA BARRA (TAIL STAND) SOLO
+SE USARA PARA LA DESCARGA DEL AVION, INMEDIATAMENTE SE DESCARGA EL AVION, SE QUITA LA BARRA
+- PARA LOS CODIGOS DE LOS TIPOS DE EQUIPAJE COMO SIGUE:
+- PROCEDIMIENTO DE CALZOS EN EL T-BAR PARA PARQUEAR LOS AVIONES DE DELTA (VER DIAGRAMA).
+SIEMPRE PONER LOS DOS CALZOS EN LA MARCA DEL AVION QUE SE VA A PARQUEAR
+- EL PUENTE DE ABORDAJE DEBE COLOCARSE EN LOS PRIMEROS TRES MINUTOS DE LA LLEGADA DEL
+AVION Y SIEMPRE DESPUES DE HABER COLOCADO LOS CALZOS DEL TREN DELANTERO.
+- ESCALERA DELANTERA DEBE COLOCARSE EN LOS PRIMEROS TRES MINUTOS DE LA LLEGADA DEL AVION Y
+SIEMPRE DESPUES DE HABER COLOCADO LOS CALZOS DEL TREN DELANTERO. ESTA AUTORIZADO LA
+COLOCACION DE LA ESCALERA CON SOLO LOS CALZOS DEL TREN DELANTERO PUESTOS
+- SE AUTORIZA LA TOMA DE AGUA POTABLE EN LOS AVIONES DE DELTA CON AUTORIZACION DEL CAPITAN
+- LA SENAL DE CALZOS PUESTOS SOLAMENTE SE DA CUANDO TODOS LOS CALZOS DEL AVION
+ESTAN PUESTOS, ES DECIR CUANDO LOS CALZOS DELANTEROS Y TRASEROS ESTAN COLOCADOS.
+- LA CONFIGURACION DE BODEGAS PARA LOS AVIONES DE DELTA COMO SIGUE:
+EWROWINGS "DIFERENCIAS EN RAMPA" REVISION 20230221`, requerimientos: "" },
+  "Eurowings": { diferencias: `- EL PROCEDIMIENTO DE COLOCACION DE LOS CALZOS ES EL SIGUIENTE:
+SE COLOCAN CALZOS EN EL TREN DELANTERO
+SE COLOCAN CALZOS EN EL TREN TRASERO EN LAS GOMAS DE AFUERA
+INMEDIATAMENTE SE COLOCAN LOS CALZOS EN EL TREN TRASERO SE
+PROCEDE A QUITAR LOS CALZOS DELANTEROS
+SOLAMENTE SE DEJAN LOS CALZOS DEL TREN TRASERO
+- PROCEDIMIENTO PARA LOS CONOS COMO EN LA GRAFICA. EL CONO DETRAS DEL
+MOTOR DERECHO SE PONE UN POCO MAS A LA DERECHA
+- SIEMPRE TOMAR EN CUENTA QUE LAS ESCALERAS SE PONEN POR DEBAJO DE LA
+MARCA QUE ESTA DEBAJO DE LA PUERTA. VER DIAGRAMA
+DIFERENCIAS EN RAMPA "EVELOP", REVISION 08/MAY/2019
+img-0.png (280.9 KB) img-1.png (27.3 KB) – Download all`, requerimientos: "" },
+  "Evelop": { diferencias: `- EN EL A350, LAS ESCALERAS SE PONEN EN LAS PUERTAS L1 Y L2 (LAS DOS PUERTAS DELANTERAS)
+- LOS BANOS IGUAL QUE EL A330
+- EL AGUA POTABLE VIENE PRE-ASIGNADA (CUALQUIER DUDA PUEDEN PREGUNTAR AL MECANICO)
+- EN EL A350, LOS CONTENEDORES A USAR SERAN SIEMPRE LOS QUE TIENEN EL LETRERO DE A350
+- LA BARRA DE REMOLQUE A USAR SERA LA MISMA QUE LA QUE SE USA EN EL A330
+- EN EL REMOLCADOR TOWBARLESS SE USARA LA INDICACION DEL A330
+- LOS VIRAJES CON EL REMOLCADOR DEBEN SER HECHOS CON PRUDENCIA. EL A350 ES MUY CRITICO CON LOS
+VIRAJES
+- PARA COLOCAR LA PLANTA Y EL AIRE ACONDICIONADO HAY QUE UTILIZAR UNA ESCALERITA
+DIFERENCIAS EN RAMPA "FINNAIR" REVISION 16/DIC/2019
+img-0.png (574.3 KB) img-1.png (160.7 KB) img-2.png (165.8 KB) img-3.png (155.7 KB) img-4.png (179.6 KB) img-4.png (27.3 KB) – Download all`, requerimientos: "" },
+  "Finnair": { diferencias: `- OPERAN EL A350 EN PUJ
+- PARA LOS BANOS:
+13 GLS PARA ENJUAGAR
+6 GLS PARA DEJAR
+- MAXIMO RADIO DE DOBLAJE CON EL REMOLCADOR ES 60 A 65 GRADOS
+- CONFIGURACION DE COMPARTIMIENTOS DE CARGA SOMO SIGUE:
+- CALZOS COMO SIGUE EN LA GRAFICA A CONTINUACION. EN EL TREN TRASERO EN LAS GOMAS DE AFUERA SOLAMENTE. CUANDO EL AVION
+LLEGA SE PONEN CALZOS EN EL TREN DE NARIZ Y LUEGO SE PONEN LOS DE ATRAS. LUEGO DE QUE SE PONEN LOS DE ATRAS, LOS DE DELANTE
+SE QUITAN (ESTO ES OBLIGATORIO)
+- CONOS COMO SIGUE EN LA GRAFICA
+- PARA EL WALKAROUND, COMO SIGUE EN LA GRAFICA
+- CUANDO SE USE EL AIRE ACONDICIONADO HAY QUE ASEGURARSE DE QUE POR LO MENOS UNA DE LAS PUERTAS DE PASAJEROS O LA
+COMPUERTA DE AVIONICA ESTE ABIERTA PARA EVITAR PRESURIZACION DEL AVION
+- REQUIEREN DOS UNIDADES DE GPU Y EL AIRE ACONDICIONADO SIEMPRE EN LA OPERACION
+FLAIR "DIFERENCIAS EN RAMPA" REVISION 20231026`, requerimientos: "" },
+  "Flair Airlines": { diferencias: `- NO ACEPTAN MERCANCIAS PELIGROSAS
+- NO ACEPTAN ANIMALES EN LOS COMPARTIMIENTOS DE EQUIPAJE
+- TRAEN UN FLIGHT KIT EN EL COMPARTIMIENTO C1 EN EL QUE TRAEN SOGAS
+- NO REQUIEREN AGUA POTABLE
+- PARA LOS BANOS: 10 GALONES PARA ENJUAGAR Y 4 GALONES PARA DEJAR
+- AQUI LA CONFIGURACION DE LOS COMPARTIMIENTOS DE EQUIPAJE:
+- TICKETS USADOS
+- CALZOS COMO EN LA GRAFICA
+- HOJA DE CARGA`, requerimientos: "" },
+  "Frontier Airlines": { diferencias: `- EN EL SIGUIENTE LINK CHEQUEAR LA SENALIZACION A LA LLEGADA:
+FRONTIER LLEGADA.mp4
+- SOLAMENTE PERSONAL EN EL SISTEMA DE FRONTIER PUEDE PROCEDER
+A OPERAR EL JETBRIDGE
+- LAS ETIQUETAS PARA EQUIPAJE QUE BAJA DEL AVION O DEL GATE ES LA
+SIGUIENTE. ESTE EQUIPAJE SE LLEVARA A LA CORREA DE ADUANAS:
+- LA ETIQUETA PARA EQUIPAJE CON MANEJO ESPECIAL ES LA
+SIGUIENTE. EN LA LLEGADA ESTE EQUIPAJE DEBE PONERSE EN EL
+PUENTE O EN LA ESCALERA
+- NUEVA BANDA PARA EQUIPAJE CONECTANDO
+- PARA LA CARGA DEL EQUIPAJE SE DEBE PRIORIZAR CARGAR PRIMERO
+DELANTE COMO SIGUE A CONTINUACION:
+ A319/A320, 20 MALETAS PRIMERO EN LA PARTE DELANTERA (COMO
+DIGA LA HOJA DE CARGA)
+ A321, 30 MALETAS PRIMERO EN LA PARTE DELANTERA (COMO DIGA
+LA HOJA DE CARGA)
+- EL WALKAROUND EN FRONTIER TIENE QUE HACERSE DENTRO DE LOS
+PRIMEROS CINCO (5) MINUTOS DE LA LLEGADA DEL AVION. SI SE
+ENCUENTRA ALGUN DANO DESPUES DE ESTOS CINCO MINUTOS, LOS
+DANOS SERAN CARGADOS A LA ESTACION
+- EN EL A321 LAS ESCALERAS O EL JETBRIDGE SE PONE SIEMPRE JUSTO
+DEBAJO DEL PUNTO NEGRO EN EL FUSELAJE. VER DIAGRAMA
+- EN EL A321 EL JETBRIDGE SE PONE SIEMPRE EN LA PUERTA L1 (PRIMERA
+PUERTA). LAS ESCALERAS SE PONEN SIEMPRE EN LA L1 (PRIMERA
+PUERTA Y LA L4 (ULTIMA PUERTA). VER DIAGRAMA
+- NO TRANSPORTAN MERCANCIAS PELIGROSAS
+- PARA LOS BANOS, 4 GALONES PARA DEJAR. NO REQUIEREN QUE SE
+ENJUAGUE LOS BANOS. SOLO LO REQUIEREN CUANDO
+EL AVION PERNOCTA Y EN ESE CASO DE LE PONEN 5 GALONES PARA
+ENJUAGAR Y 4 GALONES PARA DEJAR.
+- REFERENTE AL PROCEDIMIENTO DE DEJAR 2 PULGADAS ENTRE LA ULTIMA
+MALETA Y EL TECHO DE LAS BODEGAS SE DEBE DEJAR LA ULTIMA MALETA
+HASTA LA PARTE DE ABAJO DE LA RAYA QUE SENALIZA LAS DOS
+PULGADAS COMO EN EL GRAFICO
+GOL "DIFERENCIAS EN RAMPA" REVISADO 20251114
+Fecha Vie 14/11/25 11:37`, requerimientos: "" },
+  "Gol": { diferencias: `- TENER EN CUENTA QUE GOL NO PERMITE QUIE SE HAGA LOS BANOS DEBAJO CUANDO EL CAMION DEL
+CATERING ESTE COLOCADO EN EL AVION
+- SIEMPRE DEBEN VERIFICAR EL MANOMENTRO MEDIDOR DE PRESION DEL CAMION LAVATORIO. LA
+PRESION DEBE ESTAR ENTRE 25 PSI Y 50 PSI
+- ETIQUETAS DE GOL
+- NO PERMITEN LA CARGA O DESCARGA DEL AVION SIMULTANEA. SE DEBE DESCARGA PRIMERO LA
+PARTE TRASERA Y LUEGO LA DELANTERA Y PARA CARGAR PRIMERO LA DELANTERA Y DESPUES LA
+TRASERA.
+- SIEMPRE TOMAR EN CUENTA EL CUIDADO DE LAS MALETAS A LA LLEGADA DEL AVION Y A LA SALIDA.
+TIENEN UN PROCESO DE ESTADISTICAS QUE MARCA EL PROGRESO O NO DE MALTRATO A LAS
+MALETAS
+- LAS CAJAS DE CARGA DE MADERA SIEMPRE SE PONDRAN EN EL PISO DEL COMPARTIMIENTO
+- EL TIEMPO PARA DESCARGAR TODO EL EQUIPAJE DEL AVION ES 14 MINUTOS
+- PARA EL PROCEDIMIENTO DE LOS CALZOS, SE CALZA EL TREN DELANTERO EN LAS DOS GOMAS Y EN
+TREN PRINCIPAL SE CALZAN LAS GOMAS DE AFUERA
+- PARA LA COLOCACION DE LOS CONOS EN EL AVION:
+- ACEPTAN MERCANCIAS PELIGROSAS PERO NO INTERNACIONALMENTE
+- SI NO SE UTILIZAN CINTAS PARA CARGAR/DESCARGAR, LOS VAGONES DEBEN PONERSE A 3 METROS
+DEL FUSELAJE
+- PARA LOS COMPARTIMIENTOS DEL AVION COMO SIGUE: A, B, C, D, E, F
+- PARA EMBARQUE DE RUEDAS DEL AVION
+- PARA EL PROCESO DE LOS BANOS COMO SIGUE: 15 GALONES PARA ENJUAGAR Y 6 GALONES PARA
+DEJAR
+- LIR (HOJA DE CARGA) DE GOL
+JETBLUE "DIFERENCIAS EN RAMPA" REVISION 20230507`, requerimientos: "" },
+  "JetBlue": { diferencias: `- NO SE AUTORIZA EL USO DE LA BARRA DEL A320 EN EL TIPO DE AVION A220. SOLAMENTE SE PUEDE REMOLCAR
+EL A220 CON SU BARRA ESTABLECIDA
+- TIEMPOS PARA LA LIMPIEZA SEGUN TIPO DE AVION
+- SE PONEN CALZOS EN LAS ESCALERAS QUE SE COLOCAN AL AVION
+- EN EL E190 COMO PROCEDIMIENTO SE PONEN CONOS DOBLES EN FRENTE DE LAS ANTENAS COMO SE MUESTRA EN LA
+GRAFICA Y UN CONO EXTRA COMO EN LA GRAFICA
+- EN EL A320 Y A321 COMO PROCEDIMIENTO SE PONEN CONOS DOBLES EN FRENTE DE LAS ANTENAS COMO SE MUESTRA EN
+LA GRAFICA
+- TENER EN CUENTA EL NUEVO PROCEDIMIENTO DE MALETAS CON TICKETS VERDES PARA PONER EN LA CORREA DE
+ADUANAS DE PRIMERO SIEMPRE
+- PARA EL PROCEDIMIENTO DE CARGA DE EQUIPAJE (CUANDO HAY MALETAS SOLAMENTE) DEL A321 COMO SIGUE:
+1. SE CARGA PRIMERO LA BODEGA NO. 3
+2. SE CARGA DE SEGUNDO LA BODEGA NO. 4
+3. SE CARGA DE TERCERO LA BODEGA NO. 2
+4. SE CARGA DE CUARTO LA BODEGA NO. 1
+5. SE CARGA DE ULTIMO LA BODEGA NO. 5
+- PARA EL PROCEDIMIENTO DE CARGA DE EQUIPAJE Y CARGA (CUANDO HAY CARGA Y MALETAS) DEL A321 COMO SIGUE:
+- PARA LOS MATERIALES PELIGROSOS. JETBLUE HA SIDO DECLARADA COMO TRANSPORTISTA DE MATERIALES PELIGROSOS
+LIMITADO
+- LA CONFIGURACION DE COMPARTIMIENTOS DE CARGA PARA EL A320 ES EL SIGUIENTE:
+- LA CONFIGURACION DE COMPARTIMIENTOS DE CARGA PARA EL E190 ES EL SIGUIENTE:
+- LOS BANOS: 15 GALONES PARA ENJUAGAR Y 3 GALONES PARA DEJAR TANTO PARA EL A320 COMO PARA EL E190
+- CUANDO EL APU ESTA DANADO Y REQUIEREN ENCENDER CON EL ASU, ENCENDERAN PRIMERO EL MOTOR NO. 2 PRIMERO
+SIEMPRE
+- LOS CALZOS SE PONEN IGUAL QUE EL PROCEDIMIENTO NUESTRO
+- LOS CONOS SE PONEN COMO EL PROCEDIMIENTO NUESTRO PERO CON UNA DIFERENCIA DEL CONO DETRAS DEL MOTOR
+DERECHO COMO SIGUE:
+- LAS MALETAS DEBERAN ESTAR EN ADUANAS TODAS A LOS 25 MINUTOS DESPUES QUE EL AVION PONE CALZOS
+- LOS ARTICULOS DEL GATE SIEMPRE SE PONDRAN EN LA PARTE DELANTERA DEL AVION Y SIEMPRE HAY QUE CONTARLOS
+- SEGUN PROCEDIMIENTO DE JETBLUE, LOS MOTORES SOLO SE ENCENDERAN CUANDO TERMINE EL REMOLQUE
+- LOS RESTOS HUMANOS EN EL A320 SIEMPRE SE PONDRAN EN LA POSICION 13
+- RECORDAR QUE EN EL E190 NO SE USA PIN BYPASS, CHEQUEAR SIEMPRE LOS BOMBILLOS DE SENALIZACION DE FRENOS
+FUERA
+JETSMART "DIFERENCIAS EN RAMPA" REVISION 20250902
+Fecha Lun 03/11/25 10:57
+<nfrancisco@aag-dr.com>`, requerimientos: "" },
+  "JetSmart": { diferencias: `- TOMARAN AGUA POTABLE EN PUNTA CANA
+- SE HARAN LOS BANOS EN PUNTA CANA
+- ANIMALES VIVOS EN LAS BODEGAS
+- MERCANCIAS PELIGROSAS
+- LIMPIEZA EN PUNTA CANA
+- El walkaround se hace como sigue a continuacion:
+- LOS CALZOS EN EL TREN PRINCIPAL (DETRAS) EN LAS GOMAS DE AFUERA. COMO
+SIGUE A CONTINUACION:
+- LOS CONOS COMO SIGUE A CONTINUACION
+- Los compartimientos de carga del avión como sigue a continuacion:
+- La hoja de carga (LIR) como sigue a continuacion:
+WESTJET "DIFERENCIAS EN RAMPA" REVISION 20251202
+Fecha Mar 02/12/25 10:45`, requerimientos: "" },
+  "WestJet": { diferencias: `- REQUIEREN ESPACIO DE TRES (3) PIES ENTRE LA CINTA Y EL VAGON PARA DESCARGAR/CARGAR EN EL AVION
+- REQUIEREN QUE SE HAGA UN BRIEFING ANTES DE INICIAR EL REMOLQUE EN CADA VUELO
+- LOS CALZOS EN LA CINTA SE PONEN IGUAL QUE EL PROCEDIMIENTO NUESTRO
+- LOS CALZOS EN EL B737 COMO SIGUE DE MANERA OBLIGATORIA
+- LOS CALZOS EN EL B787 COMO SIGUE A CONTINUACION DE MANERA OBLIGATORIA
+- LA SENAL DE CALZOS PUESTOS SOLO SE DA CUANDO TODOS LOS CALZOS ESTAN COLOCADOS, TANTO LOS DELANTEROS COMO
+LOS TRASEROS
+- PARA EL B737 LOS CONOS DE LA SIGUIENTE FORMA DE MANERA OBLIGATORIA
+- PARA EL B787 LOS CONOS DE LA SIGUIENTE FORMA DE MANERA OBLIGATORIA
+- EL TIEMPO QUE NOS DA WESTJET PARA DETECTAR ALGUN DANO AL AVION A LA LLEGADA ES 30 MINUTOS. SI APARECE ALGUN DANO
+DESPUES DE ESOS 30 MINUTOS QUE NO HAYAMOS REPORTADO, ENTONCES EL DANO SERA ASIGNADO A PUJ
+- B737 TRAEN EN EL COMPARTIMIENTO DELANTERO Y EL TRASERO UNA SAQUETA CON SOGA PARA AMARRAR LAS SILLAS DE RUEDA
+ELECTRICAS Y LOS ANIMALES VIVOS. VER GRAFICA
+- B737, LA CONFIGURACION DE COMPARTIMIENTOS DE CARGA. SERA COMO SIGUE A CONTINUACION
+- ESTA AUTORIZADO LA UTILIZACION REMOLCADOR TOWBARLESS (REMOLCADOR SIN BARRA)
+- SIEMPRE DESCARGAR LA PARTE TRASERA PRIMERO Y PARA LA CARGA SIEMPRE LA PARTE DELANTERA PRIMERO. SI HAY DOS
+CINTAS SE PUEDE DESCARGAR Y CARGAR AL MISMO TIEMPO
+- B737, LOS BANOS: 10 GALONES PARA ENJUAGAR Y 4 GALONES PARA DEJAR
+- CUANDO EL APU ESTA DANADO SIEMPRE VENDRAN CON EL MOTOR NO. 1 ENCENDIDO. PARA LA SALIDA SI REQUIEREN ENCENDER
+CON EL ASU, SIEMPRE HAY QUE PONERLO EN LA PARTE DERECHA DEL AVION. ELLOS SIEMPRE ENCENDERAN EL MOTOR NO. 1
+- LA CARGA DEBE ESTAR LISTA 60 MINUTOS ANTES DE LA SALIDA DEL AVION Y LA QUE LLEGA EN EL AVION DEBE ESTAR A MAS
+TARDAR 60 MINUTOS EN EL ALMACEN DE CARGA
+- TODO EL EQUIPAJE QUE LLEGA DEBE ESTAR A MAS TARDAR 20 MINUTOS EN ADUANAS PERO A PARTIR DE CUANDO EL PRIMER
+PASAJERO LLEGA A LA CORREA. ELLOS NO REQUIEREN PRIMERA MALETA Y ULTIMA, SINO, QUE LA ULTIMA ESTE EN ESE TIEMPO
+- B737, LAS COMPUERTAS DE LOS COMPARTIMIENTOS TIENEN UNA CINTA ROJA DENTRO QUE HAY QUE COLOCARLA EN LA
+COMPUERTA PARA QUE NO SE BAJE
+- CUANDO SE RECIBE LA HOJA DE CARGA/DESCARGA DEL AVION EL ENCARGADO DEL VUELO TIENE QUE ENCERRAR EN UN CIRCULO
+EL NUMERO DE COLA DEL AVION Y LA EDICION DE LA HOJA DE CARGA. Y PONER SUS INICIALES Y FIRMAR LA HOJA DE
+CARGA/DESCARGA
+- NO TRANSPORTAN MATERIALES PELIGROSOS
+- NO SE DA LA SENAL DE CALZOS PUESTOS A LA LLEGADA HASTA QUE TODOS LOS CALZOS ESTAN PUESTOS INCLUYENDO LOS DE
+ATRAS.
+- CUANDO SE HACE LA SALIDA DEL AVION AL FINALIZAR EL REMOLQUE, EL SENALERO NO PONE EN CRUZ LOS PALITOS SINO QUE SE
+PONE EN POSICION DE ESPERA (COMO EN LA GRAFICA ABAJO) Y CUANDO QUITAN TODO, AVISA AL CAPITAN DE QUE TODO ESTA
+DESPEJADO PARA LA SALIDA
+- SE DESAUTORIZO LA TOMA DE AGUA POTABLE POR EL MOMENTO. NO AGUA POTABLE.
+- AL FINAL DEL REMOLQUE, CUANDO EL MECANICO QUITA EL PIN BY-PASS Y SE LO ENSENA AL CAPITAN, EL SENALERO DEBERA
+TAMBIEN HACERLE UNA SENAL DE TODO DESPEJADO AL CAPITAN COMO EN LA GRAFICA COMO MUESTRA DE QUE TODO ESTA
+DESPEJADO
+- LOS ANIMALES VIVOS (AVIs) SE PUEDEN COLOCAR EN CUALQUIER COMPARTIMIENTO, TANTO DELANTERO COMO TRASERO. PERO
+PREFERIBLEMENTE LO QUIEEREN EN EL COMPARTIMIENTO DELANTERO, PERO ESTO VA A DEPENDER DE LA HOJA DE CARGA.
+SIEMPRE HAY QUE AVISAR AL CAPITAN CUANDO HAYA ALGUN ANIMAL VIVO QUE SE VAYA A TRANSPORTAR
+- LAS CARGA PERECIBLE SE PUEDE COLOCAR EN CUALQUIER COMPARTIMIENTO, TANTO DELANTERO COMO TRASERO. PERO
+PREFERIBLEMENTE LA QUIEREN EN EL COMPARTIMIENTO TRASERO, PERO ESTO VA A DEPENDER DE LA HOJA DE CARGA.
+- PROCEDIMIENTO SOBRE EL TRABAJO DEL POA (PERSON OF ACCOUNTABILITY). ESTA PERSONA DEBE CHEQUEAR TODOS LOS
+PROCEDIMIENTOS EN LOS VUELOS DE WESTJET. DEBE COMPLETAR EL FORMULARIO EN CADA VUELO DEL POA Y GRAPAR LA HOJA
+DE CARGA.
+- LAS ETIQUETAS PARA EQUIPAJE PESADO Y EQUIPAJE STAND BY SON LAS SIGUIENTES:
+DIFERENCIAS EN RAMPA "WORLD ATLANTIC" REVISION 27/MAY/2019
+img-0.png (351.2 KB) img-1.png (26.2 KB) img-2.png (189 KB) img-3.png (27.3 KB) – Download all
+- NO TRANSPORTAN MERCANCIAS PELIGROSAS
+- LOS CALZOS EN EL MD80: SOLO SE COLOCAN EN LA PARTE DE ATRAS DEL AVION (IZQUIERDA Y DERCHA)
+- CONFIGURACION DE COMPARTIMIENTOS EN EL MD80:
+COMPARTIMIENTO DELANTERO
+COMPARTIMIENTO MEDIO
+COMPARTIMIENTO TRASERO
+- LOS ANIMALES VIVOS EN EL MD80
+SOLAMENTE EN LA BODEGA DELANTERA
+UN MAXIMO DE DOS ANIMALES VIVOS Y QUE EL PESO DE CADA UNO NO SEA MAYOR A 70 LBS
+- LAS MALETAS PESADAS: DE 51 A 70 LIBRAS
+- CUANDO SE USE EL AIRE ACONDICIONADO, NO QUITARLO HASTA QUE EL MECANICO LO ORDENE (SIEMPRE DEJARLO HASTA EL FINAL)
+- EL AGUA POTABLE, SIEMPRE PREGUNTAR AL MECANICO
+- LA CANTIDAD DE AGUA PARA ENJUAGAR Y DEJAR EN LOS BANOS, SIEMPRE PREGUNTAR AL MECANICO
+- EL FLIGHT KIT SIEMPRE VENDRA EN LA BODEGA DELANTERA
+- LOS CONOS COMO SE MUESTRA EN LA GRAFICA
+- SI VA A REQUERIR SERVICIO DE CATERING EN EL MD80: SOLAMENTE SE PONE EL CAMION EN LA PUERTA DELANTERA DERECHA (DETRAS NO LO
+PERMITEN)
+DIFERENCIAS EN RAMPA "XL AIRWAYS" REVISION 14/AGO/2019
+img-0.png (668.6 KB) img-1.png (74.2 KB) img-2.png (168.4 KB) img-2.png (27.3 KB) – Download all`, requerimientos: "" },
+  "XL Airways": { diferencias: `- LOS CALZOS COMO EN GRAFICA A CONTINUACION
+- LAS MALETAS DE LA TRIPULACION SE PONEN EN LA ESCALERA
+- LOS CONOS COMO EN GRAFICO A CONTINUACION
+PLUS ULTRA "DIFERENCIAS EN RAMPA" REVISADO 20220627
+Mié 29 Jun 2022 21:53
+jgonzalez . <jgonzalez@aag-dr.com>;
+ULTRA
+- AERONAVES A UTILIZAR: A330 Y A340
+- LOS CALZOS Y LOS CONOS SE PONEN IGUAL QUE EL PROCEDIMIENTO NUESTRO
+- LAS ESCALERAS SE COLOCAN EN LAS PUERTAS 2L Y 4L (2DA. PUERTA Y ULTIMA
+PUERTA)
+- LO ANIMALES VIVOS SE COLOCAN EN EL COMPARTIMIENTO DELANTERO Y/O EN EL BULK
+- TRAEN UN FLIGHT KIT (FKT) EN LA POSICION 32L
+- TRANSPORTAN MERCANCIAS PELIGROSAS
+- LA ALTURA MAXIMA DE LAS PALETAS CON CARGA ES: 62 PULGADAS
+- PARA EL TRANSPORTE DE PALETONES ACEPTAN UN MAXIMO DE 25 PALETAS INCLUYENDO
+LA BASE
+- LAS MALETAS DE TRIPULACION PREFERIBLEMENTE EN LA POSICION 51 (EN EL BULK)
+- UTILIZAN UNOS SACOS NEGROS PARA LAS ALMOHADILLAS Y MANTAS QUE VIENEN Y SE
+VAN EL BULK. VIENEN VACIOS EN LOS RACK TRASEROS DE LA CABINA. SE LES COLOCA
+UNOS PRECINTOS: ROJO PARA LAS QUE ESTAN USADAS, Y VERDES PARA LAS QUE ESTAN
+SIN USAR. LOS PRECINTOS VIENEN EN UN BOLSILLO EN EL MISMO SACO.
+- EL AGUA POTABLE SE PONE AL 100% SI SE REQUIERE.
+REVISIÓN: 20250501`, requerimientos: "" },
+  "Southwest Airlines": { diferencias: `- PARA EL B737-MAX SE REQUIERE DESCARGAR PRIMERO POR LA PARTE
+TRASERA DEL AVION Y ESPERAR QUE OPERACIONES AVISE DE QUE
+DESEMBARCARON LOS PASAJEROS PARA DESCARGAR LA PARTE
+DELANTERA. LOS COCHES DE BB Y LAS SILLAS DE RUEDA SE PUEDEN
+DESCARGAR DE LA PARTE DELANTERA INMEDIATAMENTE SEA SEGURO
+ASERCARSE AL AVION. CUANDO PROVEAN LA BARRA SOPORTE DE COLA
+PARA ESTE TIPO DE AVION ESTE PROCEDIMIENTO CAMBIARA.
+- EN EL SIGUIENTE LINK VER VIDEO DE LA SEÑALIZACIÓN AL AVIÓN A LA
+LLEGADA:
+alc_aviamltd_com/EZdhgYvrTUVGmTOYZp0qDm4Bt446LLsDMGDufvvRfApuFA?e
+=YNE4mN
+- SIEMPRE DEJAR LAS DOS PULGADAS EN LAS BODEGAS DEL AVION. VER
+FIGURA DE EJEMPLO:
+- LA BARRA SOPORTE DE COLA TENDRÁ AHORA UN SEGURO PARA MAYOR
+FACILIDAD AL COLOCARLA EN EL AVIÓN. VER FIGURA AQUÍ. TOMAR EN
+CUENTA QUE LA BARRA SOPORTE DE COLA SE DEJA COLOCADA EN EL
+AVION TODO EL TIEMPO HASTA QUE EL AVION SE CARGA.
+- SE REQUIERE LA COLOCACIÓN DEL PROTECTOR DE LA COMPUERTA DE
+LOS COMPARTIMIENTOS SIEMPRE. VER GRAFICA:
+- EN EL AVIÓN B737-MAX 8 SE REQUIERE SIEMPRE DESCARGAR LA PARTE
+DE ATRÁS PRIMERO Y ESPERAR LA AUTORIZACIÓN DEL PERSONAL
+DE SOUTHWEST PARA DESCARGAR LA PARTE DELANTERA
+- SE REQUIERE QUE EN LOS B737/800 (SOLAMENTE) SE INSTALE EL SOPORTE
+DE COLA (TAILSTAND) SIEMPRE EN LOS PRIMEROS DOS MINUTOS DE
+LLEGAR EL AVIÓN. SI HAY VIENTOS FUERTES QUE SOBREPASEN LOS 40
+NUDOS NO SE PUEDE UTILIZAR EL SOPORTE DE COLA
+- OPERAN EL NUEVO MODELO B737MAX PARA LO CUAL DEBEMOS TENER
+PENDIENTE:
+ LA ALTURA DEL PANEL DONDE SE CONECTA LA PLANTA ES MAS ALTO
+(SE NECESITARÁ UNA ESCALERITA)
+ LOS MOTORES SON MUY POTENTES, LA ZONA DE SEGURIDAD DEBE
+SER OBSERVADA CON MUCHO CUIDADO
+- EL WALKAROUND QUE SE HACE AL AVIÓN ANTES DE SALIR TIENE QUE
+TERMINAR EN EL LADO DERECHO DEL AVIÓN. DE ESTA FORMA SE CHEQUEA
+LAS COMPUERTAS DE CARGA Y PANELES DE SERVICIO DEL AVIÓN
+- CUANDO SE HACE EL REMOLQUE DEL AVIÓN LA BARRA SE QUITA PRIMERO
+DEL AVIÓN
+- SIEMPRE VERIFICAR QUE LA HIELERA QUE VA EN EL COMPARTIMIENTO B
+ESTE VACÍA
+- TOMAR EN CUENTA SIEMPRE QUE LOS VAGONES SALIENDO DEBEN
+PONERSE DOS EN LA PARTE TRASERA Y DOS Y EN LA PARTE
+DELANTERA PARA AGILIZAR EL CARGADO DEL AVIÓN
+- CUANDO EL VUELO ESTA FULL EN EL B737-700 REQUIEREN QUE SE CARGUE
+DE LA SIGUIENTE MANERA:
+ LAS PRIMERAS 50 MALETAS EN EL COMPARTIMIENTO C
+ 20 MALETAS EN EL COMPARTIMIENTO A
+ TODO EL RESTO EN EL COMPARTIMIENTO D
+- SI SOLO HAY UNA CINTA EN EL AVIÓN SE PUEDE CARGAR/DESCARGAR
+MANUALMENTE DELANTE Y DETRÁS PERO SIEMPRE TOMANDO EN CUENTA
+QUE AL COLOCAR EL VAGÓN EN EL AVION DEBEN HACERLO A MANO
+- SOUTHWEST OPERARA EN PUNTA CANA CON B737-700 B737-800 B737-
+- A LA LLEGADA DEL AVIÓN SIEMPRE CHEQUEAR EL TAIL SKID PARA
+VERIFICAR QUE ESTE SIEMPRE EN VERDE. SI POR ALGUNA RAZÓN ESTA EN
+ROJO SE DEBE REPORTAR AL CAPITÁN, VER EJEMPLO
+- LA CONFIGURACIÓN DE COMPARTIMIENTOS DE EQUIPAJE EN EL B737
+DE SOUTHWEST ES: A, B, C, D, E, F, QUE CORRESPONDEN A 1, 2, 3, 4, 5,
+6. INFORMACIÓN COMO SIGUE:
+- LOS CALZOS EN EL TREN PRINCIPAL (ATRÁS) SE COLOCAN EN LAS GOMAS
+DE AFUERA
+- PARA EL SERVICIO DE BAÑOS: 10 GALONES PARA
+ENJUAGAR Y 06 GALONES PARA DEJAR
+- REQUIEREN PONER UN CUBO EN EL PISO DEBAJO CUANDO SE HACE EL
+SERVICIO A LOS BAÑOS PARA QUE LO QUE SALGA CAIGA EN EL CUBO
+- PARA EL SERVICIO DE AGUA POTABLE SOLO SI EL CAPITÁN LO REQUIERE
+- EL EQUIPAJE QUE SALE DEBE ESTAR A MAS TARDAR 40 MINUTOS ANTES
+DE LA SALIDA DEL AVIÓN
+- SI NO HAY UNA CINTA PARA CARGAR EL VUELO, REQUIEREN QUE LOS
+VAGONES SEAN MANEJADOS A MANO
+- NO PERMITEN QUE ALGUIEN PASE POR ENCIMA DE LA BARRA CUANDO ESTA
+PUESTA EN EL AVIÓN
+- LOS SIGUIENTES CÓDIGOS PARA LOS DIFERENTES TIPOS DE EQUIPAJE
+- EL B737-700 SE CARGA 50%, 50% LIGERAMENTE MAS PESADO HACIA LA
+PARTE DELANTERA Y SE EMPIEZA CARGANDO EN LOS COMPARTIMIENTOS C
+- EL B737-800 ANTES DE CARGARLO SE DEBE PEDIR AUTORIZACIÓN A
+OPERACIONES PARA SER CARGADO
+- USAN ALGUNAS SEÑALES NO STANDARD EN EL PARQUEO DE
+LAS AERONAVES, INFORMACIÓN COMO SIGUE:`, requerimientos: "" },
+  "Swoop": { diferencias: `- NO TRANSPORTAN MERCANCÍAS PELIGROSAS
+- NO TRANSPORTAN ANIMALES VIVOS (PERROS, GATOS, ETC) EN LA BODEGA DEL AVION
+- LA CONFIGURACIÓN DE COMPARTIMIENTOS DE CARGA COMO EN LA GRAFICA:
+- SIEMPRE DESCARGAR LA PARTE TRASERA PRIMERO Y PARA LA CARGA SIEMPRE LA PARTE DELANTERA
+PRIMERO. SI HAY DOS CINTAS SE PUEDE DESCARGAR Y CARGAR AL MISMO TIEMPO
+- LOS BANOS: 10 GALONES PARA ENJUAGAR Y 4 GALONES PARA DEJAR
+- CUANDO EL APU ESTA DANADO SIEMPRE VENDRAN CON EL MOTOR NO. 1 ENCENDIDO. PARA LA SALIDA SI
+REQUIEREN ENCENDER CON EL ASU, SIEMPRE HAY QUE PONERLO EN LA PARTE DERECHA DEL AVION. ELLOS
+SIEMPRE ENCENDERAN EL MOTOR NO. 1
+- LA CARGA DEBE ESTAR LISTA 60 MINUTOS ANTES DE LA SALIDA DEL AVION Y LA QUE LLEGA EN EL AVION
+DEBE ESTAR A MAS TARDAR 60 MINUTOS EN EL ALMACEN DE CARGA
+- TODO EL EQUIPAJE QUE LLEGA DEBE ESTAR A MAS TARDAR 20 MINUTOS EN ADUANAS PERO A PARTIR DE
+CUANDO EL PRIMER PASAJERO LLEGA A LA CORREA. ELLOS NO REQUIEREN PRIMERA MALETA Y ULTIMA, SINO,
+QUE LA ULTIMA ESTE EN ESE TIEMPO
+- NO SE DA LA SENAL DE CALZOS PUESTOS A LA LLEGADA HASTA QUE TODOS LOS CALZOS ESTAN PUESTOS
+INCLUYENDO LOS DE ATRAS.
+- LOS CALZOS COMO SIGUE:
+- B737, PROCEDIMIENTO DE COLOCACION DE CONOS EN EL AVION SEGUN LA GRAFICA ABAJO. DEBEMOS
+SEGUIR COLOCANDO CONOS EN EL FRENTE DEL AVION Y ATRAS, ADEMAS DE LAS ANTENAS
+- CUANDO SE HACE LA SALIDA DEL AVION AL FINALIZAR EL REMOLQUE, EL SENALERO NO PONE EN CRUZ LOS
+PALITOS SINO QUE SE PONE EN POSICION DE ESPERA (COMO EN LA GRAFICA ABAJO) Y CUANDO SE QUITAN
+TODOS, SE AVISA AL CAPITAN DE QUE TODO ESTA DESPEJADO PARA LA SALIDA
+- AL FINAL DEL REMOLQUE, CUANDO EL MECANICO QUITA EL PIN BY-PASS Y SE LO ENSENA AL CAPITAN, EL
+SENALERO DEBERA TAMBIEN HACERLE UNA SENAL DE TODO DESPEJADO AL CAPITAN COMO EN LA GRAFICA
+COMO MUESTRA DE QUE TODO ESTA DESPEJADO
+- CUANDO SE PONE LA CINTA HAY QUE COLOCAR 3 CALZOS. VER GRAFICA:
+DIFERENCIAS EN RAMPA "TAMPA CARGO" REVISION 14/JUL/2019
+img-0.png (676.6 KB) img-1.png (110.2 KB) img-2.png (19.7 KB) img-3.png (27.3 KB) – Download all
+- TAMPA CARGO OPERARA LOS VUELOS DE CARGA DE AVIANCA
+- SIEMPRE REQUERIRAN UNA PLANTA A LA LLEGADA DEL AVION
+- SIEMPRE REQUERIRAN QUE SE HAGAN LOS BANOS. PARA ENJUAGAR 16 GALONES, PARA DEJAR 3 GALONES. VER
+DIAGRAMA PARA LA POSICION DEL PANEL DE SERVICIO DE LOS BANOS
+- LOS CALZOS EN EL TREN PRINCIPAL (TRASERO) SE PONEN EN LAS GOMAS DE AFUERA.
+- PARA DESCARGAR SIEMPRE PROCEDER CON EL SIGUIENTE PROCEDIMIENTO:
+PRIMERO SE DESCARGA LA PARTE TRASERA DEL LOWERDECK (ABAJO) INCLUYENDO EL BULK
+(COMPARTIMIENTO 5)
+LUEGO SE DESCARGA TODO ELMAINDECK (AREA DE ARRIBA)
+POR ULTIMO SE DESCARGA LA PARTE DELANTERA DEL LOWERDECK (ABAJO)
+- PARA CARGAR SIEMPRE PROCEDER CON EL SIGUIENTE PROCEDIMIENTO:
+PRIMERO SE CARGA LA PARTE DELANTERA DEL LOWERDECK (ABAJO)
+LUEGO SE CARGA TODO EL MAINDECK (AREA DE ARRIBA)
+POR ULTIMO SE CARGA LA PARTE TRASERA DEL LOWERDECK (ABAJO) INCLUYENDO EL BULK (COMPARTIMIENTO
+DIFERENCIAS EN RAMPA "THOMSON AIRWAYS" REVISION 02/JUN/2019
+img-0.png (201.8 KB) THOMSON-05.png (441.5 KB) THOMSON-02.png (220.1 KB) THOMSON-01.png (53.9 KB) THOMSON-03.png (202 KB)
+THOMSON-04.png (82.5 KB) THOMSON-06.png (251.2 KB) B787-01.png (237.8 KB) img-8.png (27.3 KB) – Download all
+LOS EQUIPOS QUE SE USAN NORMALMENTE PARA EL B767 SE USAN TAMBIEN EN EL B787
+- PARA EL AGUA POTABLE:
+B787-800 570 LITROS
+B787-900 680 LITROS
+- EN EL B787 EL PIN-BYPASS ES EL MISMO QUE EL B767
+- EN EL B787 EL GPU (UNA SOLA PLANTA CON DOS CABLES) QUE SE LE PONE, HAY QUE PONERLE LOS DOS CABLES CONECTADOS
+AL AVION CON ELECTRICIDAD CONSTANTE. TIENEN OTRA TOMA DE ELECTRICIDAD EN LA PARTE DE ATRAS DEL AVION PERO SOLO
+SE PONE SI LO REQUIEREN
+- EN EL B787 LOS SERVICIOS DE BANO Y AGUA POTABLE SE HACEN COMO EN EL B767, LA DIFERENCIA RADICA EN QUE EL PANEL
+DEL AGUA POTABLE ESTA EN EL AREA CENTRAL DEL AVION Y EL PANEL PARA LOS BANOS ESTA EN LA PARTE TRASERA DEL
+AVION. PARA LOS BANOS ENJUAGAR CON 10 GLS Y PARA DEJAR 10 GLS.
+- EN EL B787 A CONTINUACION LAS CONFIGURACIONES DE CONTENEDORES Y PALETAS
+- EN EL B787 EL AREA DEL BULK (COMPARTIMIENTO 5) QUE ESTA IGUAL QUE EN EL B767 EN LA PARTE IZQUIERDA ATRAS DEL
+AVION
+- EN EL B787 LAS ESCALERAS SE PONEN EN LAS PUERTAS L2 Y L4, ES DECIR 2DA PUERTA IZQUIERDA (DELANTE) Y ULTIMA
+PUERTA IZQUIERDA (ATRAS)
+- EN EL B787 A CONTINUACION EL DIAGRAMA PARA LOS EQUIPOS EN EL AVION
+- LA GRAFICA SIGUIENTE PARA LA APERTURA DE LAS COMPUERTAS DELANTERA Y TRASERA
+- EN EL B787 PARA LA LIMPIEZA DE LAS MESITAS NO SE PUEDE USAR NINGUN PRODUCTO, SOLO AGUA (IMPORTANTE)
+- EN E B787 LOS ANIMALES VIVOS EN EL COMPARTIMIENTO 5
+VIVA "DIFERENCIAS EN RAMPA" REVISION 20220806
+Sáb 6 Ago 2022 09:18`, requerimientos: "" },
+  "Viva": { diferencias: `- A LA LLEGADA SOLO SE INGRESA AL AVION CUANDO LOS MOTORES ESTEN
+APAGADOS Y LA LUZ ANTICOLICION APAGADA
+- AL TERMINAR EL REMOLQUE A LA SALIDA, SE COLOCA UN CALZO DELANTE DE LAS
+GOMAS DELANTERAS HASTA QUE SE QUITA LA BARRA DE REMOLQUE DEL AVION
+- EN LA CINTA, LOS CALZOS SE PONEN DELANTE DE LAS DOS GOMAS DELANTERAS
+- EN LOS CAMIONES DE AGUA POTABLE Y DE BANOS, LOS CALZOS SE PONEN EN
+DETRAS DE LAS DOS GOMAS TRASERAS
+- ANTES DE COLOCAR LOS EQUIPOS EN EL AVION DEBEN ESTAR PUESTOS LOS
+CONOS
+- PARA EL SERVICIO DE BANOS, 2.6 GALONES PARA DEJAR
+W2Fly "DIFERENCIAS EN RAMPA" REVISADO 20220707
+Vie 8 Jul 2022 21:14`, requerimientos: "" },
+  "World2Fly": { diferencias: `VUELOS DE
+W2Fly
+- LAS ESCALERAS EN EL A330 SE COLOCAN DE LA SIGUIENTE MANERA:
+2L (AVIRAMP O ESCALERA)
+4L (ESCALERA)
+- LAS ESCALERAS EN EL A350 SE COLOCAN DE LA SIGUIENTE MANERA:
+1L (ESCALERA)
+2L (AVIRAMP O ESCALERA)`, requerimientos: "" }
+};
+
+const AIRLINE_REQUERIMIENTOS_PRELOAD = {
+  "Copa Airlines": `**Requerimientos fijos:**
+- Covers
+
+**Procesos operacionales claves:**
+- 360
+- Tres paradas
+- Vagones con los equineros`,
+  "Southwest Airlines": `**Requerimientos fijos:**
+- Covers
+- Tail Stand (Barra de Cola) 737-800, para la descarga y carga de equipajes
+
+**Procesos operacionales claves:**
+- Parqueo con señal correcta
+- Dos Cintas y 6 agentes`,
+  "United": `**Requerimientos fijos:**
+- Tail Stand (Barra de Cola) 737-900
+
+**Procesos operacionales claves:**
+- Colocación de escalera 2 mm y 30 segundos after block
+- Colocación de pasamanos para subir y bajar por la Cinta`,
+  "JetBlue": `**Requerimientos fijos:**
+- Conos dobles en el tren delantero
+
+**Procesos operacionales claves:**
+- Colocación de pasamanos para subir y bajar por la Cinta
+- Tomar fotos de la colocación de los equipajes en compartimientos a la salida`,
+  "Air Canada": `**Requerimientos fijos:**
+- Briefing operacional (15 minutos antes del vuelo)
+
+**Procesos operacionales claves:**
+- Colocación de los conos correctamente
+- Escalera manual para abrir compartimientos`,
+  "Frontier Airlines": `**Procesos operacionales claves:**
+- No pegar los equipos al avión`,
+  "Air Caraibes": `**Requerimientos fijos:**
+- Esperar Ok del Mecánico para realizar 360 y acoplar equipos
+- Completar formulario turnaround de la Aerolínea
+
+**Procesos operacionales claves:**
+- Fotos de los compartimientos a la llegada y salida del avión
+- Escalera manual para abrir compartimientos`,
+  "Wingo": `**Requerimientos fijos:**
+- Covers
+
+**Procesos operacionales claves:**
+- Validación de la LIR de Carga`,
+  "Delta": `**Requerimientos fijos:**
+- Tail Stand (Barra de Cola) 737-900
+
+**Procesos operacionales claves:**
+- Runners deben desmontarse del tractor y revisar que no hayan personas cerca de los vagones para movilizarse`,
+  "Avelo": `**Requerimientos fijos:**
+- Tail Stand (Barra de Cola), para la descarga y carga de equipajes
+- Un par de calzos para vagones
+
+**Procesos operacionales claves:**
+- Solo 3 vagones máximo juntos`,
+  "Discover Airlines": `**Procesos operacionales claves:**
+- Aviramp en posición`,
+  "WestJet": `**Requerimientos fijos:**
+- Colocar 3 calzos en las cintas
+
+**Procesos operacionales claves:**
+- Dos cintas`,
+  "Air Transat": `**Requerimientos fijos:**
+- Dos Loader para los Wide Buddy
+
+**Procesos operacionales claves:**
+- Tomar fotos de los calzos y mallas a la salida
+- Dos cintas para A321`,
+  "Avianca": `**Requerimientos fijos:**
+- Revisar todos los compartimientos al finalizar la descarga
+
+**Procesos operacionales claves:**
+- Tomar fotos de equipajes en mal estado`
+};
+
+
+const SCHED_VALS = ['A','T9','B','BC','C','D','L'];
+const SCHED_COLORS = {A:'#17c97a',T9:'#2d7aee',B:'#8b5cf6',BC:'#fb923c',C:'#e84545',D:'#0eb8c9',L:'#3d5470'};
+
+// ═══════════════════════════════════════════════════════
+// STATE
+// ═══════════════════════════════════════════════════════
+let S = {
+  team:[], duties:{}, observations:{}, overrides:{}, swaps:[],
+  vacaciones:[], permisos:[], licencias:[],
+  activeDate: todayStr(),
+  airlines:{}, personAirlines:{}, airlineInfo:{}
+};
+
+let modalShift = null, modalEditIdx = null;
+let primSel=[], afterSel=[], coverPosSel=[], cierreSel=[];
+let flightData = '';
+let aiDraft = null;
+let aiCancelled = false;
+
+function todayStr(){ return new Date().toISOString().split('T')[0]; }
+
+// ═══════════════════════════════════════════════════════
+// STORAGE & UNDO
+// ═══════════════════════════════════════════════════════
+const UNDO=[], REDO=[];
+function snap(){ return JSON.stringify({duties:S.duties, observations:S.observations}); }
+function restore(s){ const p=JSON.parse(s); S.duties=p.duties; S.observations=p.observations; }
+function save(){
+  localStorage.setItem('airops4', JSON.stringify(S));
+  updateUndoBtns();
+  queueCloudSave();
+}
+
+function cloudPayload(){
+  const {activeDate, ...rest} = S;
+  return {...rest, updatedAt:Date.now(), schemaVersion:3};
+}
+
+function updateCloudPill(label, color){
+  const el=document.getElementById('cloudPill');
+  if(el){ el.textContent=label; el.style.color=color||'var(--text2)'; }
+  const fb=document.getElementById('fbBtn');
+  if(fb){
+    const cfg=getFirebaseConfig();
+    fb.textContent=cfg?'🔥✓':'🔥';
+    fb.style.color=cfg?'var(--amber)':'';
+    fb.style.borderColor=cfg?'rgba(240,165,0,.4)':'';
+  }
+}
+
+function queueCloudSave(){
+  if(!cloudReady||cloudApplying||!cloudDocRef) return;
+  clearTimeout(cloudSaveTimer);
+  cloudSaveTimer=setTimeout(async()=>{
+    try{
+      updateCloudPill('☁ Sincronizando…','var(--amber)');
+      await cloudDocRef.set(cloudPayload(), {merge:true});
+      updateCloudPill('☁ En nube','var(--green)');
+    }catch(e){
+      console.error('Cloud save error',e);
+      updateCloudPill('☁ Error nube','var(--red)');
+    }
+  },350);
+}
+
+function applyCloudState(data){
+  const keepDate=S.activeDate||todayStr();
+  const keepApiKey=localStorage.getItem('airops_gemini_key')||'';
+  Object.assign(S, data||{});
+  S.activeDate=keepDate;
+  migrate();
+  cleanStaleDuties();
+  S.team.forEach(m=>{ if(!m.waName) m.waName=m.name.split(' ')[0]; });
+  if(keepApiKey) localStorage.setItem('airops_gemini_key', keepApiKey);
+}
+
+function initCloud(){
+  if(!window.firebase){ updateCloudPill('☁ Local','var(--text2)'); return; }
+  const cfg=getFirebaseConfig();
+  if(!cfg){ updateCloudPill('☁ Sin config','var(--text3)'); return; }
+  try{
+    if(!firebase.apps.length) firebase.initializeApp(cfg);
+    cloudDb=firebase.firestore();
+    cloudDocRef=cloudDb.collection(CLOUD_DOC_PATH.collection).doc(CLOUD_DOC_PATH.doc);
+    cloudReady=true;
+    updateCloudPill('☁ Conectando…','var(--amber)');
+    cloudDocRef.onSnapshot(snap=>{
+      try{
+        cloudApplying=true;
+        if(snap.exists){
+          applyCloudState(snap.data()||{});
+          localStorage.setItem('airops4', JSON.stringify(S));
+          updateCloudPill('☁ En nube','var(--green)');
+          renderBoard(); refreshOutput(); renderChanges();
+          const teamPage=document.getElementById('page-team');
+          if(teamPage?.classList.contains('active')) renderTeamGrid();
+        } else {
+          // First time — push local data to cloud
+          updateCloudPill('☁ Inicializando…','var(--amber)');
+          queueCloudSave();
+        }
+      }catch(e){
+        console.error('Cloud snapshot error',e);
+        updateCloudPill('☁ Error','var(--red)');
+      } finally {
+        cloudApplying=false;
+      }
+    }, err=>{
+      console.error('Cloud listener error',err);
+      updateCloudPill('☁ Sin conexión','var(--red)');
+    });
+  }catch(e){
+    console.error('Cloud init error',e);
+    updateCloudPill('☁ Error init','var(--red)');
+  }
+}
+function saveDay(){ save(); toast('✅ Guardado'); }
+function pushUndo(){ UNDO.push(snap()); if(UNDO.length>50)UNDO.shift(); REDO.length=0; updateUndoBtns(); }
+function updateUndoBtns(){
+  const u=document.getElementById('undoBtn'), r=document.getElementById('redoBtn');
+  if(u){u.disabled=!UNDO.length;u.style.opacity=UNDO.length?'1':'.35';}
+  if(r){r.disabled=!REDO.length;r.style.opacity=REDO.length?'1':'.35';}
+}
+function undo(){
+  if(!UNDO.length){toast('Nada que deshacer','error');return;}
+  REDO.push(snap()); restore(UNDO.pop()); save();
+  renderBoard(); refreshOutput(); toast('↩ Deshecho');
+}
+function redo(){
+  if(!REDO.length){toast('Nada que rehacer','error');return;}
+  UNDO.push(snap()); restore(REDO.pop()); save();
+  renderBoard(); refreshOutput(); toast('↪ Rehecho');
+}
+function clearDay(){
+  showConfirm('¿Borrar toda la asignación de hoy?','Esta acción borrará todos los agentes del día.',()=>{
+    pushUndo(); S.duties[S.activeDate]={}; S.observations[S.activeDate]=[];
+    save(); renderBoard(); refreshOutput(); toast('🗑 Borrado');
+  });
+}
+
+// ═══════════════════════════════════════════════════════
+// LOAD & SEED
+// ═══════════════════════════════════════════════════════
+function load(){
+  try{ const r=localStorage.getItem('airops4'); if(r) Object.assign(S,JSON.parse(r)); }catch(e){}
+  migrate();
+  cleanStaleDuties();
+  S.team.forEach(m=>{ if(!m.waName) m.waName=m.name.split(' ')[0]; });
+}
+
+function migrate(){
+  const roster = [
+    {name:'Alexandra Delgado Torres', waName:'Alexandra', sup:false, color:'#ec4899', terminal:'B', schedule:['L','T9','A','T9','T9','T9','L']},
+    {name:'Arlene Mercedes Rijo',      waName:'Arlene',    sup:false, color:'#0eb8c9', terminal:'A', schedule:['L','T9','T9','T9','A','A','L']},
+    {name:'Sachariel Márquez',         waName:'Sachariel', sup:false, color:'#17c97a', terminal:'B', schedule:['L','C','C','B','B','B','L']},
+    {name:'Cándido Santana Collado',   waName:'Candido',   sup:false, color:'#a3e635', terminal:'A', schedule:['L','C','C','B','B','B','L']},
+    {name:'Yeidry Hernández',          waName:'Yeidry',    sup:false, color:'#2d7aee', terminal:'B', schedule:['L','T9','A','T9','T9','T9','L']},
+    {name:'Dalvin Cipriam',            waName:'Dalvin',    sup:false, color:'#8b5cf6', terminal:'',  schedule:['L','L','C','C','C','C','C']},
+    {name:'Angel Rijo de Jesús',       waName:'Angel',     sup:false, color:'#fb923c', terminal:'',  schedule:['A','L','L','C','B','B','A']},
+    {name:'Sheridam Peña',             waName:'Sheridam',  sup:false, color:'#f0a500', terminal:'',  schedule:['B','L','L','B','B','B','B']},
+    {name:'Iván Josep Rivas',          waName:'Ivan',      sup:false, color:'#38bdf8', terminal:'',  schedule:['A','L','L','B','B','B','A']},
+    {name:'Hilda Sánchez',             waName:'Hilda',     sup:false, color:'#f472b6', terminal:'',  schedule:['B','L','L','B','B','B','C']},
+    {name:'Emil Nathanael Sánchez',    waName:'Emil',      sup:false, color:'#34d399', terminal:'',  schedule:['B','L','L','B','B','B','B']},
+    {name:'Madelin María Delgado',     waName:'Madelin',   sup:false, color:'#fbbf24', terminal:'',  schedule:['B','A','L','L','C','B','B']},
+    {name:'José Misael Berroa',        waName:'Misael',    sup:false, color:'#60a5fa', terminal:'',  schedule:['C','B','L','L','C','B','B']},
+    {name:'Arismendy Marte',           waName:'Arismendy', sup:false, color:'#c084fc', terminal:'',  schedule:['C','B','L','L','C','B','B']},
+    {name:'Fernando Beltre de la Rosa',waName:'Fernando',  sup:false, color:'#f87171', terminal:'',  schedule:['D','D','L','L','D','D','D']},
+    {name:'Alan Rafael Paulino',       waName:'Alan',      sup:false, color:'#4ade80', terminal:'',  schedule:['A','L','L','C','T9','T9','T9']},
+    {name:'Katrini Peguero Sánchez',   waName:'Katrini',   sup:false, color:'#fb923c', terminal:'',  schedule:['B','C','B','L','L','C','B']},
+    {name:'Hendrix Marte',             waName:'Hendrix',   sup:false, color:'#a78bfa', terminal:'',  schedule:['B','B','B','L','L','B','B']},
+    {name:'Esmerling Guillermo',       waName:'Esmerling', sup:false, color:'#22d3ee', terminal:'',  schedule:['A','A','B','L','L','B','B']},
+    {name:'Kenia Candelaria',          waName:'Kenia',     sup:false, color:'#e879f9', terminal:'',  schedule:['B','B','B','L','L','C','C']},
+    {name:'Daniel Castro Morillo',     waName:'Daniel',    sup:true,  color:'#e84545', terminal:'',  schedule:['B','B','C','L','L','C','B']},
+    {name:'Jhonatan Pérez Acosta',     waName:'Jhonatan',  sup:true,  color:'#e84545', terminal:'',  schedule:['A','A','A','A','L','L','A']},
+    {name:'Andy Polanco Guerrero',     waName:'Andy',      sup:true,  color:'#e84545', terminal:'',  schedule:['L','B','B','C','B','B','L']},
+    {name:'Angelini Sosa Abreu',       waName:'Angelini',  sup:true,  color:'#e84545', terminal:'',  schedule:['C','C','L','L','C','C','C']},
+  ];
+
+  if(!S.team.length){
+    let id=0;
+    S.team = roster.map(r=>({id:'m'+(id++), role:'',...r}));
+  } else {
+    let maxId = Math.max(0,...S.team.map(m=>parseInt(m.id.replace('m',''))||0));
+    roster.forEach(r=>{
+      const exists = S.team.find(m=>m.name.toLowerCase().split(' ')[0]===r.name.toLowerCase().split(' ')[0]);
+      if(!exists) S.team.push({id:'m'+(++maxId), role:'',...r});
+      else {
+        if(!exists.schedule||exists.schedule.length<7) exists.schedule=r.schedule;
+        // fix empty schedules
+        exists.schedule = exists.schedule.map(s=>s||'L').slice(0,7);
+        while(exists.schedule.length<7) exists.schedule.push('L');
+      }
+    });
+  }
+
+  // Seed airlines
+  if(!S.airlines||!Object.keys(S.airlines).length){
+    const al=['Southwest Airlines','British Airways','Air France','Copa Airlines','Delta','Air Transat','Air Century','Air Europa','Edelweiss Air','Breeze','Condor','Frontier Airlines','United','Lot Polish','TUI','Aeromexico','World2Fly','Spirit Airlines','Aerolineas Argentinas','JetBlue','Avelo','Air Canada','WestJet','Avianca','Discover Airlines','Sky Airlines Peru','JetSmart','Gol','Iberojet','Global X','Air Caraibes','Flair Airlines','Wingo','Latam','Make Up','Sky High','AllegiantAir','Sun Country'];
+    S.airlines={};
+    al.forEach((n,i)=>S.airlines[n]={color:AIRLINE_COLORS[i%AIRLINE_COLORS.length]});
+  }
+
+  // Seed person→airline
+  if(!S.personAirlines||!Object.keys(S.personAirlines).length){
+    const asgn={'Arismendy Marte':['Southwest Airlines','Air Century'],'Iván Josep Rivas':['British Airways'],'Sachariel Márquez':['Air France','Air Europa'],'Yeidry Hernández':['Copa Airlines'],'Dalvin Cipriam':['Delta','Edelweiss Air'],'Arlene Mercedes Rijo':['Air Transat','Breeze'],'Fernando Beltre de la Rosa':['Condor','World2Fly'],'José Misael Berroa':['Frontier Airlines','Spirit Airlines'],'Alexandra Delgado Torres':['United','Aerolineas Argentinas'],'Hendrix Marte':['Lot Polish','JetBlue'],'Angel Rijo de Jesús':['TUI','Avelo'],'Alan Rafael Paulino':['Aeromexico'],'Cándido Santana Collado':['Air Canada','Gol'],'Emil Nathanael Sánchez':['WestJet','Iberojet'],'Sheridam Peña':['Avianca','Global X'],'Esmerling Guillermo':['Discover Airlines','Air Caraibes'],'Hilda Sánchez':['Sky Airlines Peru','Flair Airlines'],'Madelin María Delgado':['JetSmart','Wingo'],'Katrini Peguero Sánchez':['Latam','Sky High'],'Kenia Candelaria':['Make Up','AllegiantAir','Sun Country']};
+    S.personAirlines={};
+    S.team.forEach(m=>{
+      const k=Object.keys(asgn).find(k=>k.toLowerCase().split(' ')[0]===m.name.toLowerCase().split(' ')[0]);
+      if(k) S.personAirlines[m.id]=asgn[k];
+    });
+  }
+  save();
+}
+
+// ═══════════════════════════════════════════════════════
+// DATE & INIT
+// ═══════════════════════════════════════════════════════
+function initDate(){
+  const inp=document.getElementById('dateInput');
+  inp.value=S.activeDate;
+  updatePill();
+}
+function onDateChange(){
+  S.activeDate=document.getElementById('dateInput').value;
+  updatePill(); save(); renderBoard(); refreshOutput();
+}
+function updatePill(){
+  const d=new Date(S.activeDate+'T12:00:00');
+  document.getElementById('datePill').textContent=d.toLocaleDateString('es-DO',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
+}
+function dowIdx(date){ return (new Date(date+'T12:00:00').getDay()+6)%7; }
+function resolvedShift(m,date){
+  const ov=S.overrides?.[m.id]?.[date];
+  if(ov) return ov.shift==='LIBRE'?null:ov.shift;
+
+  // Vacaciones, permisos, licencias → LIBRE durante el rango
+  const inRange=(list)=>(list||[]).some(r=>r.personId===m.id&&date>=r.start&&date<=r.end);
+  if(inRange(S.vacaciones)||inRange(S.permisos)||inRange(S.licencias)) return null;
+
+  // Cambios entre colaboradores:
+  // Persona A cede su día libre (dateA) → A TRABAJA ese día con el turno de B ese día
+  //                                     → B está LIBRE ese día
+  // Persona B cede su día libre (dateB) → B TRABAJA ese día con el turno de A ese día
+  //                                     → A está LIBRE ese día
+  for(const sw of (S.swaps||[])){
+    if(sw.dateA===date){
+      if(sw.personB===m.id) return null; // B libre en dateA
+      if(sw.personA===m.id){
+        // A trabaja en dateA — usa el turno habitual de B en ese día de la semana
+        const mB=S.team.find(t=>t.id===sw.personB);
+        const s=mB?.schedule?.[dowIdx(date)];
+        // Si B también está libre ese día, usar el primer turno disponible de A
+        if(!s||s==='L'||s==='LIBRE'){
+          const fallback=m.schedule?.find(x=>x&&x!=='L'&&x!=='LIBRE');
+          return fallback||'B'; // último recurso
+        }
+        return s;
+      }
+    }
+    if(sw.dateB===date){
+      if(sw.personA===m.id) return null; // A libre en dateB
+      if(sw.personB===m.id){
+        // B trabaja en dateB — usa el turno habitual de A en ese día de la semana
+        const mA=S.team.find(t=>t.id===sw.personA);
+        const s=mA?.schedule?.[dowIdx(date)];
+        if(!s||s==='L'||s==='LIBRE'){
+          const fallback=m.schedule?.find(x=>x&&x!=='L'&&x!=='LIBRE');
+          return fallback||'B';
+        }
+        return s;
+      }
+    }
+  }
+
+  const s=m.schedule?.[dowIdx(date)];
+  return (!s||s==='L'||s==='LIBRE')?null:s;
+}
+function getDuties(shiftId){ return S.duties[S.activeDate]?.[shiftId]||[]; }
+
+function cleanStaleDuties(){
+  // Remove fields that don't belong to a shift's rules (stale data from old saves)
+  Object.values(S.duties||{}).forEach(dayDuties=>{
+    Object.entries(dayDuties||{}).forEach(([shiftId,list])=>{
+      const rules=SHIFT_RULES[shiftId];
+      if(!rules) return;
+      (list||[]).forEach(d=>{
+        if(!rules.primerasOps){ d.primaryPos=''; d.afterMealPos=''; d.cubrirOpsA=false; d.cubrirOpsB=false; }
+        if(!rules.afterMeal)  { d.afterMealPos=''; }
+        if(!rules.coverPos)   { d.coverPos=''; }
+        if(!rules.cierre)     { d.cierrePos=''; }
+        if(!rules.cena)       { d.cenaTime=''; }
+      });
+    });
+  });
+}
+
+// ═══════════════════════════════════════════════════════
+// TABS
+// ═══════════════════════════════════════════════════════
+function switchTab(t){
+  const tabs=['board','airlines','team','changes','history','knowClient','users'];
+  document.querySelectorAll('.tab').forEach(el=>{
+    const tabName=el.dataset.tab;
+    el.classList.toggle('active', tabName===t);
+  });
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.getElementById('page-'+t)?.classList.add('active');
+  if(t==='board'){renderBoard();refreshOutput();}
+  if(t==='airlines')renderAirlines();
+  if(t==='team')renderTeamGrid();
+  if(t==='changes')renderChanges();
+  if(t==='history')renderHistory();
+  if(t==='knowClient')renderKnowClient();
+  if(t==='users')renderUsers();
+}
+
+// ═══════════════════════════════════════════════════════
+// BOARD RENDER
+// ═══════════════════════════════════════════════════════
+function renderBoard(){
+  const date=S.activeDate;
+  const wrap=document.getElementById('boardWrap');
+
+  // Stats
+  const total=S.team.filter(m=>!m.sup&&resolvedShift(m,date)!==null).length;
+  const assigned=new Set(SHIFT_DEFS.flatMap(s=>getDuties(s.id).map(d=>d.agentId))).size;
+  const unassigned=total-assigned;
+  let html=`<div class="stats-bar">
+    <div class="stat"><div class="stat-n" style="color:var(--accent)">${total}</div><div class="stat-l">EN TURNO</div></div>
+    <div class="stat"><div class="stat-n" style="color:var(--green)">${assigned}</div><div class="stat-l">ASIGNADOS</div></div>
+    <div class="stat"><div class="stat-n" style="color:var(--amber)">${unassigned}</div><div class="stat-l">SIN ASIGNAR</div></div>
+  </div>`;
+
+  // Supervisors
+  const sups=S.team.filter(m=>m.sup&&resolvedShift(m,date)!==null);
+  if(sups.length){
+    html+=`<div class="sup-bar"><span class="sup-lbl">Supervisores hoy</span>`;
+    sups.forEach(s=>{ const sh=resolvedShift(s,date); html+=`<span class="sup-chip">${s.name}${sh?' <span style="font-size:10px;opacity:.7">'+sh+'</span>':''}</span>`; });
+    html+=`</div>`;
+  }
+
+  // Unassigned
+  const assignedIds=new Set(SHIFT_DEFS.flatMap(s=>getDuties(s.id).map(d=>d.agentId)));
+  const unassignedMembers=S.team.filter(m=>!m.sup&&resolvedShift(m,date)!==null&&!assignedIds.has(m.id));
+  if(unassignedMembers.length){
+    const dow=['Lunes','Martes','Miércoles','Jueves','Viernes','Sábado','Domingo'][dowIdx(date)];
+    html+=`<div class="unassigned-bar"><div class="unassigned-label">${dow} — Sin asignar:</div><div class="unassigned-chips">`;
+    unassignedMembers.forEach(m=>{
+      const sh=resolvedShift(m,date);
+      const sdef=SHIFT_DEFS.find(s=>s.id===sh);
+      html+=`<span class="uchip" style="border-color:${sdef?.color||'var(--border2)'}33;color:${sdef?.color||'var(--text2)'}" onclick="openAssignModal('${sh}',null,'${m.id}')">${m.name} <span style="font-size:10px">${sh}</span></span>`;
+    });
+    html+=`</div></div>`;
+  }
+
+  // Shift blocks — only show base shifts + extras that have duties
+  const baseShifts=SHIFT_DEFS.filter(s=>!s.id.includes('+'));
+  const extraShifts=SHIFT_DEFS.filter(s=>s.id.includes('+')&&getDuties(s.id).length>0);
+  [...baseShifts,...extraShifts].forEach(shift=>{
+    const duties=getDuties(shift.id);
+    html+=`<div class="shift-block">
+      <div class="shift-head">
+        <span class="shift-tag" style="background:${shift.bg};color:${shift.color};border:1px solid ${shift.color}44">${shift.label}</span>
+        <span class="shift-time">${shift.time}</span>
+        <span class="shift-count">${duties.length} agente${duties.length!==1?'s':''}</span>
+        <div class="shift-add" onclick="openAssignModal('${shift.id}',null,null)">+</div>
+      </div>
+      <div class="shift-body">`;
+    if(!duties.length){ html+=`<div class="shift-empty">Sin agentes. Haz clic en + para agregar.</div>`; }
+    else {
+      html+=`<div class="agents-grid">`;
+      duties.forEach((d,i)=>{
+        const m=S.team.find(t=>t.id===d.agentId);
+        if(!m) return;
+        const init=m.name.split(' ').map(p=>p[0]).join('').slice(0,2).toUpperCase();
+        let rows='';
+        const rules=SHIFT_RULES[shift.id]||SHIFT_RULES.A;
+        if(d.primaryPos&&rules.primerasOps) rows+=dr('Primeras ops',`<span class="bp">${d.primaryPos}</span>`);
+        if(d.coverPos&&rules.coverPos) rows+=dr('Cubre',`<span class="bp">${d.coverPos}</span>`);
+        if(d.specialTasks) d.specialTasks.split(',').filter(t=>t.trim()).forEach(t=>rows+=dr('Tarea',`<span class="bt">${t.trim()}${d.vehHasta?' hasta '+d.vehHasta:''}</span>`));
+        if(d.cubrirOpsA&&rules.primerasOps) rows+=dr('Cubre',`<span class="bp">Primeras ops T.A</span>`);
+        if(d.cubrirOpsB&&rules.primerasOps) rows+=dr('Cubre',`<span class="bp">Primeras ops T.B</span>`);
+        if(d.mealType&&d.mealTime) rows+=dr(d.mealType,`<span class="bm">${d.mealTime}</span>`);
+        if(d.radioNum) rows+=dr('Radio',`<span style="color:var(--cyan);font-family:'IBM Plex Mono',monospace">📻 ${d.radioNum}</span>`);
+        if(d.afterMealPos&&rules.afterMeal) rows+=dr('Post-alm.',`<span class="bp">${d.afterMealPos}</span>`);
+        (d.covers||[]).forEach(c=>{
+          if(c.who||c.pos){
+            const mtype=detectMealType(c.time||'');
+            const lbl=mtype.includes('Cena')?'Cena':mtype.includes('Almuerzo')?'Almuerzo':'Cubre';
+            rows+=dr('Cubre',`<span class="bc">${c.who?lbl+' '+c.who:''}${c.time?' a las '+c.time:''}${c.pos?' '+c.pos:''}</span>`);
+          }
+        });
+        if(d.cenaTime&&rules.cena) rows+=dr('Cena',`<span class="bm">${d.cenaTime}</span>`);
+        if(d.cierrePos&&rules.cierre) rows+=dr('Cierre',`<span class="bp">${d.cierrePos}</span>`);
+        if(d.extraNotes) rows+=dr('Nota',`<span style="color:var(--text2)">${d.extraNotes}</span>`);
+        // position limit warning
+        const posCount=countPositions(d.primaryPos)+countPositions(d.coverPos)+countPositions(d.afterMealPos);
+        const hasVeh=d.specialTasks&&(d.specialTasks.includes('TPe119')||d.specialTasks.includes('CGP17'));
+        if(posCount>3&&!hasVeh) rows=`<div style="font-size:10px;color:var(--red);font-weight:700;margin-bottom:3px">⚠️ +3 pos sin vehículo</div>`+rows;
+        if(m.noLicencia&&hasVeh) rows=`<div style="font-size:10px;color:var(--amber);font-weight:700;margin-bottom:3px">⚠️ Sin licencia — vehículo asignado</div>`+rows;
+        html+=`<div class="agent-card" onclick="openAssignModal('${shift.id}',${i},null)">
+          <div class="atop">
+            <div class="av" style="background:${m.color}22;color:${m.color}">${init}</div>
+            <div><div class="aname">${m.name}</div>${m.terminal?`<div class="aterm">Terminal ${m.terminal}</div>`:''}</div>
+          </div>
+          ${rows?`<div class="drows">${rows}</div>`:''}
+        </div>`;
+      });
+      html+=`</div>`;
+    }
+    html+=`</div></div>`;
+  });
+
+  // Observations
+  const obs=(S.observations[date]||[]);
+  html+=`<div class="obs-sec">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
+      <div style="font-size:10px;font-weight:800;letter-spacing:1px;color:var(--text3);text-transform:uppercase">📋 Observaciones</div>
+    </div>
+    ${obs.map((o,i)=>`<div class="obs-item"><span>• ${o}</span><button onclick="removeObs(${i})" style="background:none;border:none;color:var(--text3);cursor:pointer;font-size:14px;padding:0 4px">✕</button></div>`).join('')}
+    <div style="display:flex;gap:6px;margin-top:8px;">
+      <input class="fi" id="obsInput" placeholder="Agregar observación…" style="flex:1;font-size:12px;padding:6px 10px" onkeydown="if(event.key==='Enter')addObs()">
+      <button class="btn btn-outline" style="font-size:12px;padding:5px 10px" onclick="addObs()">+ Agregar</button>
+    </div>
+  </div>`;
+
+  wrap.innerHTML=html;
+}
+
+function dr(label,val){ return `<div class="drow"><span class="dlabel">${label}</span>${val}</div>`; }
+function countPositions(s){ if(!s||s==='—') return 0; let n=0; s.split(',').forEach(p=>{ p=p.trim(); if(p.includes('/'))n+=Math.abs(parseInt(p.split('/')[1].replace('N',''))-parseInt(p.split('/')[0].replace('N','')))+1; else if(p) n++; }); return n; }
+
+function addObs(){
+  const inp=document.getElementById('obsInput');
+  const v=inp?.value?.trim()||'';
+  if(!v) return;
+  pushUndo();
+  if(!S.observations[S.activeDate]) S.observations[S.activeDate]=[];
+  S.observations[S.activeDate].push(v);
+  if(inp) inp.value='';
+  save(); renderBoard(); refreshOutput();
+}
+function removeObs(i){ pushUndo(); S.observations[S.activeDate].splice(i,1); save(); renderBoard(); refreshOutput(); }
+
+// ═══════════════════════════════════════════════════════
+// WHATSAPP OUTPUT
+// ═══════════════════════════════════════════════════════
+function buildText(date){
+  const duties = S.duties[date]||{};
+  const d=new Date(date+'T12:00:00');
+  let txt='Buenos días,\nAsignación del día de hoy:\n';
+  SHIFT_DEFS.forEach(shift=>{
+    const list=duties[shift.id]||[];
+    if(!list.length) return;
+    txt+=`\n*${shift.label}*\n\n`;
+    const shiftRules=SHIFT_RULES[shift.id]||SHIFT_RULES.A;
+    list.forEach(duty=>{
+      const m=S.team.find(t=>t.id===duty.agentId); if(!m) return;
+      const wa=m.waName||m.name.split(' ')[0];
+      txt+=`@${wa}\n`;
+      if(shiftRules.primerasOps&&duty.primaryPos&&duty.primaryPos!=='—') txt+=`Pendiente primeras ops ${duty.primaryPos}\n`;
+      if(shiftRules.coverPos&&duty.coverPos&&duty.coverPos!=='—') txt+=`Cubre posiciones ${duty.coverPos}\n`;
+      if(duty.specialTasks) duty.specialTasks.split(',').filter(t=>t.trim()).forEach(t=>txt+=t.trim()+(duty.vehHasta?' hasta '+duty.vehHasta:'')+'\n');
+      if(shiftRules.primerasOps&&duty.cubrirOpsA) txt+=`Cubre primeras ops Terminal A\n`;
+      if(shiftRules.primerasOps&&duty.cubrirOpsB) txt+=`Cubre primeras ops Terminal B\n`;
+      if(duty.mealType&&duty.mealTime) txt+=`${duty.mealType} ${duty.mealTime}\n`;
+      if(duty.radioNum) txt+=`Radio ${duty.radioNum}\n`;
+      if(shiftRules.afterMeal&&duty.afterMealPos&&duty.afterMealPos!=='—') txt+=`Luego del almuerzo cubre ${duty.afterMealPos}\n`;
+      (duty.covers||[]).forEach(c=>{
+        const mtype=detectMealType(c.time||'');
+        const lbl=mtype.includes('Cena')?'cena':mtype.includes('Almuerzo')?'almuerzo':'cobertura';
+        const dur=lbl==='cena'?(duty.cenaTime?45:60):60;
+        let l='';
+        if(c.who&&c.time) l=`Cubre ${lbl} de ${c.who} hasta las ${addMins(c.time,dur)}`;
+        else if(c.who) l=`Cubre a ${c.who}`;
+        if(c.pos) l+=(l?' en ':'')+c.pos;
+        if(l) txt+=l+'\n';
+      });
+      if(shiftRules.cena&&duty.cenaTime) txt+=`Cena ${duty.cenaTime}\n`;
+      if(shiftRules.cierre&&duty.cierrePos&&duty.cierrePos!=='—') txt+=`Cierre ${duty.cierrePos}\n`;
+      if(duty.extraNotes) txt+=duty.extraNotes+'\n';
+      txt+='\n';
+    });
+  });
+  const sups=S.team.filter(m=>m.sup&&resolvedShift(m,date)!==null);
+  if(sups.length){ txt+=`*Supervisores*\n`; sups.forEach(s=>txt+=`@${s.waName||s.name.split(' ')[0]}\n`); txt+='\n'; }
+  const obs=S.observations[date]||[];
+  if(obs.length){ txt+=`*Observaciones:*\n`; obs.forEach(o=>txt+=`• ${o}\n`); txt+='\n'; }
+  txt+='*¡Excelente turno para todos!*';
+  return txt;
+}
+
+function addMins(t,m){ if(!t) return ''; const[h,min]=t.split(':').map(Number); const tot=h*60+min+m; return String(Math.floor(tot/60)%24).padStart(2,'0')+':'+String(tot%60).padStart(2,'0'); }
+
+// ═══════════════════════════════════════════════════════
+// WHATSAPP OUTPUT EDIT MODE
+// ═══════════════════════════════════════════════════════
+let outEditMode = false;
+
+function toggleOutEdit(){
+  outEditMode = !outEditMode;
+  const body=document.getElementById('outBody');
+  const editor=document.getElementById('outEditor');
+  const btn=document.getElementById('editOutBtn');
+  if(outEditMode){
+    editor.value=body.textContent;
+    body.style.display='none';
+    editor.style.display='block';
+    btn.textContent='✅ Listo';
+    btn.style.color='var(--green)';
+    editor.focus();
+  } else {
+    body.textContent=editor.value;
+    editor.style.display='none';
+    body.style.display='block';
+    btn.textContent='✏️ Editar';
+    btn.style.color='';
+  }
+}
+
+function refreshOutput(){
+  if(outEditMode) return; // don't overwrite while editing
+  document.getElementById('outBody').textContent=buildText(S.activeDate);
+}
+
+function doCopy(){
+  const txt=outEditMode
+    ? document.getElementById('outEditor').value
+    : document.getElementById('outBody').textContent;
+  if(navigator.clipboard&&window.isSecureContext){
+    navigator.clipboard.writeText(txt).then(()=>toast('📋 ¡Copiado!'));
+  } else {
+    const ta=document.createElement('textarea');
+    ta.value=txt; ta.style.cssText='position:fixed;left:-9999px;opacity:0;';
+    document.body.appendChild(ta); ta.select();
+    try{document.execCommand('copy');toast('📋 ¡Copiado!');}catch(e){}
+    document.body.removeChild(ta);
+  }
+}
+
+// ═══════════════════════════════════════════════════════
+// LACOPS FLIGHT API
+// ═══════════════════════════════════════════════════════
+function parsePossibleDate(value){
+  if(!value) return null;
+  if(value instanceof Date && !isNaN(value)) return value;
+  const s=String(value).trim();
+  let m=s.match(/^(\d{4})-(\d{2})-(\d{2})/);
+  if(m) return new Date(`${m[1]}-${m[2]}-${m[3]}T12:00:00`);
+  m=s.match(/^(\d{2})\/(\d{2})\/(\d{4})/);
+  if(m) return new Date(`${m[3]}-${m[2]}-${m[1]}T12:00:00`);
+  m=s.match(/^(\d{2})-(\d{2})-(\d{4})/);
+  if(m) return new Date(`${m[3]}-${m[2]}-${m[1]}T12:00:00`);
+  return null;
+}
+
+function rowFlightDate(row){
+  const keys=['Fecha','FECHA','fecha','Date','DATE','date','flightDate','flight_date','operationDate','operation_date'];
+  for(const k of keys){
+    const d=parsePossibleDate(row?.[k]);
+    if(d) return d;
+  }
+  for(const [k,v] of Object.entries(row||{})){
+    if(/fecha|date/i.test(k)){ const d=parsePossibleDate(v); if(d) return d; }
+  }
+  return null;
+}
+
+async function fetchLACOPS(){
+  const dateInput=document.getElementById('lacopsDate');
+  const date=dateInput.value||S.activeDate;
+  const status=document.getElementById('lacopsStatus');
+  status.style.display='block';
+  status.style.color='var(--text2)';
+  status.textContent='Conectando con el dashboard del aeropuerto…';
+
+  try {
+    const ctrl=new AbortController();
+    const tid=setTimeout(()=>ctrl.abort(),15000);
+    const url=`https://proxy-dashboard.josemiguel-account.workers.dev/vuelos?date=${date}`;
+    const res=await fetch(url,{signal:ctrl.signal});
+    clearTimeout(tid);
+    if(!res.ok) throw new Error('HTTP '+res.status);
+    const data=await res.json();
+
+    let flights=[];
+    if(data?.query_result?.data?.rows) flights=data.query_result.data.rows;
+    else if(data?.data?.rows) flights=data.data.rows;
+    else if(Array.isArray(data)) flights=data;
+    else if(Array.isArray(data?.rows)) flights=data.rows;
+
+    if(!flights.length) throw new Error('No se recibieron vuelos');
+
+    // API returns current week. DIA = "Sábado 28" (text), DIANUMERO = day of week (0=Sun..6=Sat)
+    // Filter by day of week matching selected date
+    // JS getDay(): 0=Sun,1=Mon...6=Sat — matches DIANUMERO
+    const selectedDow = new Date(date + 'T12:00:00').getDay(); // 0=Sun..6=Sat
+    const filtered = flights.filter(f => {
+      const dn = f.DIANUMERO ?? f.dianumero;
+      return dn !== undefined && dn !== null && Number(dn) === selectedDow;
+    });
+    const finalFlights = filtered.length > 0 ? filtered : flights;
+    const filterNote = filtered.length > 0 ? '' : ' (sin filtro de día — mostrando todo)';
+
+    // Deduplicate: API can return same vuelo multiple times due to GROUP BY
+    const seen = new Set();
+    const deduped = finalFlights.filter(f=>{
+      const key=(f.Vuelo||f.vuelo||'')+'|'+(f.AEROLINEA||f.Aerolinea||f.aerolinea||'')+'|'+(f.STA||f.sta||f.STD||f.std||'');
+      if(seen.has(key)) return false;
+      seen.add(key); return true;
+    });
+
+    const text=deduped.map(f=>{
+      const airline = f.AEROLINEA || f.Aerolinea || f.aerolinea || '';
+      const flight  = f.Vuelo     || f.vuelo     || f.VUELO    || '';
+      const sta     = f.STA       || f.sta       || '';
+      const std     = f.STD       || f.std       || '';
+      const eta     = f.ETA       || f.eta       || '';
+      const etd     = f.ETD       || f.etd       || '';
+      const terminal= f.TERMINAL  || f.Terminal  || f.terminal || '';
+      const ruta    = f.RUTA      || f.ruta      || '';
+      const dianom  = f.dianom    || f.DIA       || '';
+
+      // STAND format examples from dashboard:
+      // Terminal A: "P7", "P7A" → pos "7"
+      // Terminal B: "B21", "B26A" → pos "21", "26"
+      // Rampa Norte A: "AN1", "AN2" or "N1", "N2" → pos "N1", "N2"
+      // Rampa Norte B: "N6", "N7" etc → pos "N6"
+      const rawStand = f.STAND || f.stand || '';
+      const rawGate  = f.GATE  || f.gate  || '';
+
+      let pos = '';
+      const s = rawStand.toUpperCase().trim();
+      if(s){
+        // Check for Rampa Norte patterns: AN1, AN2, N1, N2...
+        const rampaNorteA = s.match(/^A?N(\d+)$/);
+        const rampaNorteB = s.match(/^N(\d+)$/);
+        if(rampaNorteA){
+          const n=parseInt(rampaNorteA[1]);
+          if(n>=1&&n<=5) pos='N'+n;
+          else if(n>=6&&n<=13) pos='N'+n;
+        } else {
+          // Strip leading letter(s) and trailing letter(s), keep numeric part
+          const stripped = s.replace(/^[A-Z]+/,'').replace(/[A-Z]+$/,'');
+          if(stripped) pos = stripped;
+        }
+      }
+      if(!pos && rawGate) pos = rawGate.replace(/[A-Z]+$/i,'').replace(/^[A-Z]+/i,'') || rawGate;
+
+      const arrTime = eta && eta!=='OVER' ? eta : (sta && sta!=='OVER' ? sta : '');
+      const depTime = etd && etd!=='OVER' ? etd : (std && std!=='OVER' ? std : '');
+      const type    = (f.STA&&f.STA!=='OVER')||f.ETA ? 'ARR' : 'DEP';
+
+      return [airline, flight, pos?`POS ${pos}`:'', arrTime||depTime, type, ruta, terminal?`T${terminal}`:'', dianom]
+        .filter(Boolean).join('  ');
+    }).join('\n');
+
+    document.getElementById('flightTextInput').value=text;
+    onFlightTextChange();
+    flightData=text;
+    updateFlightBtn();
+    buildSuggestionsPanel();
+    document.getElementById('flightSuggestionsWrap').style.display='block';
+    status.style.color='var(--green)';
+    const dupNote = deduped.length < finalFlights.length ? ` (${finalFlights.length-deduped.length} duplicados eliminados)` : '';
+    status.textContent=`✅ ${deduped.length} vuelos del ${new Date(date+'T12:00:00').toLocaleDateString('es-DO',{weekday:'long',day:'numeric',month:'long'})}${dupNote}${filterNote}`;
+  } catch(e){
+    status.style.color='var(--red)';
+    status.textContent='❌ '+(e.name==='AbortError'?'Timeout — dashboard no respondió':e.message);
+  }
+}
+// ═══════════════════════════════════════════════════════
+// POSITION PICKERS
+// ═══════════════════════════════════════════════════════
+function posPicker(prefix){
+  return `<div style="display:flex;flex-direction:column;gap:5px;margin-bottom:4px">
+    <div class="pos-section"><div class="pos-section-label">🅐 Terminal A — 1 al 11</div><div class="pos-buttons" id="pb_${prefix}_TA"></div></div>
+    <div class="pos-section"><div class="pos-section-label" style="color:var(--cyan)">Rampa Norte A — N1 al N5</div><div class="pos-buttons" id="pb_${prefix}_NA"></div></div>
+    <div class="pos-section"><div class="pos-section-label">🅑 Terminal B1 — Pares 20,22,24,26</div><div class="pos-buttons" id="pb_${prefix}_TB1P"></div></div>
+    <div class="pos-section"><div class="pos-section-label" style="color:var(--text3)">Terminal B1 — Impares 21,23,25</div><div class="pos-buttons" id="pb_${prefix}_TB1I"></div></div>
+    <div class="pos-section"><div class="pos-section-label">Terminal B2 — 27 al 33</div><div class="pos-buttons" id="pb_${prefix}_TB2A"></div></div>
+    <div class="pos-section"><div class="pos-section-label" style="color:var(--text3)">Terminal B2 — 34 al 37</div><div class="pos-buttons" id="pb_${prefix}_TB2B"></div></div>
+    <div class="pos-section"><div class="pos-section-label" style="color:var(--cyan)">Rampa Norte B — N6 al N13</div><div class="pos-buttons" id="pb_${prefix}_NB"></div></div>
+    <div style="display:flex;align-items:center;gap:8px;margin-top:2px;">
+      <div style="font-size:11px;color:var(--accent);font-family:'IBM Plex Mono',monospace;font-weight:700;min-height:18px" id="pd_${prefix}">—</div>
+      <button type="button" class="btn btn-outline" style="font-size:10px;padding:2px 7px" onclick="clearPicker('${prefix}')">✕ Limpiar</button>
+    </div>
+  </div>`;
+}
+
+// Time ranges (in minutes from midnight) for each position field per shift
+const SHIFT_TIME_RANGES = {
+  // Ranges in minutes from midnight
+  // prim  = primeras ops (only conflicts with other prim)
+  // after = post-almuerzo (conflicts with B/BC/C cover since they overlap 13:00-17:00)
+  // cover = cubre posiciones
+  // cierre = cierre (only conflicts with other cierre)
+  //
+  // Key rule: primeras ops (08-13) NEVER conflict with B/C cover
+  //           post-almuerzo (13-17) DOES conflict with B cover and C cover
+  'A':   { prim:[480,780],   after:[780,1020],  cover:null,       cierre:null        },
+  'T9':  { prim:[540,780],   after:[780,1080],  cover:null,       cierre:null        },
+  'B':   { prim:null,        after:null,        cover:[780,1140], cierre:null        }, // 13:00–19:00 (conflict zone starts at post-almuerzo time)
+  'B+C': { prim:null,        after:null,        cover:[780,1020], cierre:[1020,1440] }, // 13:00–17:00 / 17:00–00:00
+  'C':   { prim:null,        after:null,        cover:[780,1020], cierre:[1020,1440] }, // 13:00–17:00 / 17:00–00:00
+  'D':   { prim:null,        after:null,        cover:null,       cierre:null        },
+  'A+B': { prim:[480,780],   after:[780,1020],  cover:[780,1200], cierre:null        },
+  'A+C': { prim:[480,780],   after:[780,1020],  cover:[780,1440], cierre:[1020,1440] },
+  'T9+C':{ prim:[540,780],   after:[780,1020],  cover:[780,1440], cierre:[1020,1440] },
+};
+
+// What time window is the picker we're currently building?
+function getPickerTimeRange(prefix, shiftId){
+  const r=SHIFT_TIME_RANGES[shiftId]||{};
+  if(prefix==='prim')   return r.prim||null;
+  if(prefix==='after')  return r.after||null;
+  if(prefix==='cover')  return r.cover||null;
+  if(prefix==='cierre') return r.cierre||null;
+  return null;
+}
+
+// Do two time ranges overlap?
+function rangesOverlap(a, b){
+  if(!a||!b) return false;
+  return a[0]<b[1] && b[0]<a[1];
+}
+
+function getOccupiedPositions(prefix){
+  const occupied=new Set();
+  const date=S.activeDate;
+  const currentShift=getEffectiveShift()||modalShift;
+  const pickerRange=getPickerTimeRange(prefix, currentShift);
+  if(!pickerRange) return occupied; // no range = no conflicts to show
+
+  SHIFT_DEFS.forEach(shift=>{
+    (S.duties[date]?.[shift.id]||[]).forEach((d,i)=>{
+      if(shift.id===modalShift && i===modalEditIdx) return;
+
+      const otherRanges=SHIFT_TIME_RANGES[shift.id]||{};
+
+      // prim picker only conflicts with other prim fields (same zone, same time)
+      // after picker conflicts with after AND cover fields (post-almuerzo overlaps B/C cover)
+      // cover picker conflicts with cover AND after fields
+      // cierre picker only conflicts with other cierre fields
+      let checks=[];
+      if(prefix==='prim'){
+        checks=[{pos:d.primaryPos, range:otherRanges.prim}];
+      } else if(prefix==='after'){
+        checks=[
+          {pos:d.afterMealPos, range:otherRanges.after},
+          {pos:d.coverPos,     range:otherRanges.cover},
+        ];
+      } else if(prefix==='cover'){
+        checks=[
+          {pos:d.coverPos,     range:otherRanges.cover},
+          {pos:d.afterMealPos, range:otherRanges.after},
+        ];
+      } else if(prefix==='cierre'){
+        checks=[{pos:d.cierrePos?.split(' - ')[0], range:otherRanges.cierre}];
+      }
+
+      checks.forEach(({pos,range})=>{
+        if(!pos||pos==='—'||!range) return;
+        if(rangesOverlap(pickerRange, range)){
+          parseRange(pos).forEach(p=>occupied.add(p));
+        }
+      });
+    });
+  });
+  return occupied;
+}
+
+function buildPicker(prefix, arr){
+  const occupied=getOccupiedPositions(prefix);
+  const groups={
+    TA:POS.TA, NA:POS.N_A,
+    TB1P:POS.TB1_PAR, TB1I:POS.TB1_IMPAR,
+    TB2A:POS.TB2A, TB2B:POS.TB2B,
+    NB:POS.N_B
+  };
+  for(const[grp,pos] of Object.entries(groups)){
+    const el=document.getElementById(`pb_${prefix}_${grp}`);
+    if(!el) continue;
+    el.innerHTML=pos.map(p=>{
+      const isSel=arr.includes(p);
+      const isOcc=occupied.has(p)&&!isSel;
+      const cls=`pos-btn${isSel?' sel':''}${isOcc?' occ':''}`;
+      const title=isOcc?'Ya asignada a otro agente':'';
+      return `<button type="button" class="${cls}" onclick="togglePos('${prefix}','${p}')" title="${title}">${p}${isOcc?'<span style="font-size:8px;vertical-align:super;color:var(--amber)">●</span>':''}</button>`;
+    }).join('');
+  }
+  const d=document.getElementById(`pd_${prefix}`);
+  if(d) d.textContent=posToRange(arr)||'—';
+}
+
+function togglePos(prefix,p){
+  const arr=getArr(prefix);
+  const i=arr.indexOf(p);
+  if(i>-1) arr.splice(i,1); else arr.push(p);
+  buildPicker(prefix,arr);
+}
+
+function clearPicker(prefix){ const arr=getArr(prefix); arr.length=0; buildPicker(prefix,arr); }
+
+function getArr(prefix){
+  if(prefix==='prim') return primSel;
+  if(prefix==='after') return afterSel;
+  if(prefix==='cover') return coverPosSel;
+  if(prefix==='cierre') return cierreSel;
+  return [];
+}
+
+function posToRange(arr){
+  if(!arr||!arr.length) return '';
+  const parts=[];
+
+  // Terminal A (1-11): group consecutive
+  const ta=arr.filter(p=>!isNaN(p)&&parseInt(p)>=1&&parseInt(p)<=11).map(Number).sort((a,b)=>a-b);
+  if(ta.length){
+    let s=ta[0],e=ta[0];
+    for(let i=1;i<ta.length;i++){
+      if(ta[i]===e+1) e=ta[i];
+      else{ parts.push(s===e?String(s):s+'/'+e); s=e=ta[i]; }
+    }
+    parts.push(s===e?String(s):s+'/'+e);
+  }
+
+  // Terminal B1 pares (20,22,24,26): list individually or group only same-parity consecutive (step 2)
+  const b1par=arr.filter(p=>!isNaN(p)&&[20,22,24,26].includes(parseInt(p))).map(Number).sort((a,b)=>a-b);
+  if(b1par.length){
+    // Group consecutive even (step of 2)
+    let s=b1par[0],e=b1par[0];
+    for(let i=1;i<b1par.length;i++){
+      if(b1par[i]===e+2) e=b1par[i];
+      else{ parts.push(s===e?String(s):s+'/'+e); s=e=b1par[i]; }
+    }
+    parts.push(s===e?String(s):s+'/'+e);
+  }
+
+  // Terminal B1 impares (21,23,25): same
+  const b1imp=arr.filter(p=>!isNaN(p)&&[21,23,25].includes(parseInt(p))).map(Number).sort((a,b)=>a-b);
+  if(b1imp.length){
+    let s=b1imp[0],e=b1imp[0];
+    for(let i=1;i<b1imp.length;i++){
+      if(b1imp[i]===e+2) e=b1imp[i];
+      else{ parts.push(s===e?String(s):s+'/'+e); s=e=b1imp[i]; }
+    }
+    parts.push(s===e?String(s):s+'/'+e);
+  }
+
+  // Terminal B2 (27-37): group consecutive
+  const tb2=arr.filter(p=>!isNaN(p)&&parseInt(p)>=27&&parseInt(p)<=37).map(Number).sort((a,b)=>a-b);
+  if(tb2.length){
+    let s=tb2[0],e=tb2[0];
+    for(let i=1;i<tb2.length;i++){
+      if(tb2[i]===e+1) e=tb2[i];
+      else{ parts.push(s===e?String(s):s+'/'+e); s=e=tb2[i]; }
+    }
+    parts.push(s===e?String(s):s+'/'+e);
+  }
+
+  // Rampa Norte (N1-N13): group consecutive
+  const npos=arr.filter(p=>p.startsWith('N')).map(p=>parseInt(p.slice(1))).sort((a,b)=>a-b);
+  if(npos.length){
+    let s=npos[0],e=npos[0];
+    for(let i=1;i<npos.length;i++){
+      if(npos[i]===e+1) e=npos[i];
+      else{ parts.push(s===e?'N'+s:'N'+s+'/N'+e); s=e=npos[i]; }
+    }
+    parts.push(s===e?'N'+s:'N'+s+'/N'+e);
+  }
+
+  return parts.join(', ');
+}
+
+function parseRange(str){
+  if(!str||str==='—') return [];
+  const out=[];
+  str.split(',').forEach(part=>{
+    part=part.trim();
+    if(!part) return;
+    if(part.includes('/')){
+      const[a,b]=part.split('/');
+      const isN=a.startsWith('N');
+      const s=parseInt(isN?a.slice(1):a);
+      const e=parseInt(isN?b.replace('N',''):b);
+      if(isN){
+        // N positions: consecutive
+        for(let i=s;i<=e;i++) out.push('N'+i);
+      } else if(s>=20&&s<=26){
+        // B1: same parity only (step 2)
+        const step=2;
+        for(let i=s;i<=e;i+=step) out.push(String(i));
+      } else {
+        // Terminal A or B2: consecutive
+        const all=[...POS.TA,...POS.TB2A,...POS.TB2B];
+        for(let i=s;i<=e;i++){ if(all.includes(String(i))) out.push(String(i)); }
+      }
+    } else {
+      const allPos=[...POS.TA,...POS.N_A,...POS.TB1_PAR,...POS.TB1_IMPAR,...POS.TB2A,...POS.TB2B,...POS.N_B];
+      if(allPos.includes(part)) out.push(part);
+    }
+  });
+  return out;
+}
+
+// ═══════════════════════════════════════════════════════
+// ASSIGN MODAL
+// ═══════════════════════════════════════════════════════
+function openAssignModal(shiftId, editIdx, preselect){
+  modalShift=shiftId; modalEditIdx=editIdx;
+  const date=S.activeDate;
+
+  // Build agent dropdown
+  const assignedIds=new Set(SHIFT_DEFS.flatMap(s=>getDuties(s.id).filter((_,i)=>!(s.id===shiftId&&i===editIdx)).map(d=>d.agentId)));
+  const avail=S.team.filter(m=>!m.sup&&!assignedIds.has(m.id));
+  const scheduled=avail.filter(m=>resolvedShift(m,date)===shiftId);
+  const others=avail.filter(m=>resolvedShift(m,date)!==shiftId);
+  const sel=document.getElementById('agentSel');
+  sel.innerHTML='';
+  if(scheduled.length){ const g=document.createElement('optgroup'); g.label='✅ Programados '+shiftId+' hoy'; g.innerHTML=scheduled.map(m=>`<option value="${m.id}">${m.name}${m.terminal?' [T.'+m.terminal+']':''}</option>`).join(''); sel.appendChild(g); }
+  if(others.length){ const g=document.createElement('optgroup'); g.label='Otros disponibles'; g.innerHTML=others.map(m=>`<option value="${m.id}">${m.name}${m.terminal?' [T.'+m.terminal+']':''}</option>`).join(''); sel.appendChild(g); }
+
+  // Reset ALL fields
+  primSel=[]; afterSel=[]; coverPosSel=[]; cierreSel=[];
+  document.getElementById('radioNum').value='';
+  document.getElementById('extraNotes').value='';
+  document.getElementById('coverRows').innerHTML='';
+  document.getElementById('extraShiftSel').value='';
+  document.getElementById('extraBadge').style.display='none';
+  // Always reset cubrir ops buttons
+  document.getElementById('cubrirTA')?.classList.remove('sel');
+  document.getElementById('cubrirTB')?.classList.remove('sel');
+
+  // Show/hide delete button
+  const delBtn=document.getElementById('assignDeleteBtn');
+  if(delBtn) delBtn.style.display=editIdx!==null?'inline-flex':'none';
+
+  if(editIdx!==null){
+    const d=getDuties(shiftId)[editIdx];
+    if(d){
+      // Build sections FIRST based on shiftId (the block this duty belongs to)
+      buildShiftSections(shiftId, null);
+
+      sel.value=d.agentId;
+      document.getElementById('radioNum').value=d.radioNum||'';
+      document.getElementById('extraNotes').value=d.extraNotes||'';
+      buildTaskBtns((d.specialTasks||'').split(',').map(t=>t.trim()).filter(Boolean));
+      const vh=document.getElementById('vehHasta'); if(vh) vh.value=d.vehHasta||'';
+      if(d.cubrirOpsA) document.getElementById('cubrirTA')?.classList.add('sel');
+      if(d.cubrirOpsB) document.getElementById('cubrirTB')?.classList.add('sel');
+      (d.covers||[]).forEach(c=>addCoverRow(c));
+
+      // Only restore positions that are valid for THIS shift's rules
+      const rules=SHIFT_RULES[shiftId]||SHIFT_RULES.A;
+      if(rules.primerasOps){ primSel=parseRange(d.primaryPos||''); buildPicker('prim',primSel); }
+      if(rules.afterMeal){ afterSel=parseRange(d.afterMealPos||''); buildPicker('after',afterSel); }
+      if(rules.coverPos){ coverPosSel=parseRange(d.coverPos||''); buildPicker('cover',coverPosSel); }
+      if(rules.cierre){ cierreSel=parseRange(d.cierrePos?.split(' - ')[0]||''); buildPicker('cierre',cierreSel); }
+
+      const mt=document.getElementById('mealTimeInp'); if(mt&&d.mealTime) mt.value=d.mealTime;
+      const ct=document.getElementById('cenaTimeInp'); if(ct&&d.cenaTime) ct.value=d.cenaTime;
+      const cn=document.getElementById('cierreNote'); if(cn&&d.cierrePos) cn.value=d.cierrePos.includes(' - ')?d.cierrePos.split(' - ').slice(1).join(' - '):'';
+    }
+    const agentName=S.team.find(t=>t.id===getDuties(shiftId)[editIdx]?.agentId)?.name||'';
+    document.getElementById('assignTitle').textContent='Editar — '+agentName;
+  } else {
+    buildShiftSections(shiftId, null);
+    document.getElementById('assignTitle').textContent='Asignar — '+shiftId;
+    if(preselect) sel.value=preselect;
+    else if(scheduled.length) sel.value=scheduled[0].id;
+    buildTaskBtns([]);
+  }
+
+  showAirlineSuggestion(sel.value);
+  document.getElementById('assignModal').classList.add('open');
+}
+
+function buildShiftSections(shiftId, saved){
+  const rules=SHIFT_RULES[shiftId]||SHIFT_RULES.A;
+  document.getElementById('shiftBadge').textContent=rules.label;
+  let html='';
+
+  if(rules.noAssign){
+    document.getElementById('shiftSections').innerHTML=`<div style="padding:14px;text-align:center;color:var(--text3);font-size:13px">Turno D — sin asignación de posiciones.</div>`;
+    return;
+  }
+
+  // Primeras Ops (A, T9 and extras starting with A/T9)
+  if(rules.primerasOps){
+    html+=`<div class="divider"><span>Primeras Ops — Posición inicial</span></div>`;
+    html+=posPicker('prim');
+  }
+
+  // Meal
+  if(rules.meal){
+    html+=`<div class="divider"><span>Almuerzo</span></div>`;
+    html+=`<div class="frow"><div class="form-group" style="flex:0 0 120px"><label class="fl">Hora</label><input class="fi" id="mealTimeInp" value="${rules.meal.time}" placeholder="${rules.meal.time}"></div></div>`;
+  }
+
+  // After meal position (A, T9)
+  if(rules.afterMeal){
+    html+=`<div class="divider"><span>Posición después del almuerzo</span></div>`;
+    html+=posPicker('after');
+  }
+
+  // Cover positions (B, BC, C)
+  if(rules.coverPos){
+    const lbl=shiftId==='C'?'A su llegada cubre posiciones':shiftId==='B+C'?'Cubre posiciones (después de almorzar)':'Cubre posiciones (después de almorzar)';
+    html+=`<div class="divider"><span>${lbl}</span></div>`;
+    html+=posPicker('cover');
+  }
+
+  // Cena
+  if(rules.cena){
+    const dur=rules.cena.dur;
+    const durLabel=dur?`(${dur} min)`:'(1 hora)';
+    html+=`<div class="divider"><span>Cena ${durLabel}</span></div>`;
+    html+=`<div class="frow" style="align-items:center">
+      <div class="form-group" style="flex:0 0 130px"><label class="fl">Hora de cena</label>
+        <select class="fs" id="cenaTimeInp" onchange="updateCenaReturn()">
+          <option value="17:00">17:00</option>
+          <option value="17:30">17:30</option>
+          <option value="18:00">18:00</option>
+          <option value="18:30">18:30</option>
+          <option value="19:00">19:00</option>
+        </select>
+      </div>
+      <div id="cenaReturn" style="font-size:11px;color:var(--text3);padding-top:18px;margin-left:8px"></div>
+    </div>`;
+  }
+
+  // Cierre
+  if(rules.cierre){
+    html+=`<div class="divider"><span>Cierre</span></div>`;
+    html+=posPicker('cierre');
+    html+=`<div class="form-group" style="margin-top:4px"><label class="fl">Nota de cierre</label><input class="fi" id="cierreNote" placeholder="ej: OPS ARAJET"></div>`;
+  }
+
+  document.getElementById('shiftSections').innerHTML=html;
+
+  // Build pickers
+  buildPicker('prim',primSel); buildPicker('after',afterSel);
+  buildPicker('cover',coverPosSel); buildPicker('cierre',cierreSel);
+
+  // Set cena default
+  if(rules.cena){
+    const ct=document.getElementById('cenaTimeInp');
+    if(ct) ct.value=rules.cena.default||'17:00';
+    updateCenaReturn();
+  }
+}
+
+function updateCenaReturn(){
+  const ct=document.getElementById('cenaTimeInp');
+  const ret=document.getElementById('cenaReturn');
+  if(!ct||!ret) return;
+  const rules=SHIFT_RULES[getEffectiveShift()]||{};
+  const dur=rules.cena?.dur||60;
+  ret.textContent='→ Regresa '+addMins(ct.value,dur);
+}
+
+function getEffectiveShift(){
+  const extra=document.getElementById('extraShiftSel')?.value;
+  if(!extra) return modalShift;
+  const map={'A+B':'A+B','T9+B':'A+B','A+C':'A+C','T9+C':'T9+C','B+C':'B+C'};
+  return map[modalShift+'+'+extra]||(modalShift+'+'+extra);
+}
+
+function onAgentChange(){
+  const agentId=document.getElementById('agentSel').value;
+  showAirlineSuggestion(agentId);
+  // Check licencia
+  const m=S.team.find(t=>t.id===agentId);
+  const noLic=m?.noLicencia||false;
+  let licBanner=document.getElementById('licenciaBanner');
+  if(!licBanner){
+    licBanner=document.createElement('div');
+    licBanner.id='licenciaBanner';
+    licBanner.style.cssText='margin-bottom:8px;padding:8px 11px;background:rgba(240,165,0,.1);border:1px solid rgba(240,165,0,.35);border-radius:6px;font-size:12px;font-weight:700;color:var(--amber);display:none';
+    licBanner.textContent='🚫 Sin licencia de conducir — no asignar vehículo (TPe119, CGP17) ni rangos amplios de posiciones.';
+    document.getElementById('shiftBadge').insertAdjacentElement('afterend', licBanner);
+  }
+  licBanner.style.display=noLic?'block':'none';
+  // Disable/enable task buttons
+  setTimeout(()=>{
+    document.querySelectorAll('#taskBtns .task-btn').forEach(btn=>{
+      const isVeh=btn.textContent.includes('TPe119')||btn.textContent.includes('CGP17');
+      if(isVeh&&noLic){
+        btn.disabled=true;
+        btn.style.opacity='.4';
+        btn.style.cursor='not-allowed';
+        btn.classList.remove('sel');
+        btn.title='Sin licencia de conducir';
+      } else {
+        btn.disabled=false;
+        btn.style.opacity='1';
+        btn.style.cursor='pointer';
+        btn.title='';
+      }
+    });
+  },50);
+}
+
+function onExtraChange(){
+  const extra=document.getElementById('extraShiftSel').value;
+  const badge=document.getElementById('extraBadge');
+  if(!extra){ badge.style.display='none'; buildShiftSections(modalShift,null); return; }
+  const eff=getEffectiveShift();
+  const def=SHIFT_DEFS.find(s=>s.id===eff);
+  badge.style.display='block';
+  badge.textContent=def?`${def.label} — ${def.time}`:`Extra ${eff}`;
+  buildShiftSections(eff,null);
+}
+
+function buildTaskBtns(selected){
+  document.getElementById('taskBtns').innerHTML=SPECIAL_TASKS.map(t=>
+    `<button type="button" class="task-btn${selected.includes(t)?' sel':''}" onclick="toggleTask(this,'${t}')">${t}</button>`
+  ).join('');
+  // Show vehicle-until-time row if a vehicle task is selected
+  updateVehHastaRow();
+  // Show cubrir ops row for A/T9 shifts
+  const eff=getEffectiveShift();
+  const showCubrir=eff==='A'||eff==='T9'||eff==='A+B'||eff==='A+C'||eff==='T9+C';
+  document.getElementById('cubrirOpsRow').style.display=showCubrir?'block':'none';
+}
+
+function updateVehHastaRow(){
+  const hasVeh=[...document.querySelectorAll('#taskBtns .task-btn.sel')].some(b=>b.textContent.includes('TPe119')||b.textContent.includes('CGP17'));
+  document.getElementById('vehHastaRow').style.display=hasVeh?'block':'none';
+}
+
+function toggleTask(btn,t){
+  btn.classList.toggle('sel');
+  updateVehHastaRow();
+}
+
+function toggleCubrirOps(term){
+  const btn=document.getElementById('cubrirT'+term);
+  btn.classList.toggle('sel');
+}
+
+function addCoverRow(data){
+  const c=document.getElementById('coverRows');
+  const opts=S.team.filter(m=>!m.sup).map(m=>`<option value="${m.name}"${data?.who===m.name?' selected':''}>${m.name}</option>`).join('');
+  const div=document.createElement('div'); div.className='cover-row';
+  div.innerHTML=`
+    <select class="fs cover-who" style="flex:1" onchange="autofillCoverPos(this)">${opts}</select>
+    <input class="fi c-time" placeholder="Hora" value="${data?.time||''}" style="flex:0 0 80px;font-size:12px;padding:5px 8px" oninput="detectCoverType(this)">
+    <span class="cover-type-badge" style="font-size:10px;font-weight:800;padding:3px 7px;border-radius:5px;background:var(--s1);border:1px solid var(--border2);color:var(--text3);white-space:nowrap;align-self:flex-end;margin-bottom:1px">${detectMealType(data?.time||'')}</span>
+    <input class="fi c-pos" placeholder="Posición" value="${data?.pos||''}" style="flex:0 0 95px;font-size:12px;padding:5px 8px">
+    <button type="button" class="btn btn-danger" style="font-size:11px;padding:4px 8px" onclick="this.parentElement.remove()">✕</button>`;
+  c.appendChild(div);
+  if(!data?.pos) autofillCoverPos(div.querySelector('.cover-who'));
+}
+
+function detectMealType(time){
+  if(!time) return '—';
+  const h=parseInt(time.split(':')[0]);
+  if(h>=11&&h<15) return '🍽 Almuerzo';
+  if(h>=17&&h<21) return '🌙 Cena';
+  return '—';
+}
+
+function detectCoverType(inp){
+  const badge=inp.parentElement.querySelector('.cover-type-badge');
+  if(!badge) return;
+  const type=detectMealType(inp.value);
+  badge.textContent=type;
+  if(type.includes('Almuerzo')){badge.style.color='var(--amber)';badge.style.borderColor='rgba(240,165,0,.4)';}
+  else if(type.includes('Cena')){badge.style.color='var(--purple)';badge.style.borderColor='rgba(139,92,246,.4)';}
+  else{badge.style.color='var(--text3)';badge.style.borderColor='var(--border2)';}
+}
+
+function autofillCoverPos(sel){
+  const m=S.team.find(t=>t.name===sel.value); if(!m) return;
+  const posInput=sel.parentElement.querySelector('.c-pos');
+  for(const shiftId of Object.keys(S.duties[S.activeDate]||{})){
+    const duty=(S.duties[S.activeDate][shiftId]||[]).find(d=>d.agentId===m.id);
+    if(duty){ posInput.value=duty.primaryPos||duty.coverPos||duty.afterMealPos||''; posInput.style.borderColor='var(--green)'; break; }
+  }
+}
+
+function saveAssign(){
+  const agentId=document.getElementById('agentSel').value;
+  if(!agentId){toast('Selecciona un agente','error');return;}
+  const eff=getEffectiveShift();
+  const rules=SHIFT_RULES[eff]||SHIFT_RULES.A;
+
+  const duty={
+    agentId,
+    primaryPos:  rules.primerasOps ? posToRange(primSel)||'' : '',
+    afterMealPos:rules.afterMeal   ? posToRange(afterSel)||'' : '',
+    coverPos:    rules.coverPos    ? posToRange(coverPosSel)||'' : '',
+    cierrePos:   rules.cierre      ? posToRange(cierreSel)||'' : '',
+    radioNum:    document.getElementById('radioNum').value.trim(),
+    specialTasks:[...document.querySelectorAll('#taskBtns .task-btn.sel')].map(b=>b.textContent).join(','),
+    vehHasta:    document.getElementById('vehHasta')?.value||'',
+    cubrirOpsA:  document.getElementById('cubrirTA')?.classList.contains('sel')||false,
+    cubrirOpsB:  document.getElementById('cubrirTB')?.classList.contains('sel')||false,
+    mealType:    rules.meal?.type||'',
+    mealTime:    document.getElementById('mealTimeInp')?.value||'',
+    cenaTime:    document.getElementById('cenaTimeInp')?.value||'',
+    extraNotes:  document.getElementById('extraNotes').value.trim(),
+    covers:[...document.querySelectorAll('#coverRows .cover-row')].map(r=>({
+      who:r.querySelector('.cover-who').value,
+      time:r.querySelector('.c-time').value.trim(),
+      pos:r.querySelector('.c-pos').value.trim()
+    })).filter(c=>c.who)
+  };
+
+  // Add cierre note
+  const cn=document.getElementById('cierreNote');
+  if(cn&&cn.value.trim()&&duty.cierrePos) duty.cierrePos+=' - '+cn.value.trim();
+
+  pushUndo();
+  if(!S.duties[S.activeDate]) S.duties[S.activeDate]={};
+  const shiftToSave = eff!==modalShift ? eff : modalShift;
+  if(!S.duties[S.activeDate][shiftToSave]) S.duties[S.activeDate][shiftToSave]=[];
+
+  if(modalEditIdx!==null && eff===modalShift){
+    S.duties[S.activeDate][shiftToSave][modalEditIdx]=duty;
+  } else {
+    // Remove from original shift if moved
+    if(eff!==modalShift && modalEditIdx!==null){
+      S.duties[S.activeDate][modalShift]?.splice(modalEditIdx,1);
+    }
+    S.duties[S.activeDate][shiftToSave].push(duty);
+  }
+
+  save(); closeModal('assignModal'); renderBoard(); refreshOutput();
+}
+
+function deleteCurrentAssignment(){
+  if(modalEditIdx===null) return;
+  const agentName=S.team.find(t=>t.id===getDuties(modalShift)[modalEditIdx]?.agentId)?.name||'este agente';
+  showConfirm(`¿Quitar a ${agentName}?`,'Volverá a la lista de sin asignar.',()=>{
+    pushUndo();
+    S.duties[S.activeDate]?.[modalShift]?.splice(modalEditIdx,1);
+    save(); closeModal('assignModal'); renderBoard(); refreshOutput();
+    toast(`↩ ${agentName} quitado`);
+  });
+}
+
+function removeAssignment(shiftId, idx){
+  showConfirm('¿Quitar esta asignación?','',()=>{
+    pushUndo();
+    S.duties[S.activeDate]?.[shiftId]?.splice(idx,1);
+    save(); renderBoard(); refreshOutput();
+  });
+}
+
+// ═══════════════════════════════════════════════════════
+// AIRLINE SUGGESTIONS
+// ═══════════════════════════════════════════════════════
+function showAirlineSuggestion(agentId){
+  const banner=document.getElementById('airlineBanner');
+  const txt=document.getElementById('airlineBannerText');
+  if(!agentId){banner.style.display='none';return;}
+  const sugg=getPositionSuggestions(agentId);
+  if(!sugg.length){banner.style.display='none';return;}
+  const warn=sugg.length>3?' ⚠️ +3 pos':'';
+  const src=flightData&&parseFlightList(flightData).length?'(de vuelos de hoy)':'';
+  txt.textContent=sugg.join(', ')+warn+' '+src;
+  banner.style.display='block';
+}
+
+function applyAirlineSuggestion(){
+  const agentId=document.getElementById('agentSel').value;
+  if(!agentId) return;
+  const sugg=getPositionSuggestions(agentId);
+  if(!sugg.length) return;
+  // Apply to primary/cover depending on shift
+  const rules=SHIFT_RULES[getEffectiveShift()]||SHIFT_RULES.A;
+  if(rules.primerasOps){ primSel=[...sugg]; buildPicker('prim',primSel); }
+  else if(rules.coverPos){ coverPosSel=[...sugg]; buildPicker('cover',coverPosSel); }
+  toast('✅ Posiciones aplicadas');
+}
+
+function getPositionSuggestions(memberId){
+  const airlines=(S.personAirlines||{})[memberId]||[];
+  if(!airlines.length) return [];
+  if(flightData
