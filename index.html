@@ -5058,44 +5058,47 @@ async function doLogin(){
 }
 
 async function doFirstLogin(){
-  const email=document.getElementById('invEmail').value.trim();
-  const code=document.getElementById('invCode').value.trim();
-  const oldPw=document.getElementById('invOldPassword').value;
-  const newPw=document.getElementById('invNewPassword').value;
-  const newPw2=document.getElementById('invNewPassword2').value;
+  const email=document.getElementById('invEmail').value.trim();
+  const code=document.getElementById('invCode').value.trim();
+  const oldPw=document.getElementById('invOldPassword').value;
+  const newPw=document.getElementById('invNewPassword').value;
+  const newPw2=document.getElementById('invNewPassword2').value;
 
-  if(!email||!code||!oldPw||!newPw){ showAuthError('invError','Completa todos los campos'); return; }
-  if(newPw.length<6){ showAuthError('invError','La nueva contraseña debe tener al menos 6 caracteres'); return; }
-  if(newPw!==newPw2){ showAuthError('invError','Las contraseñas no coinciden'); return; }
-  if(!firebase.auth||!cloudDb){ showAuthError('invError','Firebase no disponible'); return; }
+  if(!email||!code||!oldPw||!newPw){ showAuthError('invError','Completa todos los campos'); return; }
+  if(newPw.length<6){ showAuthError('invError','La nueva contraseña debe tener al menos 6 caracteres'); return; }
+  if(newPw!==newPw2){ showAuthError('invError','Las contraseñas no coinciden'); return; }
+  
+  // CORRECCIÓN: Verificamos firebase directamente para evitar el error "No disponible"
+  if(!window.firebase || !window.firebase.auth || !window.firebase.firestore){ showAuthError('invError','Firebase no disponible'); return; }
 
-  try{
-    // Sign in with initial password
-    const cred=await firebase.auth().signInWithEmailAndPassword(email,oldPw);
-    const uid=cred.user.uid;
+  try{
+    const db = window.firebase.firestore();
+    // Sign in with initial password
+    const cred=await window.firebase.auth().signInWithEmailAndPassword(email,oldPw);
+    const uid=cred.user.uid;
 
-    // Verify invitation code against user doc
-    const doc=await cloudDb.collection('users').doc(uid).get();
-    if(!doc.exists){ throw new Error('Usuario no encontrado en la base de datos. Contacta al admin.'); }
-    const data=doc.data();
-    if(!data.activo){ await firebase.auth().signOut(); throw new Error('Cuenta desactivada. Contacta al admin.'); }
-    if(data.invitationCode!==code){ await firebase.auth().signOut(); throw new Error('Código de invitación incorrecto'); }
+    // Verify invitation code against user doc
+    const doc=await db.collection('users').doc(uid).get();
+    if(!doc.exists){ throw new Error('Usuario no encontrado en la base de datos. Contacta al admin.'); }
+    const data=doc.data();
+    if(!data.activo){ await window.firebase.auth().signOut(); throw new Error('Cuenta desactivada. Contacta al admin.'); }
+    if(data.invitationCode!==code){ await window.firebase.auth().signOut(); throw new Error('Código de invitación incorrecto'); }
 
-    // Change password and clear code
-    await cred.user.updatePassword(newPw);
-    await cloudDb.collection('users').doc(uid).update({
-      firstLogin:false,
-      invitationCode:null,
-      activatedAt:Date.now()
-    });
-    toast('✅ Cuenta activada');
-    // onAuthStateChanged se encarga del resto
-  }catch(e){
-    let msg=e.message||'Error al activar cuenta';
-    if(e.code==='auth/invalid-credential'||e.code==='auth/wrong-password') msg='Correo o contraseña inicial incorrectos';
-    else if(e.code==='auth/weak-password') msg='La nueva contraseña es muy débil (mínimo 6 caracteres)';
-    showAuthError('invError',msg);
-  }
+    // Change password and clear code
+    await cred.user.updatePassword(newPw);
+    await db.collection('users').doc(uid).update({
+      firstLogin:false,
+      invitationCode:null,
+      activatedAt:Date.now()
+    });
+    toast('✅ Cuenta activada');
+    // onAuthStateChanged se encarga del resto
+  }catch(e){
+    let msg=e.message||'Error al activar cuenta';
+    if(e.code==='auth/invalid-credential'||e.code==='auth/wrong-password') msg='Correo o contraseña inicial incorrectos';
+    else if(e.code==='auth/weak-password') msg='La nueva contraseña es muy débil (mínimo 6 caracteres)';
+    showAuthError('invError',msg);
+  }
 }
 
 async function doLogout(){
