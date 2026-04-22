@@ -5107,12 +5107,16 @@ async function doLogout(){
 }
 
 async function loadUserProfile(uid){
-  if(!cloudDb) return null;
   try{
-    const doc=await cloudDb.collection('users').doc(uid).get();
+    // Usamos firebase.firestore() directamente porque cloudDb se inicializa más tarde
+    const db = window.firebase.firestore();
+    const doc = await db.collection('users').doc(uid).get();
     if(!doc.exists) return null;
     return {uid, ...doc.data()};
-  }catch(e){ console.error('loadUserProfile error:',e); return null; }
+  }catch(e){ 
+    console.error('loadUserProfile error:',e); 
+    return null; 
+  }
 }
 
 function applyUserPermissions(){
