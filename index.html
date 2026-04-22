@@ -9,6 +9,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
 <style>
 :root{
   --bg:#07090f;--s1:#0d1117;--s2:#131a24;--s3:#1a2332;
@@ -175,6 +176,65 @@ input[type="date"]::-webkit-calendar-picker-indicator{
 </head>
 <body>
 
+<!-- ═══════ LOGIN SCREEN ═══════ -->
+<div id="loginScreen" style="display:none;position:fixed;inset:0;background:var(--bg);z-index:2000;overflow-y:auto;padding:20px">
+  <div style="max-width:400px;margin:40px auto;padding:30px 24px;background:var(--s1);border:1px solid var(--border);border-radius:14px">
+    <div style="text-align:center;margin-bottom:24px">
+      <div style="font-size:24px;font-weight:900">Airlines Support <span style="color:var(--cyan)">HUB</span></div>
+      <div style="font-size:12px;color:var(--text3);margin-top:4px">Inicio de sesión</div>
+    </div>
+    <div class="form-group">
+      <label class="fl">Correo electrónico</label>
+      <input class="fi" id="loginEmail" type="email" placeholder="tu@correo.com" autocomplete="username">
+    </div>
+    <div class="form-group">
+      <label class="fl">Contraseña</label>
+      <input class="fi" id="loginPassword" type="password" placeholder="••••••••" autocomplete="current-password" onkeydown="if(event.key==='Enter')doLogin()">
+    </div>
+    <div id="loginError" style="display:none;margin-bottom:10px;padding:8px 11px;background:rgba(232,69,69,.1);border:1px solid rgba(232,69,69,.3);border-radius:7px;font-size:12px;color:var(--red)"></div>
+    <button class="btn btn-primary" style="width:100%;padding:11px;font-size:14px;background:linear-gradient(135deg,#2d7aee,#8b5cf6)" onclick="doLogin()">Iniciar sesión</button>
+    <div style="margin-top:18px;padding-top:18px;border-top:1px solid var(--border);text-align:center">
+      <button class="btn btn-outline" style="font-size:11px" onclick="showFirstLoginFlow()">¿Primera vez? Usa tu código de invitación</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════ FIRST LOGIN (Invitation Code) ═══════ -->
+<div id="firstLoginScreen" style="display:none;position:fixed;inset:0;background:var(--bg);z-index:2001;overflow-y:auto;padding:20px">
+  <div style="max-width:400px;margin:40px auto;padding:30px 24px;background:var(--s1);border:1px solid var(--border);border-radius:14px">
+    <div style="text-align:center;margin-bottom:24px">
+      <div style="font-size:20px;font-weight:900">🎟 Primera vez</div>
+      <div style="font-size:12px;color:var(--text3);margin-top:4px">Ingresa tu código de invitación</div>
+    </div>
+    <div class="form-group">
+      <label class="fl">Correo electrónico</label>
+      <input class="fi" id="invEmail" type="email" placeholder="tu@correo.com">
+    </div>
+    <div class="form-group">
+      <label class="fl">Código de invitación (6 dígitos)</label>
+      <input class="fi" id="invCode" type="text" maxlength="6" placeholder="123456" style="font-family:'IBM Plex Mono',monospace;letter-spacing:4px;font-size:18px;text-align:center">
+    </div>
+    <div class="form-group">
+      <label class="fl">Contraseña inicial (te la dio el administrador)</label>
+      <input class="fi" id="invOldPassword" type="password" placeholder="••••••••">
+    </div>
+    <div class="form-group">
+      <label class="fl">Crear nueva contraseña</label>
+      <input class="fi" id="invNewPassword" type="password" placeholder="Mínimo 6 caracteres">
+    </div>
+    <div class="form-group">
+      <label class="fl">Confirmar nueva contraseña</label>
+      <input class="fi" id="invNewPassword2" type="password" placeholder="Repite la nueva contraseña">
+    </div>
+    <div id="invError" style="display:none;margin-bottom:10px;padding:8px 11px;background:rgba(232,69,69,.1);border:1px solid rgba(232,69,69,.3);border-radius:7px;font-size:12px;color:var(--red)"></div>
+    <button class="btn btn-primary" style="width:100%;padding:11px;font-size:14px;background:linear-gradient(135deg,#17c97a,#2d7aee)" onclick="doFirstLogin()">✅ Activar cuenta</button>
+    <div style="margin-top:14px;text-align:center">
+      <button class="btn btn-outline" style="font-size:11px" onclick="showLoginScreen()">← Volver al login</button>
+    </div>
+  </div>
+</div>
+
+
 <header>
   <div class="logo">Airlines Support <span>HUB</span></div>
   <div class="header-mid">
@@ -201,12 +261,13 @@ input[type="date"]::-webkit-calendar-picker-indicator{
 </header>
 
 <div class="tabs" id="tabBar">
-  <div class="tab active" onclick="switchTab('board')">📋 Asignaciones</div>
-  <div class="tab" onclick="switchTab('airlines')">✈️ Aerolíneas</div>
-  <div class="tab" onclick="switchTab('team')">👥 Equipo</div>
-  <div class="tab" onclick="switchTab('changes')">🔄 Cambios</div>
-  <div class="tab" onclick="switchTab('history')">📅 Historial</div>
-  <div class="tab" onclick="switchTab('knowClient')">📖 Conociendo el cliente</div>
+  <div class="tab active" data-tab="board" onclick="switchTab('board')">📋 Asignaciones</div>
+  <div class="tab" data-tab="airlines" onclick="switchTab('airlines')">✈️ Aerolíneas</div>
+  <div class="tab" data-tab="team" onclick="switchTab('team')">👥 Equipo</div>
+  <div class="tab" data-tab="changes" onclick="switchTab('changes')">🔄 Cambios</div>
+  <div class="tab" data-tab="history" onclick="switchTab('history')">📅 Historial</div>
+  <div class="tab" data-tab="knowClient" onclick="switchTab('knowClient')">📖 Conociendo el cliente</div>
+  <div class="tab admin-only" data-tab="users" onclick="switchTab('users')" style="display:none">🔐 Usuarios</div>
 </div>
 
 <div class="app">
@@ -336,7 +397,88 @@ input[type="date"]::-webkit-calendar-picker-indicator{
   </div>
 </div>
 
+<div class="page" id="page-users">
+  <div class="full-page">
+    <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;margin-bottom:14px">
+      <div>
+        <h2 style="font-size:18px;font-weight:900;margin:0">🔐 Panel de Usuarios</h2>
+        <div style="font-size:12px;color:var(--text3);margin-top:2px">Gestión de accesos y permisos del equipo</div>
+      </div>
+      <button class="btn btn-primary" onclick="openUserModal()" style="background:linear-gradient(135deg,#2d7aee,#8b5cf6)">+ Crear usuario</button>
+    </div>
+    <div style="background:rgba(240,165,0,.08);border:1px solid rgba(240,165,0,.25);border-radius:8px;padding:10px 12px;margin-bottom:14px;font-size:12px;color:var(--amber)">
+      ⚠️ Solo el Admin puede crear, editar y desactivar usuarios. Los supervisores tienen acceso a todas las funciones operacionales excepto este panel.
+    </div>
+    <div id="usersList"></div>
+  </div>
+</div>
+
 </div><!-- end .app -->
+
+<!-- ═══════ USER MODAL (Create/Edit) ═══════ -->
+<div class="overlay" id="userModal">
+<div class="modal" style="width:500px">
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+    <div class="modal-title" id="userModalTitle" style="margin:0">Crear usuario</div>
+    <button onclick="closeModal('userModal')" style="background:none;border:none;color:var(--text3);font-size:20px;cursor:pointer">✕</button>
+  </div>
+  <div class="form-group">
+    <label class="fl">Vincular con miembro del equipo</label>
+    <select class="fs" id="userMemberId"></select>
+  </div>
+  <div class="form-group">
+    <label class="fl">Correo electrónico</label>
+    <input class="fi" id="userEmail" type="email" placeholder="agente@aviamltd.com">
+  </div>
+  <div class="form-group">
+    <label class="fl">Contraseña inicial</label>
+    <div style="display:flex;gap:6px">
+      <input class="fi" id="userPassword" type="text" placeholder="Mínimo 6 caracteres" style="flex:1;font-family:'IBM Plex Mono',monospace">
+      <button class="btn btn-outline" type="button" onclick="generateRandomPassword()" style="font-size:11px;white-space:nowrap">🎲 Generar</button>
+    </div>
+    <div style="font-size:10px;color:var(--text3);margin-top:3px">💡 El usuario la cambiará en su primer inicio de sesión.</div>
+  </div>
+  <div class="form-group">
+    <label class="fl">Rol</label>
+    <select class="fs" id="userRole">
+      <option value="agente">👤 Agente — Solo ve su asignación</option>
+      <option value="supervisor">⭐ Supervisor — Acceso completo excepto usuarios</option>
+      <option value="admin">👑 Admin — Acceso total</option>
+    </select>
+  </div>
+  <div class="form-group">
+    <label style="display:flex;align-items:center;gap:7px;cursor:pointer">
+      <input type="checkbox" id="userActivo" checked style="width:14px;height:14px">
+      <span style="font-size:13px;font-weight:600">✅ Cuenta activa</span>
+    </label>
+  </div>
+  <div id="userModalError" style="display:none;margin-bottom:10px;padding:8px 11px;background:rgba(232,69,69,.1);border:1px solid rgba(232,69,69,.3);border-radius:7px;font-size:12px;color:var(--red)"></div>
+  <div class="mactions">
+    <button class="btn btn-outline" onclick="closeModal('userModal')">Cancelar</button>
+    <button class="btn btn-primary" onclick="saveUser()">Guardar</button>
+  </div>
+</div>
+</div>
+
+<!-- ═══════ USER CREATED SUCCESS MODAL ═══════ -->
+<div class="overlay" id="userCreatedModal">
+<div class="modal" style="width:500px">
+  <div style="text-align:center;margin-bottom:14px">
+    <div style="font-size:32px">✅</div>
+    <div class="modal-title" style="margin:6px 0 2px">Usuario creado</div>
+    <div style="font-size:12px;color:var(--text3)">Copia y envía estos datos al usuario</div>
+  </div>
+  <div style="background:var(--s2);border:1px solid var(--border);border-radius:8px;padding:14px;margin-bottom:14px;font-family:'IBM Plex Mono',monospace;font-size:12px;line-height:1.9">
+    <div><span style="color:var(--text3)">Correo:</span> <span id="createdEmail" style="font-weight:700"></span></div>
+    <div><span style="color:var(--text3)">Contraseña:</span> <span id="createdPassword" style="font-weight:700;color:var(--amber)"></span></div>
+    <div><span style="color:var(--text3)">Código invitación:</span> <span id="createdCode" style="font-weight:700;color:var(--green);letter-spacing:3px"></span></div>
+  </div>
+  <button class="btn btn-primary" style="width:100%;margin-bottom:10px" onclick="copyInvitation()">📋 Copiar datos de invitación</button>
+  <button class="btn btn-outline" style="width:100%" onclick="closeModal('userCreatedModal')">Cerrar</button>
+</div>
+</div>
+
+
 
 <div class="toast" id="toast"></div>
 
@@ -2149,16 +2291,20 @@ function cleanStaleDuties(){
 // TABS
 // ═══════════════════════════════════════════════════════
 function switchTab(t){
-  const tabs=['board','airlines','team','changes','history','knowClient'];
-  document.querySelectorAll('.tab').forEach((el,i)=>el.classList.toggle('active',tabs[i]===t));
+  const tabs=['board','airlines','team','changes','history','knowClient','users'];
+  document.querySelectorAll('.tab').forEach(el=>{
+    const tabName=el.dataset.tab;
+    el.classList.toggle('active', tabName===t);
+  });
   document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
-  document.getElementById('page-'+t).classList.add('active');
+  document.getElementById('page-'+t)?.classList.add('active');
   if(t==='board'){renderBoard();refreshOutput();}
   if(t==='airlines')renderAirlines();
   if(t==='team')renderTeamGrid();
   if(t==='changes')renderChanges();
   if(t==='history')renderHistory();
   if(t==='knowClient')renderKnowClient();
+  if(t==='users')renderUsers();
 }
 
 // ═══════════════════════════════════════════════════════
@@ -4856,16 +5002,452 @@ function toast(msg,type){
 }
 
 // ═══════════════════════════════════════════════════════
-// INIT
+// AUTH SYSTEM
+// ═══════════════════════════════════════════════════════
+let currentUser = null;          // Firebase auth user
+let currentUserProfile = null;   // User doc from Firestore: {email, nombre, rol, memberId, activo, ...}
+let authInitialized = false;
+
+function isAdmin(){ return currentUserProfile?.rol === 'admin'; }
+function isSupervisor(){ return currentUserProfile?.rol === 'supervisor' || isAdmin(); }
+function isAgente(){ return currentUserProfile?.rol === 'agente'; }
+
+function showLoginScreen(){
+  document.getElementById('loginScreen').style.display='block';
+  document.getElementById('firstLoginScreen').style.display='none';
+  document.getElementById('loginError').style.display='none';
+  document.body.style.overflow='hidden';
+}
+
+function showFirstLoginFlow(){
+  document.getElementById('loginScreen').style.display='none';
+  document.getElementById('firstLoginScreen').style.display='block';
+  document.getElementById('invError').style.display='none';
+  document.body.style.overflow='hidden';
+}
+
+function hideLoginScreens(){
+  document.getElementById('loginScreen').style.display='none';
+  document.getElementById('firstLoginScreen').style.display='none';
+  document.body.style.overflow='';
+}
+
+function showAuthError(id, msg){
+  const el=document.getElementById(id);
+  if(!el) return;
+  el.textContent=msg;
+  el.style.display='block';
+}
+
+async function doLogin(){
+  const email=document.getElementById('loginEmail').value.trim();
+  const password=document.getElementById('loginPassword').value;
+  if(!email||!password){ showAuthError('loginError','Ingresa correo y contraseña'); return; }
+  if(!firebase.auth){ showAuthError('loginError','Firebase Auth no disponible. Contacta al admin.'); return; }
+  try{
+    await firebase.auth().signInWithEmailAndPassword(email,password);
+    // onAuthStateChanged se encarga del resto
+  }catch(e){
+    let msg='Error al iniciar sesión';
+    if(e.code==='auth/invalid-credential'||e.code==='auth/wrong-password'||e.code==='auth/user-not-found') msg='Correo o contraseña incorrectos';
+    else if(e.code==='auth/too-many-requests') msg='Demasiados intentos. Espera unos minutos.';
+    else if(e.code==='auth/network-request-failed') msg='Sin conexión a internet';
+    else if(e.message) msg=e.message;
+    showAuthError('loginError',msg);
+  }
+}
+
+async function doFirstLogin(){
+  const email=document.getElementById('invEmail').value.trim();
+  const code=document.getElementById('invCode').value.trim();
+  const oldPw=document.getElementById('invOldPassword').value;
+  const newPw=document.getElementById('invNewPassword').value;
+  const newPw2=document.getElementById('invNewPassword2').value;
+
+  if(!email||!code||!oldPw||!newPw){ showAuthError('invError','Completa todos los campos'); return; }
+  if(newPw.length<6){ showAuthError('invError','La nueva contraseña debe tener al menos 6 caracteres'); return; }
+  if(newPw!==newPw2){ showAuthError('invError','Las contraseñas no coinciden'); return; }
+  if(!firebase.auth||!cloudDb){ showAuthError('invError','Firebase no disponible'); return; }
+
+  try{
+    // Sign in with initial password
+    const cred=await firebase.auth().signInWithEmailAndPassword(email,oldPw);
+    const uid=cred.user.uid;
+
+    // Verify invitation code against user doc
+    const doc=await cloudDb.collection('users').doc(uid).get();
+    if(!doc.exists){ throw new Error('Usuario no encontrado en la base de datos. Contacta al admin.'); }
+    const data=doc.data();
+    if(!data.activo){ await firebase.auth().signOut(); throw new Error('Cuenta desactivada. Contacta al admin.'); }
+    if(data.invitationCode!==code){ await firebase.auth().signOut(); throw new Error('Código de invitación incorrecto'); }
+
+    // Change password and clear code
+    await cred.user.updatePassword(newPw);
+    await cloudDb.collection('users').doc(uid).update({
+      firstLogin:false,
+      invitationCode:null,
+      activatedAt:Date.now()
+    });
+    toast('✅ Cuenta activada');
+    // onAuthStateChanged se encarga del resto
+  }catch(e){
+    let msg=e.message||'Error al activar cuenta';
+    if(e.code==='auth/invalid-credential'||e.code==='auth/wrong-password') msg='Correo o contraseña inicial incorrectos';
+    else if(e.code==='auth/weak-password') msg='La nueva contraseña es muy débil (mínimo 6 caracteres)';
+    showAuthError('invError',msg);
+  }
+}
+
+async function doLogout(){
+  showConfirm('¿Cerrar sesión?','Tendrás que iniciar sesión de nuevo.',async()=>{
+    try{ await firebase.auth().signOut(); }catch(e){}
+    currentUser=null; currentUserProfile=null;
+    location.reload();
+  });
+}
+
+async function loadUserProfile(uid){
+  if(!cloudDb) return null;
+  try{
+    const doc=await cloudDb.collection('users').doc(uid).get();
+    if(!doc.exists) return null;
+    return {uid, ...doc.data()};
+  }catch(e){ console.error('loadUserProfile error:',e); return null; }
+}
+
+function applyUserPermissions(){
+  // Show/hide admin-only UI
+  const isAdm=isAdmin();
+  const isSup=isSupervisor();
+  const isAg=isAgente();
+
+  document.querySelectorAll('.admin-only').forEach(el=>{ el.style.display = isAdm ? '' : 'none'; });
+
+  // Hide tabs agentes shouldn't see
+  if(isAg){
+    document.querySelectorAll('#tabBar .tab').forEach(tab=>{
+      const t=tab.dataset.tab;
+      // Agentes only see: board (simplified "my day") and knowClient
+      if(t==='board'||t==='knowClient') tab.style.display='';
+      else tab.style.display='none';
+    });
+    // Hide buttons in header that agentes can't use
+    ['analysisBtn','flightBtn','undoBtn','redoBtn','apiKeyBtn','fbBtn'].forEach(id=>{
+      const el=document.getElementById(id);
+      if(el) el.style.display='none';
+    });
+    // Hide Auto, clear day, save buttons
+    document.querySelectorAll('.hactions .btn-green,.hactions .btn-danger,.hactions .btn-primary').forEach(b=>{
+      b.style.display='none';
+    });
+  }
+
+  // Show user badge in header
+  updateUserBadge();
+}
+
+function updateUserBadge(){
+  let badge=document.getElementById('userBadge');
+  if(!badge){
+    badge=document.createElement('div');
+    badge.id='userBadge';
+    badge.style.cssText='display:flex;align-items:center;gap:6px;padding:4px 10px;background:var(--s2);border:1px solid var(--border);border-radius:14px;font-size:11px;cursor:pointer;white-space:nowrap';
+    badge.onclick=showUserMenu;
+    const cloudPill=document.getElementById('cloudPill');
+    cloudPill?.parentNode?.insertBefore(badge, cloudPill);
+  }
+  if(!currentUserProfile){ badge.style.display='none'; return; }
+  badge.style.display='flex';
+  const roleIcon = isAdmin()?'👑':isSupervisor()?'⭐':'👤';
+  const roleColor = isAdmin()?'var(--amber)':isSupervisor()?'var(--accent)':'var(--text2)';
+  badge.innerHTML=`<span style="color:${roleColor}">${roleIcon}</span><span style="font-weight:700">${currentUserProfile.nombre||currentUserProfile.email?.split('@')[0]||'Usuario'}</span>`;
+}
+
+function showUserMenu(){
+  const options=[`👤 ${currentUserProfile.email}`, `${isAdmin()?'👑 Admin':isSupervisor()?'⭐ Supervisor':'Agente'}`, '', '🔒 Cerrar sesión'];
+  const choice=prompt('Sesión activa:\n\n'+options.join('\n')+'\n\nEscribe "salir" para cerrar sesión:');
+  if(choice?.toLowerCase().trim()==='salir') doLogout();
+}
+
+function initAuth(){
+  if(!window.firebase||!firebase.auth){
+    console.warn('Firebase Auth no disponible — corriendo sin autenticación (modo desarrollo)');
+    authInitialized=true;
+    startApp();
+    return;
+  }
+  firebase.auth().onAuthStateChanged(async(user)=>{
+    if(user){
+      currentUser=user;
+      const profile=await loadUserProfile(user.uid);
+      if(!profile||!profile.activo){
+        alert(profile?'Tu cuenta fue desactivada. Contacta al admin.':'No tienes perfil en el sistema. Contacta al admin.');
+        await firebase.auth().signOut();
+        location.reload();
+        return;
+      }
+      if(profile.firstLogin){
+        // Force first-login flow
+        await firebase.auth().signOut();
+        currentUser=null; currentUserProfile=null;
+        toast('Completa tu primer inicio de sesión','info');
+        showFirstLoginFlow();
+        document.getElementById('invEmail').value=user.email||'';
+        authInitialized=true;
+        return;
+      }
+      currentUserProfile=profile;
+      hideLoginScreens();
+      if(!authInitialized){ authInitialized=true; startApp(); }
+      else applyUserPermissions();
+    } else {
+      currentUser=null; currentUserProfile=null;
+      showLoginScreen();
+      authInitialized=true;
+    }
+  });
+}
+
+function startApp(){
+  load();
+  initDate();
+  renderBoard();
+  refreshOutput();
+  updateUndoBtns();
+  updateApiKeyBtn();
+  initCloud();
+  applyUserPermissions();
+}
+
+// ═══════════════════════════════════════════════════════
+// USER MANAGEMENT (admin panel)
+// ═══════════════════════════════════════════════════════
+function generateInvitationCode(){
+  return String(Math.floor(100000+Math.random()*900000));
+}
+
+function generateRandomPassword(){
+  const chars='abcdefghjkmnpqrstuvwxyzABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+  let pw=''; for(let i=0;i<10;i++) pw+=chars[Math.floor(Math.random()*chars.length)];
+  const inp=document.getElementById('userPassword');
+  if(inp) inp.value=pw;
+}
+
+let _userEditUid=null;
+
+function openUserModal(uid){
+  if(!isAdmin()){ toast('Solo el admin puede crear usuarios','error'); return; }
+  _userEditUid=uid||null;
+  document.getElementById('userModalTitle').textContent=uid?'Editar usuario':'Crear usuario';
+  const sel=document.getElementById('userMemberId');
+  sel.innerHTML='<option value="">— Ninguno (admin sin equipo) —</option>'+S.team.map(m=>`<option value="${m.id}">${m.name}${m.sup?' (supervisor)':''}</option>`).join('');
+  document.getElementById('userEmail').value='';
+  document.getElementById('userPassword').value='';
+  document.getElementById('userRole').value='agente';
+  document.getElementById('userActivo').checked=true;
+  document.getElementById('userModalError').style.display='none';
+  if(uid){
+    // Load existing user data
+    cloudDb.collection('users').doc(uid).get().then(doc=>{
+      if(!doc.exists) return;
+      const d=doc.data();
+      sel.value=d.memberId||'';
+      document.getElementById('userEmail').value=d.email||'';
+      document.getElementById('userEmail').disabled=true;
+      document.getElementById('userPassword').value='';
+      document.getElementById('userPassword').placeholder='(dejar vacío para no cambiar)';
+      document.getElementById('userRole').value=d.rol||'agente';
+      document.getElementById('userActivo').checked=d.activo!==false;
+    });
+  } else {
+    document.getElementById('userEmail').disabled=false;
+    document.getElementById('userPassword').placeholder='Mínimo 6 caracteres';
+  }
+  document.getElementById('userModal').classList.add('open');
+}
+
+async function saveUser(){
+  if(!isAdmin()){ return; }
+  const email=document.getElementById('userEmail').value.trim();
+  const password=document.getElementById('userPassword').value;
+  const rol=document.getElementById('userRole').value;
+  const memberId=document.getElementById('userMemberId').value;
+  const activo=document.getElementById('userActivo').checked;
+  const errBox=document.getElementById('userModalError');
+  errBox.style.display='none';
+
+  if(_userEditUid){
+    // Edit existing
+    try{
+      await cloudDb.collection('users').doc(_userEditUid).update({
+        rol, memberId: memberId||null, activo,
+        updatedAt:Date.now()
+      });
+      toast('✅ Usuario actualizado');
+      closeModal('userModal');
+      renderUsers();
+    }catch(e){
+      errBox.textContent='Error al actualizar: '+(e.message||e.code);
+      errBox.style.display='block';
+    }
+    return;
+  }
+
+  // Create new
+  if(!email||!password){ errBox.textContent='Ingresa correo y contraseña'; errBox.style.display='block'; return; }
+  if(password.length<6){ errBox.textContent='La contraseña debe tener al menos 6 caracteres'; errBox.style.display='block'; return; }
+
+  // Important: creating a new user via signInWithEmailAndPassword actually signs them in
+  // and replaces the admin's current session. We need a workaround: create a secondary app instance.
+  try{
+    const secondaryAppName='userCreator_'+Date.now();
+    const secondaryApp=firebase.initializeApp(getFirebaseConfig(), secondaryAppName);
+    const secondaryAuth=secondaryApp.auth();
+    try{
+      const cred=await secondaryAuth.createUserWithEmailAndPassword(email,password);
+      const uid=cred.user.uid;
+      const invitationCode=generateInvitationCode();
+      const member=S.team.find(m=>m.id===memberId);
+      await cloudDb.collection('users').doc(uid).set({
+        email, rol, memberId: memberId||null,
+        nombre: member?.name || email.split('@')[0],
+        activo, firstLogin:true,
+        invitationCode,
+        createdAt:Date.now(),
+        createdBy: currentUserProfile?.email||'admin'
+      });
+      await secondaryAuth.signOut();
+      await secondaryApp.delete();
+      closeModal('userModal');
+      showUserCreatedConfirmation(email,password,invitationCode);
+      renderUsers();
+    } catch(e){
+      await secondaryApp.delete().catch(()=>{});
+      throw e;
+    }
+  }catch(e){
+    let msg='Error: '+(e.message||e.code);
+    if(e.code==='auth/email-already-in-use') msg='Ese correo ya está registrado';
+    else if(e.code==='auth/invalid-email') msg='Correo inválido';
+    else if(e.code==='auth/weak-password') msg='Contraseña muy débil';
+    errBox.textContent=msg;
+    errBox.style.display='block';
+  }
+}
+
+function showUserCreatedConfirmation(email, password, code){
+  document.getElementById('createdEmail').textContent=email;
+  document.getElementById('createdPassword').textContent=password;
+  document.getElementById('createdCode').textContent=code;
+  document.getElementById('userCreatedModal').classList.add('open');
+}
+
+function copyInvitation(){
+  const email=document.getElementById('createdEmail').textContent;
+  const password=document.getElementById('createdPassword').textContent;
+  const code=document.getElementById('createdCode').textContent;
+  const url=location.origin+location.pathname;
+  const txt=`👋 Hola! Se creó tu cuenta en Airlines Support HUB.
+
+🔗 Link: ${url}
+📧 Correo: ${email}
+🔑 Contraseña inicial: ${password}
+🎟 Código de invitación: ${code}
+
+Al entrar por primera vez, toca "¿Primera vez?" y usa estos datos para activar tu cuenta y crear tu propia contraseña.`;
+  if(navigator.clipboard){
+    navigator.clipboard.writeText(txt).then(()=>toast('📋 ¡Copiado! Pégalo en WhatsApp'));
+  } else {
+    const ta=document.createElement('textarea'); ta.value=txt; document.body.appendChild(ta); ta.select(); document.execCommand('copy'); document.body.removeChild(ta);
+    toast('📋 ¡Copiado!');
+  }
+}
+
+async function renderUsers(){
+  if(!isAdmin()) return;
+  const c=document.getElementById('usersList');
+  if(!cloudDb){ c.innerHTML='<div style="color:var(--red);padding:20px">Firebase no conectado</div>'; return; }
+  c.innerHTML='<div style="padding:20px;text-align:center;color:var(--text3)">Cargando usuarios…</div>';
+  try{
+    const snap=await cloudDb.collection('users').orderBy('createdAt','desc').get();
+    if(snap.empty){ c.innerHTML='<div style="padding:20px;text-align:center;color:var(--text3)">Sin usuarios aún. Toca "Crear usuario".</div>'; return; }
+    const rows=[];
+    snap.forEach(doc=>{
+      const d=doc.data();
+      const uid=doc.id;
+      const member=d.memberId?S.team.find(m=>m.id===d.memberId):null;
+      const roleIcon=d.rol==='admin'?'👑':d.rol==='supervisor'?'⭐':'👤';
+      const roleColor=d.rol==='admin'?'var(--amber)':d.rol==='supervisor'?'var(--accent)':'var(--text2)';
+      const statusBadge=d.activo===false
+        ? '<span style="font-size:10px;padding:2px 7px;border-radius:4px;background:rgba(232,69,69,.15);color:var(--red);font-weight:700">DESACTIVADO</span>'
+        : d.firstLogin
+          ? '<span style="font-size:10px;padding:2px 7px;border-radius:4px;background:rgba(240,165,0,.15);color:var(--amber);font-weight:700">PENDIENTE 1er LOGIN</span>'
+          : '<span style="font-size:10px;padding:2px 7px;border-radius:4px;background:rgba(23,201,122,.15);color:var(--green);font-weight:700">ACTIVO</span>';
+      rows.push(`<div style="background:var(--s1);border:1px solid var(--border);border-radius:9px;padding:12px 14px;margin-bottom:8px;display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+        <div style="font-size:22px">${roleIcon}</div>
+        <div style="flex:1;min-width:180px">
+          <div style="font-size:13px;font-weight:700">${d.nombre||d.email}</div>
+          <div style="font-size:11px;color:var(--text3);font-family:'IBM Plex Mono',monospace;margin-top:2px">${d.email}${member?` · vinculado a ${member.name}`:''}</div>
+          ${d.firstLogin&&d.invitationCode?`<div style="font-size:10px;color:var(--amber);margin-top:3px;font-family:'IBM Plex Mono',monospace">🎟 Código: ${d.invitationCode}</div>`:''}
+        </div>
+        <div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px">
+          <span style="font-size:11px;font-weight:800;color:${roleColor};text-transform:uppercase">${d.rol||'agente'}</span>
+          ${statusBadge}
+        </div>
+        <div style="display:flex;gap:4px">
+          ${d.firstLogin?`<button class="btn btn-outline" style="font-size:10px;padding:3px 7px" onclick="copyInvitationFor('${uid}')" title="Copiar datos de invitación">📋</button>`:''}
+          <button class="btn btn-outline" style="font-size:10px;padding:3px 7px" onclick="openUserModal('${uid}')">✏️</button>
+          ${uid!==currentUser?.uid?`<button class="btn btn-danger" style="font-size:10px;padding:3px 7px" onclick="deleteUser('${uid}','${(d.email||'').replace(/'/g,"\\'")}')">🗑</button>`:''}
+        </div>
+      </div>`);
+    });
+    c.innerHTML=rows.join('');
+  }catch(e){
+    c.innerHTML=`<div style="color:var(--red);padding:20px">Error al cargar usuarios: ${e.message}</div>`;
+  }
+}
+
+async function copyInvitationFor(uid){
+  const doc=await cloudDb.collection('users').doc(uid).get();
+  if(!doc.exists){ toast('Usuario no encontrado','error'); return; }
+  const d=doc.data();
+  if(!d.invitationCode){ toast('Ese usuario ya activó su cuenta','error'); return; }
+  // Don't have the password since it's not stored — just the code
+  const url=location.origin+location.pathname;
+  const txt=`👋 Hola! Tu cuenta en Airlines Support HUB está lista.
+
+🔗 Link: ${url}
+📧 Correo: ${d.email}
+🎟 Código de invitación: ${d.invitationCode}
+
+Toca "¿Primera vez?" al entrar y usa la contraseña inicial que te compartí + este código.`;
+  if(navigator.clipboard){ navigator.clipboard.writeText(txt).then(()=>toast('📋 ¡Copiado!')); }
+}
+
+async function deleteUser(uid, email){
+  showConfirm(`¿Eliminar a ${email}?`,'El usuario no podrá iniciar sesión. Su auth en Firebase debe eliminarse aparte.',async()=>{
+    try{
+      // We can only delete the Firestore doc — the auth account has to be deleted from Firebase Console
+      // But we can mark as inactive
+      await cloudDb.collection('users').doc(uid).update({activo:false, deactivatedAt:Date.now()});
+      toast('✅ Usuario desactivado. Para eliminar el acceso definitivamente, bórralo en Firebase Console → Authentication.');
+      renderUsers();
+    }catch(e){ toast('❌ '+(e.message||e.code),'error'); }
+  });
+}
+
+// ═══════════════════════════════════════════════════════
+// INIT (auth-gated)
 // ═══════════════════════════════════════════════════════
 if(window.pdfjsLib) pdfjsLib.GlobalWorkerOptions.workerSrc='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
-load();
-initDate();
-renderBoard();
-refreshOutput();
-updateUndoBtns();
-updateApiKeyBtn();
-initCloud();
+// Initialize Firebase first
+try{
+  if(window.firebase && !firebase.apps.length){
+    const cfg=getFirebaseConfig();
+    if(cfg) firebase.initializeApp(cfg);
+  }
+}catch(e){ console.error('Firebase init error:',e); }
+initAuth();
 </script>
 </body>
 </html>
