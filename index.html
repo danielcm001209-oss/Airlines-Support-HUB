@@ -942,26 +942,26 @@ function configFirebase(){
 const SHIFT_DEFS = [
   {id:'A',   label:'Turno A',   time:'08:00–17:00', color:'#17c97a', bg:'rgba(23,201,122,.1)'},
   {id:'T9',  label:'Turno T9',  time:'09:00–18:00', color:'#2d7aee', bg:'rgba(45,122,238,.1)'},
+  {id:'T9+C',label:'Turno T9→C',time:'09:00–00:00', color:'#a78bfa', bg:'rgba(167,139,250,.1)'},
+  {id:'A+B', label:'Turno A→B', time:'08:00–20:00', color:'#f0a500', bg:'rgba(240,165,0,.1)'},
+  {id:'A+C', label:'Turno A→C', time:'08:00–00:00', color:'#ec4899', bg:'rgba(236,72,153,.1)'},
   {id:'B',   label:'Turno B',   time:'11:00–20:00', color:'#8b5cf6', bg:'rgba(139,92,246,.1)'},
   {id:'B+C', label:'Turno BC',  time:'11:00–00:00', color:'#fb923c', bg:'rgba(251,146,60,.1)'},
   {id:'C',   label:'Turno C',   time:'15:00–00:00', color:'#e84545', bg:'rgba(232,69,69,.1)'},
   {id:'D',   label:'Turno D',   time:'23:00–08:00', color:'#0eb8c9', bg:'rgba(14,184,201,.1)'},
-  {id:'A+B', label:'Extra A→B', time:'08:00–20:00', color:'#f0a500', bg:'rgba(240,165,0,.1)'},
-  {id:'A+C', label:'Extra A→C', time:'08:00–00:00', color:'#ec4899', bg:'rgba(236,72,153,.1)'},
-  {id:'T9+C',label:'Extra T9→C',time:'09:00–00:00', color:'#a78bfa', bg:'rgba(167,139,250,.1)'},
 ];
 
 // Rules per shift: what sections to show in the assign modal
 const SHIFT_RULES = {
-  A:    {label:'Turno A — 08:00 a 17:00',    primerasOps:true,  afterMeal:true,  coverPos:false, meal:{type:'Almuerzo',time:'13:00'}, cena:false, cierre:false, noAssign:false},
-  T9:   {label:'Turno T9 — 09:00 a 18:00',   primerasOps:true,  afterMeal:true,  coverPos:false, meal:{type:'Almuerzo',time:'13:00'}, cena:false, cierre:false, noAssign:false},
-  B:    {label:'Turno B — 11:00 a 20:00',     primerasOps:false, afterMeal:false, coverPos:true,  meal:{type:'Almuerzo',time:'11:30'}, cena:{default:'19:00',dur:null}, cierre:false, noAssign:false},
-  'B+C':{label:'Turno BC — 11:00 a 00:00',    primerasOps:false, afterMeal:false, coverPos:true,  meal:{type:'Almuerzo',time:'11:30'}, cena:{default:'17:00',dur:45}, cierre:true, noAssign:false},
+  A:    {label:'Turno A — 08:00 a 17:00',    primerasOps:true,  afterMeal:true,  coverPos:false, meal:{type:'Almuerzo',time:'12:15'}, cena:false, cierre:false, noAssign:false},
+  T9:   {label:'Turno T9 — 09:00 a 18:00',   primerasOps:true,  afterMeal:true,  coverPos:false, meal:{type:'Almuerzo',time:'12:15'}, cena:false, cierre:false, noAssign:false},
+  B:    {label:'Turno B — 11:00 a 20:00',     primerasOps:false, afterMeal:false, coverPos:true,  meal:{type:'Almuerzo',time:'11:00'}, cena:{default:'19:00',dur:null}, cierre:false, noAssign:false},
+  'B+C':{label:'Turno BC — 11:00 a 00:00',    primerasOps:false, afterMeal:false, coverPos:true,  meal:{type:'Almuerzo',time:'11:00'}, cena:{default:'17:00',dur:45}, cierre:true, noAssign:false},
   C:    {label:'Turno C — 15:00 a 00:00',     primerasOps:false, afterMeal:false, coverPos:true,  meal:null, cena:{default:'17:00',dur:60}, cierre:true, noAssign:false},
   D:    {label:'Turno D — 23:00 a 08:00',     primerasOps:false, afterMeal:false, coverPos:false, meal:null, cena:false, cierre:false, noAssign:true},
-  'A+B':{label:'Extra A→B — 08:00 a 20:00',   primerasOps:true,  afterMeal:true,  coverPos:true,  meal:{type:'Almuerzo',time:'13:00'}, cena:{default:'19:00',dur:null}, cierre:false, noAssign:false},
-  'A+C':{label:'Extra A→C — 08:00 a 00:00',   primerasOps:true,  afterMeal:true,  coverPos:true,  meal:{type:'Almuerzo',time:'13:00'}, cena:{default:'17:00',dur:60}, cierre:true, noAssign:false},
-  'T9+C':{label:'Extra T9→C — 09:00 a 00:00', primerasOps:true,  afterMeal:true,  coverPos:true,  meal:{type:'Almuerzo',time:'13:00'}, cena:{default:'17:00',dur:60}, cierre:true, noAssign:false},
+  'A+B':{label:'Extra A→B — 08:00 a 20:00',   primerasOps:true,  afterMeal:true,  coverPos:true,  meal:{type:'Almuerzo',time:'12:15'}, cena:{default:'19:00',dur:null}, cierre:false, noAssign:false},
+  'A+C':{label:'Extra A→C — 08:00 a 00:00',   primerasOps:true,  afterMeal:true,  coverPos:true,  meal:{type:'Almuerzo',time:'12:15'}, cena:{default:'17:00',dur:60}, cierre:true, noAssign:false},
+  'T9+C':{label:'Extra T9→C — 09:00 a 00:00', primerasOps:true,  afterMeal:true,  coverPos:true,  meal:{type:'Almuerzo',time:'12:15'}, cena:{default:'17:00',dur:60}, cierre:true, noAssign:false},
 };
 
 const SPECIAL_TASKS = ['TPe119','CGP17','Arreglo de hojas C/D+Cobus'];
@@ -2084,7 +2084,10 @@ function initCloud(){
           applyCloudState(snap.data()||{});
           localStorage.setItem('airops4', JSON.stringify(S));
           updateCloudPill('☁ En nube','var(--green)');
-          S.activeDate = todayStr();
+          const currentDate = S.activeDate; // preservar fecha activa
+          applyCloudState(snap.data()||{});
+          localStorage.setItem('airops4', JSON.stringify(S));
+          S.activeDate = currentDate; // restaurar después del apply
           document.getElementById('dateInput').value = S.activeDate;
           updatePill();
           renderBoard(); refreshOutput(); renderChanges();
@@ -2350,9 +2353,10 @@ function renderBoard(){
   }
 
   // Shift blocks — only show base shifts + extras that have duties
-  const baseShifts=SHIFT_DEFS.filter(s=>!s.id.includes('+'));
-  const extraShifts=SHIFT_DEFS.filter(s=>s.id.includes('+')&&getDuties(s.id).length>0);
-  [...baseShifts,...extraShifts].forEach(shift=>{
+const orderedShifts=['A','T9','A+B','B','B+C','C','D','A+C','T9+C']
+  .map(id=>SHIFT_DEFS.find(s=>s.id===id))
+  .filter(s=>s&&(!s.id.includes('+')||getDuties(s.id).length>0));
+orderedShifts.forEach(shift=>{
     const duties=getDuties(shift.id);
     html+=`<div class="shift-block">
       <div class="shift-head">
@@ -4635,8 +4639,8 @@ function buildAnalysisBodyHTML(){
   const SHIFT_WINDOWS={
     'A':   [480,1020],  // 08:00–17:00
     'T9':  [540,1080],  // 09:00–18:00
-    'B':   [690,1200],  // 11:30–20:00
-    'B+C': [690,1440],  // 11:30–00:00
+    'B':   [690,1200],  // 11:00–20:00
+    'B+C': [690,1440],  // 11:00–00:00
     'C':   [900,1440],  // 15:00–00:00
     'D':   [1380,1980], // 23:00–08:00 next day
     'A+B': [480,1200],
@@ -4898,9 +4902,9 @@ SIN LICENCIA DE CONDUCIR (NO asignar TPe119, CGP17, ni rangos amplios):
 ${S.team.filter(m=>m.noLicencia&&!m.sup).map(m=>m.name).join(', ')||'Ninguno'}
 
 REGLAS POR TURNO:
-- A y T9: tienen primaryPos (primeras ops) + afterMealPos (diferente, después del almuerzo 13:00)
-- B: coverPos (cubre posiciones después de almorzar 11:30), cena 19:00
-- BC: coverPos (después de almorzar 11:30), cena 17:00 (45 min), cierrePos
+- A y T9: tienen primaryPos (primeras ops) + afterMealPos (diferente, después del almuerzo 12:15)
+- B: coverPos (cubre posiciones después de almorzar 11:00), cena 19:00
+- BC: coverPos (después de almorzar 11:00), cena 17:00 (45 min), cierrePos
 - C: coverPos (a su llegada), cena 17:00 (1 hora), cierrePos
 - D: sin asignación de posiciones
 
@@ -5095,9 +5099,9 @@ async function doFirstLogin(){
   activatedAt:Date.now()
 });
 await cred.user.updatePassword(newPw);
-  toast('✅ Cuenta activada — iniciando sesión…');
-await firebase.auth().signInWithEmailAndPassword(email, newPw);
-// onAuthStateChanged se encarga del resto
+toast('✅ Cuenta activada — iniciando sesión…');
+await firebase.auth().signOut();
+showLoginScreen(email); // prellenar el email como ya tenías
   }catch(e){
     
     let msg=e.message||'Error al activar cuenta';
@@ -5250,7 +5254,8 @@ function startApp(){
         if(snap.exists){
           applyCloudState(snap.data()||{});
           localStorage.setItem('airops4', JSON.stringify(S));
-          S.activeDate=todayStr();
+          const savedDate = S.activeDate;
+          S.activeDate = savedDate || todayStr();
           const i=document.getElementById('dateInput');
           if(i) i.value=S.activeDate;
           updatePill();
