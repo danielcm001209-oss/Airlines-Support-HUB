@@ -390,6 +390,7 @@ input[type="date"]::-webkit-calendar-picker-indicator{
         <button class="btn btn-outline" onclick="addNewAirline()" style="font-size:12px" title="Agregar una aerolínea nueva">+ Aerolínea</button>
         <button class="btn btn-outline" onclick="loadDiferenciasFromDoc()" style="font-size:12px" title="Carga diferencias y requerimientos de los documentos">📥 Cargar datos</button>
         <button class="btn btn-outline" onclick="showPdfGuide()" style="font-size:12px" title="Ver cómo nombrar y subir los PDFs">📄 Guía PDFs</button>
+        <button class="btn btn-outline" onclick="preCachePdfs()" style="font-size:12px" title="Guarda todos los PDFs para uso sin internet">📥 Guardar offline</button>
         <button class="btn btn-outline" id="knowEditBtn" onclick="toggleKnowEditMode()" style="font-size:12px">✏️ Modo editar</button>
       </div>
     </div>
@@ -2074,6 +2075,13 @@ function initCloud(){
   try{
     if(!firebase.apps.length) firebase.initializeApp(cfg);
     cloudDb=firebase.firestore();
+    // Solo habilitar persistence si no se ha hecho antes
+    if(!cloudDb._persistenceEnabled){
+  cloudDb.enablePersistence({synchronizeTabs:true}).catch(e=>{
+    if(e.code==='failed-precondition') console.warn('Offline: múltiples tabs abiertas');
+    else if(e.code==='unimplemented') console.warn('Offline: navegador no soportado');
+  });
+}
     cloudDocRef=cloudDb.collection(CLOUD_DOC_PATH.collection).doc(CLOUD_DOC_PATH.doc);
     cloudReady=true;
     updateCloudPill('☁ Conectando…','var(--amber)');
@@ -4332,7 +4340,27 @@ function handlePdfError(viewerId){
     el.innerHTML='<div style="padding:20px;color:var(--text3);font-size:12px;text-align:center">📄 Documento no disponible.</div>';
   }
 }
-
+async function preCachePdfs(){
+  if(!('serviceWorker' in navigator)||!navigator.serviceWorker.controller){
+    toast('⚠️ Recarga la página primero para activar el modo offline','error'); return;
+  }
+  const als=Object.keys(S.airlines||{});
+  if(!als.length){ toast('Sin aerolíneas registradas','error'); return; }
+  const urls=[];
+  als.forEach(name=>{
+    const slug=name.replace(/[^a-zA-Z0-9]/g,'');
+    urls.push(`./pdfs/airlines/${slug}_diferencias.pdf`);
+    urls.push(`./pdfs/airlines/${slug}_requerimientos.pdf`);
+  });
+  toast('⏳ Guardando PDFs offline…');
+  navigator.serviceWorker.controller.postMessage({type:'CACHE_PDFS', urls});
+  navigator.serviceWorker.addEventListener('message', function handler(e){
+    if(e.data?.type==='CACHE_PDFS_DONE'){
+      navigator.serviceWorker.removeEventListener('message', handler);
+      toast(`✅ ${e.data.ok} PDFs guardados · ${e.data.fail} no disponibles`);
+    }
+  });
+}
 function showPdfGuide(){
   const als=Object.keys(S.airlines||{}).sort();
   if(!als.length){ toast('Sin aerolíneas','error'); return; }
@@ -5248,7 +5276,7 @@ function startApp(){
   // Carga directa garantizada desde Firestore
   const cfg=getFirebaseConfig();
   if(cfg && window.firebase){
-    const db=firebase.firestore();
+    const db=cloudDb||firebase.firestore();
     db.collection('apps').doc('airlines-support-hub').get()
       .then(snap=>{
         if(snap.exists){
@@ -5496,6 +5524,11 @@ try{
     if(cfg) firebase.initializeApp(cfg);
   }
 }catch(e){ console.error('Firebase init error:',e); }
+if('serviceWorker' in navigator){
+  navigator.serviceWorker.register('./sw.js')
+    .then(reg=>console.log('SW registrado'))
+    .catch(e=>console.warn('SW error:',e));
+}
 initAuth();
 </script>
 </body>
