@@ -2075,13 +2075,6 @@ function initCloud(){
   try{
     if(!firebase.apps.length) firebase.initializeApp(cfg);
     cloudDb=firebase.firestore();
-    // Solo habilitar persistence si no se ha hecho antes
-    if(!cloudDb._persistenceEnabled){
-  cloudDb.enablePersistence({synchronizeTabs:true}).catch(e=>{
-    if(e.code==='failed-precondition') console.warn('Offline: múltiples tabs abiertas');
-    else if(e.code==='unimplemented') console.warn('Offline: navegador no soportado');
-  });
-}
     cloudDocRef=cloudDb.collection(CLOUD_DOC_PATH.collection).doc(CLOUD_DOC_PATH.doc);
     cloudReady=true;
     updateCloudPill('☁ Conectando…','var(--amber)');
@@ -4375,25 +4368,58 @@ function handlePdfError(viewerId){
   }
 }
 async function preCachePdfs(){
-  if(!('serviceWorker' in navigator)||!navigator.serviceWorker.controller){
-    toast('⚠️ Recarga la página primero para activar el modo offline','error'); return;
+  if(!('serviceWorker' in navigator)){
+    toast('⚠️ Tu navegador no soporta modo offline','error');
+    return;
   }
-  const als=Object.keys(S.airlines||{});
+
+  const als = Object.keys(S.airlines || {});
   if(!als.length){ toast('Sin aerolíneas registradas','error'); return; }
-  const urls=[];
-  als.forEach(name=>{
-    const slug=name.replace(/[^a-zA-Z0-9]/g,'');
+
+  const urls = [];
+  als.forEach(name => {
+    const slug = name.replace(/[^a-zA-Z0-9]/g, '');
     urls.push(`./pdfs/airlines/${slug}_diferencias.pdf`);
     urls.push(`./pdfs/airlines/${slug}_requerimientos.pdf`);
   });
+
   toast('⏳ Guardando PDFs offline…');
-  navigator.serviceWorker.controller.postMessage({type:'CACHE_PDFS', urls});
-  navigator.serviceWorker.addEventListener('message', function handler(e){
-    if(e.data?.type==='CACHE_PDFS_DONE'){
-      navigator.serviceWorker.removeEventListener('message', handler);
-      toast(`✅ ${e.data.ok} PDFs guardados · ${e.data.fail} no disponibles`);
+
+  try {
+    // Espera a que el SW esté instalado y activo (resuelve el caso de primer load)
+    const registration = await navigator.serviceWorker.ready;
+
+    // controller = null en primer load. registration.active siempre existe después de ready.
+    const sw = navigator.serviceWorker.controller || registration.active;
+
+    if(!sw){
+      toast('⚠️ Service Worker no disponible. Recarga la página.','error');
+      return;
     }
-  });
+
+    // Configurar listener ANTES de enviar el mensaje
+    let timeoutId;
+    const messageHandler = (e) => {
+      if(e.data?.type === 'CACHE_PDFS_DONE'){
+        navigator.serviceWorker.removeEventListener('message', messageHandler);
+        clearTimeout(timeoutId);
+        toast(`✅ ${e.data.ok} PDFs guardados · ${e.data.fail} no disponibles`);
+      }
+    };
+    navigator.serviceWorker.addEventListener('message', messageHandler);
+
+    // Timeout de seguridad por si el SW no responde
+    timeoutId = setTimeout(() => {
+      navigator.serviceWorker.removeEventListener('message', messageHandler);
+      toast('⚠️ El proceso tardó demasiado. Intenta de nuevo.','error');
+    }, 90000);
+
+    sw.postMessage({type:'CACHE_PDFS', urls});
+
+  } catch(err) {
+    console.error('preCachePdfs error:', err);
+    toast('❌ ' + err.message, 'error');
+  }
 }
 function showPdfGuide(){
   const als=Object.keys(S.airlines||{}).sort();
@@ -5555,7 +5581,15 @@ if(window.pdfjsLib) pdfjsLib.GlobalWorkerOptions.workerSrc='https://cdnjs.cloudf
 try{
   if(window.firebase && !firebase.apps.length){
     const cfg=getFirebaseConfig();
-    if(cfg) firebase.initializeApp(cfg);
+    if(cfg){
+      firebase.initializeApp(cfg);
+      // Activar persistence AQUÍ, antes de cualquier llamada a Firestore
+      firebase.firestore().enablePersistence({synchronizeTabs:true}).catch(e=>{
+        if(e.code==='failed-precondition') console.warn('Offline persistence: múltiples tabs');
+        else if(e.code==='unimplemented') console.warn('Offline persistence: navegador no soportado');
+        // Cualquier otro error (incluyendo "already started") se ignora silenciosamente
+      });
+    }
   }
 }catch(e){ console.error('Firebase init error:',e); }
 if('serviceWorker' in navigator){
