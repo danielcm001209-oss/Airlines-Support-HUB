@@ -3769,19 +3769,38 @@ async function importScheduleFile(file){
       rows=t.split('\n').map(l=>l.split(/\s{2,}/));
     }
     const VALID=new Set(['A','T9','B','BC','C','D','L','LIBRE']);
+    const toShift=v=>{
+      v=String(v||'').toUpperCase().trim().replace(/\s+/g,'');
+      if(!v||v==='LIBRE'||v==='L'||v==='VAC'||v==='FREE') return 'L';
+      if(v==='BC'||v==='B+C') return 'B+C';
+      if(VALID.has(v)) return v;
+      return null;
+    };
     let updated=0;
     rows.forEach(cols=>{
-      const rawName=String(cols[0]||'').trim(); if(!rawName||rawName.length<3) return;
-      const member=S.team.find(m=>{ const nl=rawName.toLowerCase(); return nl.split(/\s+/).some(p=>p.length>2&&m.name.toLowerCase().includes(p))||m.name.toLowerCase().split(/\s+/).some(p=>p.length>2&&nl.includes(p)); });
+      // Nombre está en cols[1], habilitación en cols[2], turnos en cols[3..9]
+      const rawName=String(cols[1]||'').trim();
+      if(!rawName||rawName.length<3) return;
+      if(/nombre|habilitaci/i.test(rawName)) return;
+      // Solo procesar filas con número en columna A (filas de agentes)
+      const noCol=String(cols[0]||'').trim();
+      if(!noCol||isNaN(parseInt(noCol))) return;
+      const normalize=s=>s.normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase();
+      const member=S.team.find(m=>{
+        const nlWords=normalize(rawName).split(/\s+/).filter(p=>p.length>2);
+        const mnWords=normalize(m.name).split(/\s+/).filter(p=>p.length>2);
+        let matches=0;
+        nlWords.forEach(p=>{ if(mnWords.includes(p)) matches++; });
+        return matches>=2; // requiere al menos 2 palabras completas que coincidan
+      });
       if(!member) return;
-      const shifts=[]; let start=2;
-      for(let i=start;i<cols.length&&shifts.length<7;i++){
-        const v=String(cols[i]||'').toUpperCase().trim().replace(/\s+/,'');
-        if(v==='LIBRE'||v==='L') shifts.push('L');
-        else if(v==='BC') shifts.push('B+C');
-        else if(VALID.has(v)&&v!=='LIBRE') shifts.push(v);
+      const shifts=[];
+      for(let i=3;i<=9&&shifts.length<7;i++){
+        const s=toShift(cols[i]);
+        if(s) shifts.push(s);
+        else shifts.push('L'); // valor desconocido → libre
       }
-      if(shifts.length===7){member.schedule=shifts;updated++;}
+      if(shifts.length===7){ member.schedule=shifts; updated++; }
     });
     save(); renderTeamGrid(); openScheduleModal();
     toast(updated>0?`✅ ${updated} horarios actualizados`:'⚠️ No se detectaron horarios. Verifica el formato.');
@@ -3792,12 +3811,27 @@ function exportScheduleExcel(){
   const XLSX=window.XLSX; if(!XLSX){toast('SheetJS no disponible','error');return;}
   const wb=XLSX.utils.book_new();
   const DAYS=['LUNES','MARTES','MIERCOLES','JUEVES','VIERNES','SÁBADO','DOMINGO'];
-  const rows=[['NOMBRE','HABILITACIÓN',...DAYS]];
-  S.team.forEach(m=>{ const s=(m.schedule||[]).map(x=>x==='B+C'?'BC':x); while(s.length<7)s.push('L'); rows.push([m.name,m.role||'',...s.slice(0,7)]); });
-  rows.push([]); rows.push(['LEYENDA']); rows.push(['A','08:00 - 17:00']); rows.push(['T9','09:00 - 18:00']); rows.push(['B','11:00 - 20:00']); rows.push(['BC','11:00 - 00:00']); rows.push(['C','15:00 - 00:00']); rows.push(['D','23:00 - 08:00']); rows.push(['L','LIBRE']);
+  const rows=[
+    ['HORARIO SOPORTE LINEAS AEREAS'],
+    ['NO','NOMBRE','HABILITACIÓN',...DAYS]
+  ];
+  S.team.forEach((m,idx)=>{
+    const s=(m.schedule||[]).map(x=>x==='B+C'?'BC':(!x||x==='L')?'LIBRE':x);
+    while(s.length<7) s.push('LIBRE');
+    rows.push([idx+1, m.name, m.role||'', ...s.slice(0,7)]);
+  });
+  rows.push([]);
+  rows.push(['TURNOS','','','LEYENDA']);
+  rows.push(['08:00 - 17:00','A']);
+  rows.push(['09:00 - 18:00','T9']);
+  rows.push(['11:00 - 20:00','B']);
+  rows.push(['15:00 - 00:00','C']);
+  rows.push(['23:00 - 08:00','D']);
+  rows.push(['11:00 - 00:00','BC']);
   const ws=XLSX.utils.aoa_to_sheet(rows);
-  ws['!cols']=[{wch:30},{wch:24},{wch:9},{wch:9},{wch:9},{wch:9},{wch:9},{wch:9},{wch:9}];
-  XLSX.utils.book_append_sheet(wb,ws,'Horario');
+  ws['!cols']=[{wch:5},{wch:30},{wch:30},{wch:10},{wch:10},{wch:10},{wch:10},{wch:10},{wch:10},{wch:10}];
+  ws['!merges']=[{s:{r:0,c:0},e:{r:0,c:9}}];
+  XLSX.utils.book_append_sheet(wb,ws,'HORARIO SOPORTES');
   XLSX.writeFile(wb,'Horario_Airlines_Support_HUB.xlsx');
   toast('✅ Excel exportado');
 }
