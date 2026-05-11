@@ -2749,10 +2749,18 @@ async function fetchLACOPS(){
     // Filter by day of week matching selected date
     // JS getDay(): 0=Sun,1=Mon...6=Sat — matches DIANUMERO
     const selectedDow = new Date(date + 'T12:00:00').getDay(); // 0=Sun..6=Sat
-    const filtered = flights.filter(f => {
-      const dn = f.DIANUMERO ?? f.dianumero;
-      return dn !== undefined && dn !== null && Number(dn) === selectedDow;
-    });
+    const selectedDay = new Date(S.activeDate+'T12:00:00').getDate(); // día del mes (11, 18, etc)
+const filtered = flights.filter(f => {
+  const dn = f.DIANUMERO ?? f.dianumero;
+  if(dn === undefined || dn === null || Number(dn) !== selectedDow) return false;
+  // Verificar que el DIA contenga el número del día correcto
+  const dia = f.DIA || f.dia || '';
+  if(dia){
+    const diaNum = parseInt(dia.replace(/\D+/g,''));
+    if(diaNum && diaNum !== selectedDay) return false;
+  }
+  return true;
+});
     const finalFlights = filtered.length > 0 ? filtered : flights;
     const filterNote = filtered.length > 0 ? '' : ' (sin filtro de día — mostrando todo)';
 
@@ -2805,7 +2813,7 @@ async function fetchLACOPS(){
       const depTime = etd && etd!=='OVER' ? etd : (std && std!=='OVER' ? std : '');
       const type    = (f.STA&&f.STA!=='OVER')||f.ETA ? 'ARR' : 'DEP';
 
-      return [airline, flight, pos?`POS ${pos}`:'', arrTime||depTime, type, ruta, terminal?`T${terminal}`:'', dianom]
+      return [airline, flight, pos?`POS ${pos}`:'POS 0', arrTime||depTime, type, ruta, terminal?`T${terminal}`:'', dianom]
         .filter(Boolean).join('  ');
     }).join('\n');
 
@@ -3447,7 +3455,7 @@ function getPositionSuggestions(memberId){
 
 function parseFlightList(text){
   const flights=[];
-  const airlineMap={'transat':'Air Transat','tsc':'Air Transat','jetblue':'JetBlue','jbu':'JetBlue','american':'American Airlines','aal':'American Airlines','copa':'Copa Airlines','cmp':'Copa Airlines','westjet':'WestJet','wja':'WestJet','united':'United','ual':'United','delta':'Delta','dal':'Delta','canada':'Air Canada','aca':'Air Canada','arajet':'Arajet','dwi':'Arajet','avianca':'Avianca','ava':'Avianca','southwest':'Southwest Airlines','swa':'Southwest Airlines','spirit':'Spirit Airlines','nks':'Spirit Airlines','frontier':'Frontier Airlines','fft':'Frontier Airlines','flair':'Flair Airlines','fle':'Flair Airlines','aeromexico':'Aeromexico','amx':'Aeromexico','argentinas':'Aerolineas Argentinas','arg':'Aerolineas Argentinas','wingo':'Wingo','rpb':'Wingo','condor':'Condor','cfg':'Condor','gol':'Gol','glo':'Gol','jetsmart':'JetSmart','jec':'JetSmart','latam':'Latam','lan':'Latam','lpe':'Latam','avianca-taca':'Avianca','aerolineas':'Aerolineas Argentinas'};
+  const airlineMap={'sky airline':'Sky Airlines Peru','sky airline perú':'Sky Airlines Peru','sky airline':'Sky Airlines Peru','iberojet':'Iberojet','tui':'TUI','lan peru':'Latam','world2fly':'World2Fly','transat':'Air Transat','tsc':'Air Transat','jetblue':'JetBlue','jbu':'JetBlue','american':'American Airlines','aal':'American Airlines','copa':'Copa Airlines','cmp':'Copa Airlines','westjet':'WestJet','wja':'WestJet','united':'United','ual':'United','delta':'Delta','dal':'Delta','canada':'Air Canada','aca':'Air Canada','arajet':'Arajet','dwi':'Arajet','avianca':'Avianca','ava':'Avianca','southwest':'Southwest Airlines','swa':'Southwest Airlines','spirit':'Spirit Airlines','nks':'Spirit Airlines','frontier':'Frontier Airlines','fft':'Frontier Airlines','flair':'Flair Airlines','fle':'Flair Airlines','aeromexico':'Aeromexico','amx':'Aeromexico','argentinas':'Aerolineas Argentinas','arg':'Aerolineas Argentinas','wingo':'Wingo','rpb':'Wingo','condor':'Condor','cfg':'Condor','gol':'Gol','glo':'Gol','jetsmart':'JetSmart','jec':'JetSmart','latam':'Latam','lan':'Latam','lpe':'Latam','avianca-taca':'Avianca','aerolineas':'Aerolineas Argentinas'};
 
   // Map full airline name to our internal names
   const fullNameMap={
@@ -3464,11 +3472,12 @@ function parseFlightList(text){
     'Lan Chile':'Latam','Lan Peru':'Latam','British Airways':'British Airways',
     'Air France':'Air France','Lot Polish':'Lot Polish','TUI Airways':'TUI',
     'Tui Airways':'TUI','World2Fly':'World2Fly','Sky Airlines Peru':'Sky Airlines Peru',
-    'Discover Airlines':'Discover Airlines','Air Europa':'Air Europa',
+    'Discover Airlines':'Discover Airlines','Air Europa':'Air Europa', 
     'Edelweiss Air':'Edelweiss Air','Breeze':'Breeze','Iberojet':'Iberojet',
     'Global X':'Global X','Air Caraibes':'Air Caraibes','Make Up':'Make Up',
     'Sky High':'Sky High','AllegiantAir':'AllegiantAir','Sun Country Airlines':'Sun Country',
     'Air Century':'Air Century','Avelo':'Avelo','Rutaca Airlines':'Rutaca',
+    'Iberojet Portugal':'Iberojet','Iberojet España':'Iberojet','Iberojet España':'Iberojet','Sky Airlines Peru':'Sky Airlines Peru','Sky Airline Perú':'Sky Airlines Peru',
   };
 
   text.split('\n').forEach(line=>{
@@ -3498,12 +3507,12 @@ function parseFlightList(text){
         else if(raw.startsWith('N')){ const n=parseInt(raw.slice(1)); if(n>=1&&n<=13) pos='N'+n; }
       }
     }
-    if(!pos) return;
+    if(!pos || pos==='0') return; // descarta los sin posición conocida
 
     // Match airline — try full name map first
     let airline='';
     for(const[full,mapped] of Object.entries(fullNameMap)){
-      if(line.includes(full)){ airline=mapped; break; }
+      if(line.toLowerCase().includes(full.toLowerCase())){ airline=mapped; break; }
     }
     if(!airline){
       const ll=line.toLowerCase();
