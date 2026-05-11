@@ -7,6 +7,7 @@
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=Barlow:wght@400;600;700;800;900&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
@@ -173,6 +174,61 @@ input[type="date"]::-webkit-calendar-picker-indicator{
   /* Changes buttons */
   #page-changes .btn{font-size:11px;padding:5px 8px;}
 }
+/* ── BRIEFING ── */
+#page-briefing{background:var(--bg);}
+.brief-kpi-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin-bottom:16px;}
+.brief-kpi{background:var(--s1);border:1px solid var(--border);border-radius:10px;padding:14px 16px;position:relative;overflow:hidden;}
+.brief-kpi-accent{position:absolute;top:0;left:0;right:0;height:3px;border-radius:10px 10px 0 0;}
+.brief-kpi-label{font-size:10px;color:var(--text3);letter-spacing:1px;text-transform:uppercase;margin-bottom:4px;}
+.brief-kpi-value{font-size:30px;font-weight:900;line-height:1;margin-bottom:2px;font-family:'IBM Plex Mono',monospace;}
+.brief-kpi-sub{font-size:10px;color:var(--text3);}
+.brief-section{background:var(--s1);border:1px solid var(--border);border-radius:10px;padding:16px;margin-bottom:12px;}
+.brief-section-label{font-size:10px;font-weight:800;letter-spacing:1.5px;color:var(--text3);text-transform:uppercase;margin-bottom:12px;}
+.brief-heat-table{width:100%;border-collapse:collapse;table-layout:auto;}
+.brief-heat-table th{font-size:10px;color:var(--text3);font-weight:700;padding:5px 4px;text-align:center;border-bottom:1px solid var(--border);white-space:nowrap;}
+.brief-heat-table th:first-child{text-align:left;min-width:48px;}
+.brief-heat-table td{padding:3px 2px;text-align:center;}
+.brief-heat-table td:first-child{font-size:11px;font-weight:800;color:var(--accent);text-align:left;font-family:'IBM Plex Mono',monospace;}
+.brief-heat-cell{border-radius:5px;width:34px;height:26px;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;margin:0 auto;transition:transform .1s;}
+.brief-heat-cell:hover{transform:scale(1.2);}
+.brief-grp-row td{font-size:10px;font-weight:800;letter-spacing:1.5px;text-transform:uppercase;padding:8px 0 3px;border-bottom:1px solid var(--border);}
+.brief-total-row td{font-size:12px;font-weight:800;padding:7px 4px;border-top:1px solid var(--border);color:var(--text2);}
+.brief-total-row td:first-child{font-size:10px;letter-spacing:1px;text-transform:uppercase;color:var(--text3);}
+.brief-equip-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:8px;}
+.brief-equip-card{background:var(--s2);border:1px solid var(--border2);border-radius:8px;padding:12px;display:flex;align-items:center;gap:10px;}
+.brief-delay-row{display:flex;align-items:center;gap:12px;margin-bottom:8px;flex-wrap:wrap;}
+.brief-delay-name{font-size:12px;color:var(--text2);min-width:120px;}
+.brief-delay-track{flex:1;min-width:80px;height:8px;background:var(--s2);border-radius:4px;overflow:hidden;}
+.brief-delay-fill{height:100%;border-radius:4px;transition:width .8s ease;}
+.brief-delay-nums{font-size:12px;font-weight:800;min-width:65px;text-align:right;}
+.brief-charts-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px;}
+@media(max-width:600px){.brief-charts-row{grid-template-columns:1fr;}}
+
+/* ── FULLSCREEN MODE ── */
+#briefingFsWrap:fullscreen,
+#briefingFsWrap:-webkit-full-screen{
+  background:#07090f;overflow-y:auto;padding:24px;
+}
+#briefingFsWrap:fullscreen .brief-kpi-value,
+#briefingFsWrap:-webkit-full-screen .brief-kpi-value{font-size:48px;}
+#briefingFsWrap:fullscreen .brief-kpi-label,
+#briefingFsWrap:-webkit-full-screen .brief-kpi-label{font-size:12px;}
+#briefingFsWrap:fullscreen .brief-kpi-sub,
+#briefingFsWrap:-webkit-full-screen .brief-kpi-sub{font-size:12px;}
+#briefingFsWrap:fullscreen .brief-heat-cell,
+#briefingFsWrap:-webkit-full-screen .brief-heat-cell{width:44px;height:32px;font-size:14px;border-radius:6px;}
+#briefingFsWrap:fullscreen .brief-heat-table th,
+#briefingFsWrap:-webkit-full-screen .brief-heat-table th{font-size:12px;padding:7px 4px;}
+#briefingFsWrap:fullscreen .brief-heat-table td:first-child,
+#briefingFsWrap:-webkit-full-screen .brief-heat-table td:first-child{font-size:14px;}
+#briefingFsWrap:fullscreen .brief-section-label,
+#briefingFsWrap:-webkit-full-screen .brief-section-label{font-size:12px;}
+#briefingFsWrap:fullscreen .brief-equip-card,
+#briefingFsWrap:-webkit-full-screen .brief-equip-card{padding:16px;}
+#briefingFsWrap:fullscreen .brief-equip-count,
+#briefingFsWrap:-webkit-full-screen .brief-equip-count{font-size:36px!important;}
+#briefingFsWrap:fullscreen #briefingClock,
+#briefingFsWrap:-webkit-full-screen #briefingClock{display:flex!important;}
 </style>
 </head>
 <body>
@@ -267,6 +323,7 @@ input[type="date"]::-webkit-calendar-picker-indicator{
   <div class="tab" data-tab="team" onclick="switchTab('team')">👥 Equipo</div>
   <div class="tab" data-tab="changes" onclick="switchTab('changes')">🔄 Cambios</div>
   <div class="tab" data-tab="history" onclick="switchTab('history')">📅 Historial</div>
+  <div class="tab" data-tab="briefing" onclick="switchTab('briefing')">📊 Briefing</div>
   <div class="tab" data-tab="knowClient" onclick="switchTab('knowClient')">📖 Conociendo el cliente</div>
   <div class="tab admin-only" data-tab="users" onclick="switchTab('users')" style="display:none">🔐 Usuarios</div>
 </div>
@@ -414,7 +471,100 @@ input[type="date"]::-webkit-calendar-picker-indicator{
     <div id="usersList"></div>
   </div>
 </div>
+<!-- MODAL CONFIG BRIEFING -->
+<div id="briefConfigModal" class="modal">
+  <div class="modal-content" style="max-width:500px">
+    <div class="modal-header">
+      <h3>⚙️ Configuración de Briefing</h3>
+      <button class="modal-close" onclick="closeBriefConfigModal()">×</button>
+    </div>
+    <div class="modal-body">
+      <div style="margin-bottom:16px">
+        <label class="label">Límite máximo de delays del mes</label>
+        <input type="number" class="fi" id="cfgMonthlyDelayLimit" placeholder="73" min="0">
+        <div class="hint">Máximo de delays permitidos en el mes</div>
+      </div>
+      <div style="margin-bottom:16px">
+        <label class="label">Delays del mes (acumulado actual)</label>
+        <input type="number" class="fi" id="cfgCurrentMonthDelays" placeholder="0" min="0">
+        <div class="hint">Total de delays acumulados en el mes hasta hoy</div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" onclick="closeBriefConfigModal()">Cancelar</button>
+      <button class="btn btn-primary" onclick="saveBriefConfig()">💾 Guardar</button>
+    </div>
+  </div>
+</div>
+<!-- BRIEFING -->
+<div class="page" id="page-briefing">
+  <div class="full-page">
+    <div id="briefingFsWrap">
+      <!-- Header -->
+      <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;margin-bottom:16px;">
+        <div>
+          <div style="font-size:10px;letter-spacing:2px;color:var(--cyan);text-transform:uppercase;margin-bottom:3px;">Aeropuerto Internacional Punta Cana — PUJ</div>
+          <h2 style="font-size:20px;font-weight:900;margin:0;">📊 Briefing Operacional</h2>
+          <div style="font-size:12px;color:var(--text3);margin-top:3px;font-family:'IBM Plex Mono',monospace" id="briefingDateLabel"></div>
+        </div>
+        <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+          <!-- Clock (solo visible en fullscreen) -->
+          <div id="briefingClock" style="display:none;align-items:center;gap:8px;background:var(--s2);border:1px solid var(--border2);border-radius:8px;padding:8px 16px;font-family:'IBM Plex Mono',monospace;">
+            <span style="font-size:32px;font-weight:900;color:var(--cyan)" id="briefingClockTime">--:--</span>
+          </div>
+          <button class="btn btn-outline" onclick="openBriefConfigModal()" title="Configurar metas y delays">⚙️ Configurar</button>
+          <button class="btn btn-outline" onclick="renderBriefing()" title="Actualizar datos">🔄 Actualizar</button>
+          <button class="btn btn-primary" onclick="openBriefingFullscreen()" style="background:linear-gradient(135deg,#2d7aee,#0eb8c9)">⛶ Pantalla completa</button>
+        </div>
+      </div>
 
+      <!-- Sin vuelos warning -->
+      <div id="briefingNoFlights" style="display:none;background:rgba(240,165,0,.08);border:1px solid rgba(240,165,0,.25);border-radius:8px;padding:14px 16px;margin-bottom:16px;font-size:13px;color:var(--amber);">
+        ⚠️ No hay vuelos cargados. Carga los vuelos desde <button class="btn btn-outline" style="font-size:11px;padding:3px 9px;margin-left:6px" onclick="openFlightModal()">✈️ Vuelos</button> para ver el briefing.
+      </div>
+
+      <!-- KPIs -->
+      <div class="brief-kpi-grid" id="briefingKpis"></div>
+
+      <!-- Charts -->
+<div class="brief-charts-row">
+  <div class="brief-section">
+    <div class="brief-section-label">Vuelos por franja horaria</div>
+    <div style="position:relative;height:200px"><canvas id="briefChartHoras" role="img" aria-label="Vuelos por franja horaria"></canvas></div>
+  </div>
+  <div class="brief-section">
+    <div class="brief-section-label">Distribución por terminal</div>
+    <div style="position:relative;height:200px"><canvas id="briefChartTerminal" role="img" aria-label="Vuelos por terminal"></canvas></div>
+  </div>
+</div>
+
+      <!-- Heatmap -->
+      <div class="brief-section">
+        <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;margin-bottom:10px;">
+          <div class="brief-section-label" style="margin:0;">Heatmap — vuelos por posición y franja</div>
+          <div style="display:flex;gap:5px;flex-wrap:wrap;" id="briefingHeatTabs"></div>
+        </div>
+        <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:10px;font-size:10px;color:var(--text3);">
+          <span><span style="display:inline-block;width:12px;height:12px;border-radius:3px;background:rgba(23,201,122,.7);margin-right:4px;vertical-align:middle"></span>1–2</span>
+          <span><span style="display:inline-block;width:12px;height:12px;border-radius:3px;background:rgba(45,122,238,.8);margin-right:4px;vertical-align:middle"></span>3–4</span>
+          <span><span style="display:inline-block;width:12px;height:12px;border-radius:3px;background:rgba(240,165,0,.85);margin-right:4px;vertical-align:middle"></span>5–6</span>
+          <span><span style="display:inline-block;width:12px;height:12px;border-radius:3px;background:rgba(232,69,69,.9);margin-right:4px;vertical-align:middle"></span>7+</span>
+        </div>
+        <div style="overflow-x:auto"><table class="brief-heat-table" id="briefingHeatmap"></table></div>
+      </div>
+
+      <!-- Equipos -->
+      <div class="brief-section">
+        <div class="brief-section-label">Equipos requeridos</div>
+        <div style="font-size:11px;color:var(--text3);margin-bottom:12px">
+          Pico simultáneo: <span id="briefingPeakLabel" style="color:var(--amber);font-weight:800;font-family:'IBM Plex Mono',monospace"></span>
+        </div>
+        <div class="brief-equip-grid" id="briefingEquip"></div>
+      </div>
+
+    </div><!-- end briefingFsWrap -->
+  </div>
+</div>
 </div><!-- end .app -->
 
 <!-- ═══════ USER MODAL (Create/Edit) ═══════ -->
@@ -2313,6 +2463,7 @@ function switchTab(t){
   if(t==='history')renderHistory();
   if(t==='knowClient')renderKnowClient();
   if(t==='users')renderUsers();
+  if(t==='briefing'){ loadBriefConfig().then(()=>renderBriefing()); }
 }
 
 // ═══════════════════════════════════════════════════════
@@ -5599,6 +5750,376 @@ if('serviceWorker' in navigator){
     .catch(e=>console.warn('SW error:',e));
 }
 initAuth();
+// ═══════════════════════════════════════════════════════
+// BRIEFING OPERACIONAL
+// ═══════════════════════════════════════════════════════
+const BRIEF_SLOTS = [
+  {label:'00–02',start:0,   end:120},
+  {label:'02–04',start:120, end:240},
+  {label:'04–06',start:240, end:360},
+  {label:'06–08',start:360, end:480},
+  {label:'08–10',start:480, end:600},
+  {label:'10–12',start:600, end:720},
+  {label:'12–14',start:720, end:840},
+  {label:'14–16',start:840, end:960},
+  {label:'16–18',start:960, end:1080},
+  {label:'18–20',start:1080,end:1200},
+  {label:'20–22',start:1200,end:1320},
+  {label:'22–24',start:1320,end:1440},
+];
+
+const BRIEF_GROUPS = [
+  {id:'TA',  label:'Terminal A',    positions:POS.TA,       color:'#2d7aee', bg:'rgba(45,122,238,.15)'},
+  {id:'NA',  label:'Rampa Norte A', positions:POS.N_A,      color:'#0eb8c9', bg:'rgba(14,184,201,.15)'},
+  {id:'TB1', label:'Terminal B1',   positions:[...POS.TB1_PAR,...POS.TB1_IMPAR], color:'#e84545', bg:'rgba(232,69,69,.12)'},
+  {id:'TB2', label:'Terminal B2',   positions:[...POS.TB2A,...POS.TB2B], color:'#f0a500', bg:'rgba(240,165,0,.12)'},
+  {id:'NB',  label:'Rampa Norte B', positions:POS.N_B,      color:'#8b5cf6', bg:'rgba(139,92,246,.15)'},
+];
+
+let briefCharts = {};
+let briefActiveGroup = 'all';
+let briefClockInterval = null;
+
+function briefTimeToMins(t){ if(!t) return 0; const[h,m]=t.split(':').map(Number); return h*60+m; }
+
+function briefHeatColor(count, max){
+  if(!count) return {bg:'transparent', color:'var(--text3)'};
+  const r = count/max;
+  if(r > 0.75) return {bg:'rgba(232,69,69,.9)',  color:'#fff'};
+  if(r > 0.5)  return {bg:'rgba(240,165,0,.85)', color:'#000'};
+  if(r > 0.25) return {bg:'rgba(45,122,238,.8)', color:'#fff'};
+  return               {bg:'rgba(23,201,122,.7)', color:'#000'};
+}
+
+async function renderBriefing(){
+  await loadBriefConfig(); // Cargar config primero
+  const flights = flightData ? parseFlightList(flightData) : [];
+  const noFlights = document.getElementById('briefingNoFlights');
+  if(!flights.length){ noFlights.style.display='block'; renderBriefingEmpty(); return; }
+  noFlights.style.display='none';
+
+  const date = S.activeDate;
+  const d = new Date(date+'T12:00:00');
+  document.getElementById('briefingDateLabel').textContent =
+    d.toLocaleDateString('es-DO',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
+
+  // ── Build heatmap data ──
+  const allPos = BRIEF_GROUPS.flatMap(g=>g.positions);
+  const hmap = {};
+  allPos.forEach(p=>{ hmap[p]={}; BRIEF_SLOTS.forEach(s=>{ hmap[p][s.label]=0; }); });
+  flights.forEach(f=>{
+    if(!hmap[f.pos]) return;
+    BRIEF_SLOTS.forEach(s=>{
+      const t = briefTimeToMins(f.time||'');
+      if(t >= s.start && t < s.end) hmap[f.pos][s.label]++;
+    });
+  });
+  const colTotals = {};
+  BRIEF_SLOTS.forEach(s=>{ colTotals[s.label]=allPos.reduce((a,p)=>a+(hmap[p]?.[s.label]||0),0); });
+  const rowTotals = {};
+  allPos.forEach(p=>{ rowTotals[p]=BRIEF_SLOTS.reduce((a,s)=>a+(hmap[p]?.[s.label]||0),0); });
+  const maxCell = Math.max(...Object.values(hmap).flatMap(r=>Object.values(r)),1);
+  const peakSlot = Object.entries(colTotals).sort((a,b)=>b[1]-a[1])[0]||['—',0];
+
+  // Terminal counts
+  const termCounts = {TA:0,NA:0,TB1:0,TB2:0,NB:0};
+  flights.forEach(f=>{
+    const grp = BRIEF_GROUPS.find(g=>g.positions.includes(f.pos));
+    if(grp) termCounts[grp.id]++;
+  });
+
+  // ── Calcular vuelos de la semana ──
+  const flightsWeek = flights.length * 7;
+  const flightsMonth = flights.length * 30;
+
+  const kpis = [
+    {label:'Vuelos del día',      value:flights.length,                  sub:'operaciones hoy',    color:'#2d7aee'},
+    {label:'Vuelos semana',       value:flightsWeek,                     sub:'estimado semanal',   color:'#0eb8c9'},
+    {label:'Vuelos del mes',      value:flightsMonth,                    sub:'estimado mensual',   color:'#17c97a'},
+    {label:'Pico simultáneo',     value:peakSlot[1],                     sub:'franja '+peakSlot[0],color:'#f0a500'},
+    {label:'Delays del mes',      value:`${briefConfig.currentMonthDelays} / ${briefConfig.monthlyDelayLimit||73}`, sub:'actual / máximo', color: (briefConfig.currentMonthDelays||0) <= (briefConfig.monthlyDelayLimit||73) ? '#17c97a':'#e84545'},
+  ];
+// ── Render KPIs ──
+  document.getElementById('briefingKpis').innerHTML = kpis.map(k => `
+    <div class="brief-kpi-card" style="border-top:3px solid ${k.color}">
+      <div style="font-size:11px;color:var(--text3);margin-bottom:4px">${k.label}</div>
+      <div style="font-size:32px;font-weight:900;color:${k.color};line-height:1;font-family:'IBM Plex Mono',monospace">${k.value}</div>
+      <div style="font-size:10px;color:var(--text3);margin-top:4px">${k.sub}</div>
+    </div>`).join('');
+
+    // ── Charts ──
+  ['briefChartHoras','briefChartTerminal'].forEach(id=>{
+    if(briefCharts[id]){ briefCharts[id].destroy(); delete briefCharts[id]; }
+  });
+
+  const horaData = BRIEF_SLOTS.map(s=>colTotals[s.label]||0);
+  const horaMax = Math.max(...horaData,1);
+  briefCharts['briefChartHoras'] = new Chart(document.getElementById('briefChartHoras'),{
+    type:'bar',
+    data:{
+      labels:BRIEF_SLOTS.map(s=>s.label),
+      datasets:[{
+        label:'Vuelos',
+        data:horaData,
+        backgroundColor:horaData.map(v=>{
+          const r=v/horaMax;
+          if(r>.75) return 'rgba(232,69,69,.85)';
+          if(r>.5)  return 'rgba(240,165,0,.8)';
+          if(r>.25) return 'rgba(45,122,238,.8)';
+          return 'rgba(23,201,122,.7)';
+        }),
+        borderRadius:5, borderSkipped:false,
+      }]
+    },
+    options:{
+      responsive:true, maintainAspectRatio:false,
+      plugins:{legend:{display:false}},
+      scales:{
+        x:{grid:{display:false}, ticks:{color:'#7a90ab',font:{size:10}}},
+        y:{grid:{color:'rgba(255,255,255,.04)'}, ticks:{color:'#7a90ab',font:{size:10}}, beginAtZero:true}
+      }
+    }
+  });
+
+  briefCharts['briefChartTerminal'] = new Chart(document.getElementById('briefChartTerminal'),{
+    type:'doughnut',
+    data:{
+      labels:BRIEF_GROUPS.map(g=>g.label),
+      datasets:[{
+        data:BRIEF_GROUPS.map(g=>termCounts[g.id]||0),
+        backgroundColor:BRIEF_GROUPS.map(g=>g.color),
+        borderWidth:3,
+        borderColor:'#0d1117',
+      }]
+    },
+    options:{
+      responsive:true, maintainAspectRatio:false, cutout:'62%',
+      plugins:{
+        legend:{
+          display:true, position:'right',
+          labels:{color:'#7a90ab', font:{size:10}, boxWidth:10, padding:8}
+        }
+      }
+    }
+  });
+
+  // ── Heatmap tabs ──
+  const tabs = [{id:'all',label:'Todas'},...BRIEF_GROUPS.map(g=>({id:g.id,label:g.label,color:g.color}))];
+  document.getElementById('briefingHeatTabs').innerHTML = tabs.map(t=>`
+    <button class="shift-tab${briefActiveGroup===t.id?' on':''}"
+      style="${briefActiveGroup===t.id&&t.color?'border-color:'+t.color+';color:'+t.color+';background:'+t.color+'22':''}"
+      onclick="setBriefGroup('${t.id}')">${t.label}</button>`).join('');
+
+  // ── Heatmap table ──
+  buildBriefHeatmap(hmap, rowTotals, colTotals, maxCell);
+
+  // ── Equipment ──
+  // Vuelos en la franja del pico
+  const peakFlights = flights.filter(f=>{
+    const t = briefTimeToMins(f.time||'');
+    const slot = BRIEF_SLOTS.find(s=>s.label===peakSlot[0]);
+    return slot && t >= slot.start && t < slot.end;
+  });
+  
+  document.getElementById('briefingPeakLabel').textContent =
+    `${peakSlot[1]} vuelos en franja ${peakSlot[0]}`;
+  
+  // Belt loaders: 1 por cada vuelo en el pico
+  const beltLoaders = peakFlights.length;
+  
+  // Escaleras: vuelos del pico en TA + NA + NB + posiciones 34-37
+  const needsStairs = peakFlights.filter(f => {
+    const pos = f.pos;
+    // TA: posiciones 1-11
+    if(['1','2','3','4','5','6','7','8','9','10','11'].includes(pos)) return true;
+    // NA: N1-N5
+    if(['N1','N2','N3','N4','N5'].includes(pos)) return true;
+    // NB: N6-N10
+    if(['N6','N7','N8','N9','N10'].includes(pos)) return true;
+    // Posiciones 34-37
+    if(['34','35','36','37'].includes(pos)) return true;
+    return false;
+  }).length;
+  
+  const equips=[
+    {icon:'🏗', name:'Belt Loaders',  count:beltLoaders,                     note:'1 por vuelo en pico'},
+    {icon:'🚜', name:'Tractores',     count:Math.ceil(peakSlot[1]*.6),       note:'60% del pico'},
+    {icon:'🪜', name:'Escaleras',     count:needsStairs,                     note:'Vuelos TA+NA+NB+34-37'},
+    
+  ];
+  document.getElementById('briefingEquip').innerHTML = equips.map(e=>`
+    <div class="brief-equip-card">
+      <div style="font-size:26px">${e.icon}</div>
+      <div>
+        <div style="font-size:11px;color:var(--text3);margin-bottom:2px">${e.name}</div>
+        <div class="brief-equip-count" style="font-size:28px;font-weight:900;color:var(--accent);line-height:1;font-family:'IBM Plex Mono',monospace">${e.count}</div>
+        <div style="font-size:10px;color:var(--text3)">${e.note}</div>
+      </div>
+    </div>`).join('');
+}
+
+function buildBriefHeatmap(hmap, rowTotals, colTotals, maxCell){
+  const groups = briefActiveGroup==='all'
+    ? BRIEF_GROUPS
+    : BRIEF_GROUPS.filter(g=>g.id===briefActiveGroup);
+
+  let html=`<thead><tr>
+    <th>POS</th>
+    ${BRIEF_SLOTS.map(s=>`<th>${s.label}</th>`).join('')}
+    <th>Total</th>
+  </tr></thead><tbody>`;
+
+  groups.forEach(grp=>{
+    const grpTotal = grp.positions.reduce((a,p)=>a+(rowTotals[p]||0),0);
+    html+=`<tr class="brief-grp-row">
+      <td colspan="${BRIEF_SLOTS.length+2}" style="color:${grp.color}">
+        <span style="padding:2px 10px;border-radius:4px;background:${grp.bg}">${grp.label} — ${grpTotal} vuelos</span>
+      </td></tr>`;
+    grp.positions.forEach(pos=>{
+      const tot = rowTotals[pos]||0;
+      if(briefActiveGroup!=='all' || tot>0){
+        html+=`<tr><td style="color:${grp.color}">${pos}</td>`;
+        BRIEF_SLOTS.forEach(s=>{
+          const count=hmap[pos]?.[s.label]||0;
+          const {bg,color}=briefHeatColor(count,maxCell);
+          html+=`<td><div class="brief-heat-cell" style="background:${bg};color:${color}">${count||'·'}</div></td>`;
+        });
+        html+=`<td style="font-size:12px;font-weight:800;color:${tot?'var(--text)':'var(--text3)'}">
+          ${tot||'—'}</td></tr>`;
+      }
+    });
+  });
+
+  const grandTotal = groups.flatMap(g=>g.positions).reduce((a,p)=>a+(rowTotals[p]||0),0);
+  html+=`<tr class="brief-total-row"><td>Total</td>`;
+  BRIEF_SLOTS.forEach(s=>{
+    const c=colTotals[s.label]||0;
+    const {bg}=briefHeatColor(c,maxCell);
+    html+=`<td style="font-size:13px;color:${c?bg.replace('transparent','var(--text3)'):'var(--text3)'}">
+      ${c||'—'}</td>`;
+  });
+  html+=`<td style="color:var(--text);font-size:14px">${grandTotal}</td></tr></tbody>`;
+  document.getElementById('briefingHeatmap').innerHTML=html;
+}
+
+function renderBriefingEmpty(){
+  ['briefingKpis','briefingDelays','briefingHeatmap','briefingEquip']
+    .forEach(id=>{ const el=document.getElementById(id); if(el) el.innerHTML=''; });
+  ['briefChartHoras','briefChartTerminal']
+    .forEach(id=>{ if(briefCharts[id]){ briefCharts[id].destroy(); delete briefCharts[id]; } });
+}
+
+function setBriefGroup(id){
+  briefActiveGroup=id;
+  // rebuild only tabs + heatmap without re-running full render
+  const flights = flightData ? parseFlightList(flightData) : [];
+  if(!flights.length) return;
+  const allPos=BRIEF_GROUPS.flatMap(g=>g.positions);
+  const hmap={};
+  allPos.forEach(p=>{ hmap[p]={}; BRIEF_SLOTS.forEach(s=>{ hmap[p][s.label]=0; }); });
+  flights.forEach(f=>{
+    if(!hmap[f.pos]) return;
+    BRIEF_SLOTS.forEach(s=>{ const t=briefTimeToMins(f.time||''); if(t>=s.start&&t<s.end) hmap[f.pos][s.label]++; });
+  });
+  const colTotals={};
+  BRIEF_SLOTS.forEach(s=>{ colTotals[s.label]=allPos.reduce((a,p)=>a+(hmap[p]?.[s.label]||0),0); });
+  const rowTotals={};
+  allPos.forEach(p=>{ rowTotals[p]=BRIEF_SLOTS.reduce((a,s)=>a+(hmap[p]?.[s.label]||0),0); });
+  const maxCell=Math.max(...Object.values(hmap).flatMap(r=>Object.values(r)),1);
+
+  const tabs=[{id:'all',label:'Todas'},...BRIEF_GROUPS.map(g=>({id:g.id,label:g.label,color:g.color}))];
+  document.getElementById('briefingHeatTabs').innerHTML=tabs.map(t=>`
+    <button class="shift-tab${briefActiveGroup===t.id?' on':''}"
+      style="${briefActiveGroup===t.id&&t.color?'border-color:'+t.color+';color:'+t.color+';background:'+t.color+'22':''}"
+      onclick="setBriefGroup('${t.id}')">${t.label}</button>`).join('');
+  buildBriefHeatmap(hmap,rowTotals,colTotals,maxCell);
+}
+
+function openBriefingFullscreen(){
+  const el=document.getElementById('briefingFsWrap');
+  if(el.requestFullscreen) el.requestFullscreen();
+  else if(el.webkitRequestFullscreen) el.webkitRequestFullscreen();
+  else if(el.mozRequestFullScreen) el.mozRequestFullScreen();
+  else if(el.msRequestFullscreen) el.msRequestFullscreen();
+}
+
+// Clock update for fullscreen
+function startBriefClock(){
+  if(briefClockInterval) clearInterval(briefClockInterval);
+  function tick(){
+    const now=new Date();
+    const t=now.toLocaleTimeString('es-DO',{hour:'2-digit',minute:'2-digit'});
+    const el=document.getElementById('briefingClockTime');
+    if(el) el.textContent=t;
+  }
+  tick();
+  briefClockInterval=setInterval(tick,1000);
+}
+
+document.addEventListener('fullscreenchange',()=>{
+  const isFs=!!document.fullscreenElement;
+  const clock=document.getElementById('briefingClock');
+  if(clock) clock.style.display=isFs?'flex':'none';
+  if(isFs) startBriefClock();
+  else if(briefClockInterval){ clearInterval(briefClockInterval); briefClockInterval=null; }
+});
+// ═══════════════════════════════════════════════════════
+// BRIEFING CONFIG
+// ═══════════════════════════════════════════════════════
+let briefConfig = {
+  monthlyDelayLimit: 73,
+  currentMonthDelays: 0,
+};
+
+async function loadBriefConfig(){
+  if(!cloudDb) return;
+  const monthKey = S.activeDate.substring(0,7); // "2026-05"
+  try{
+    const doc = await cloudDb.collection('briefingConfig').doc(monthKey).get();
+    if(doc.exists){
+      briefConfig = {...briefConfig, ...doc.data()};
+    }
+  }catch(e){
+    console.error('Error cargando config briefing:', e);
+  }
+}
+
+async function saveBriefConfig(){
+  if(!cloudDb){ toast('❌ Sin conexión a Firestore'); return; }
+  const monthKey = S.activeDate.substring(0,7);
+  
+  const data = {
+    monthlyDelayLimit: parseInt(document.getElementById('cfgMonthlyDelayLimit').value) || 73,
+    currentMonthDelays: parseInt(document.getElementById('cfgCurrentMonthDelays').value) || 0,
+    lastUpdated: firebase.firestore.FieldValue.serverTimestamp(),
+  };
+  
+  try{
+    await cloudDb.collection('briefingConfig').doc(monthKey).set(data, {merge:true});
+    briefConfig = data;
+    toast('✅ Configuración guardada');
+    closeBriefConfigModal();
+    renderBriefing(); // Recargar con nueva config
+  }catch(e){
+    console.error('Error guardando config:', e);
+    toast('❌ Error guardando: '+e.message);
+  }
+}
+
+function openBriefConfigModal(){
+  // Solo permitir en pestaña briefing
+  if(S.activeTab !== 'briefing'){
+    toast('⚠️ Esta configuración solo está disponible en la pestaña de Briefing');
+    return;
+  }
+  document.getElementById('cfgMonthlyDelayLimit').value = briefConfig.monthlyDelayLimit;
+  document.getElementById('cfgCurrentMonthDelays').value = briefConfig.currentMonthDelays;
+  document.getElementById('briefConfigModal').classList.add('active');
+}
+
+function closeBriefConfigModal(){
+  document.getElementById('briefConfigModal').classList.remove('active');
+}
 </script>
 </body>
 </html>
