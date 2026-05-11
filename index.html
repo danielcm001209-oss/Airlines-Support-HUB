@@ -5267,6 +5267,33 @@ function toast(msg,type){
 // ═══════════════════════════════════════════════════════
 let currentUser = null;          // Firebase auth user
 let currentUserProfile = null;   // User doc from Firestore: {email, nombre, rol, memberId, activo, ...}
+const PERMISOS_DEF = [
+  { section:'🗂 Pestañas', items:[
+    { key:'tab_board',            label:'Ver Asignaciones' },
+    { key:'tab_airlines',         label:'Ver Aerolíneas' },
+    { key:'tab_team',             label:'Ver Equipo' },
+    { key:'tab_changes',          label:'Ver Cambios' },
+    { key:'tab_history',          label:'Ver Historial' },
+    { key:'tab_briefing',         label:'Ver Briefing' },
+    { key:'tab_knowClient',       label:'Ver Conociendo el cliente' },
+  ]},
+  { section:'⚡ Acciones', items:[
+    { key:'action_editBoard',         label:'Editar asignaciones' },
+    { key:'action_editChanges',       label:'Editar cambios' },
+    { key:'action_loadFlights',       label:'Cargar vuelos LACOPS' },
+    { key:'action_manageUsers',       label:'Gestionar usuarios' },
+    { key:'action_configureBriefing', label:'Configurar briefing' },
+  ]},
+];
+
+const DEFAULT_PERMISOS = Object.fromEntries(
+  PERMISOS_DEF.flatMap(s=>s.items).map(p=>[p.key, false])
+);
+
+function hasPermiso(key){
+  if(isAdmin()) return true; // admin siempre tiene todo
+  return currentUserProfile?.permisos?.[key] === true;
+}
 let authInitialized = false;
 
 function isAdmin(){ return currentUserProfile?.rol === 'admin'; }
@@ -5387,33 +5414,56 @@ async function loadUserProfile(uid){
 }
 
 function applyUserPermissions(){
-  // Show/hide admin-only UI
-  const isAdm=isAdmin();
-  const isSup=isSupervisor();
-  const isAg=isAgente();
+  const isAdm = isAdmin();
 
-  document.querySelectorAll('.admin-only').forEach(el=>{ el.style.display = isAdm ? '' : 'none'; });
+  // Usuarios tab solo para admin
+  document.querySelectorAll('.admin-only').forEach(el=>{
+    el.style.display = isAdm ? '' : 'none';
+  });
 
-  // Hide tabs agentes shouldn't see
-  if(isAg){
-    document.querySelectorAll('#tabBar .tab').forEach(tab=>{
-      const t=tab.dataset.tab;
-      // Agentes only see: board (simplified "my day") and knowClient
-      if(t==='board'||t==='knowClient') tab.style.display='';
-      else tab.style.display='none';
-    });
-    // Hide buttons in header that agentes can't use
+  if(isAdm){
+    // Admin ve todo
+    document.querySelectorAll('#tabBar .tab').forEach(tab=>{ tab.style.display=''; });
     ['analysisBtn','flightBtn','undoBtn','redoBtn','apiKeyBtn','fbBtn'].forEach(id=>{
-      const el=document.getElementById(id);
-      if(el) el.style.display='none';
+      const el=document.getElementById(id); if(el) el.style.display='';
     });
-    // Hide Auto, clear day, save buttons
-    document.querySelectorAll('.hactions .btn-green,.hactions .btn-danger,.hactions .btn-primary').forEach(b=>{
-      b.style.display='none';
-    });
+    return;
   }
 
-  // Show user badge in header
+  // Permisos granulares para no-admin
+  const tabMap = {
+    board:'tab_board', airlines:'tab_airlines', team:'tab_team',
+    changes:'tab_changes', history:'tab_history', briefing:'tab_briefing',
+    knowClient:'tab_knowClient', users:'tab_users'
+  };
+
+  document.querySelectorAll('#tabBar .tab').forEach(tab=>{
+    const t = tab.dataset.tab;
+    if(t === 'users'){ tab.style.display='none'; return; } // users solo admin
+    tab.style.display = hasPermiso(tabMap[t]||('tab_'+t)) ? '' : 'none';
+  });
+
+  // Botones de header según acciones
+  const flightBtn = document.getElementById('flightBtn');
+  if(flightBtn) flightBtn.style.display = hasPermiso('action_loadFlights') ? '' : 'none';
+
+  const analysisBtn = document.getElementById('analysisBtn');
+  if(analysisBtn) analysisBtn.style.display = hasPermiso('action_editBoard') ? '' : 'none';
+
+  ['undoBtn','redoBtn'].forEach(id=>{
+    const el=document.getElementById(id);
+    if(el) el.style.display = hasPermiso('action_editBoard') ? '' : 'none';
+  });
+
+  // Botón Auto y Save
+  document.querySelectorAll('.hactions .btn-green,.hactions .btn-primary').forEach(b=>{
+    b.style.display = hasPermiso('action_editBoard') ? '' : 'none';
+  });
+
+  // Botón Configurar Briefing
+  const cfgBriefBtn = document.querySelector('[onclick="openBriefConfigModal()"]');
+  if(cfgBriefBtn) cfgBriefBtn.style.display = hasPermiso('action_configureBriefing') ? '' : 'none';
+
   updateUserBadge();
 }
 
@@ -5512,6 +5562,7 @@ function startApp(){
           renderBoard();
           refreshOutput();
           updateCloudPill('☁ En nube','var(--green)');
+          applyUserPermissions(); // ← asegurar permisos después de cargar datos
         }
       })
       .catch(e=>console.error('Force load error:',e));
@@ -5613,7 +5664,8 @@ async function saveUser(){
         activo, firstLogin:true,
         invitationCode,
         createdAt:Date.now(),
-        createdBy: currentUserProfile?.email||'admin'
+        createdBy: currentUserProfile?.email||'admin',
+        permisos: {...DEFAULT_PERMISOS}, // todos desactivados por defecto
       });
       await secondaryAuth.signOut();
       await secondaryApp.delete();
@@ -5698,7 +5750,28 @@ async function renderUsers(){
           <button class="btn btn-outline" style="font-size:10px;padding:3px 7px" onclick="openUserModal('${uid}')">✏️</button>
           ${uid!==currentUser?.uid?`<button class="btn btn-danger" style="font-size:10px;padding:3px 7px" onclick="deleteUser('${uid}','${(d.email||'').replace(/'/g,"\\'")}')">🗑</button>`:''}
         </div>
-      </div>`);
+      </div>
+      ${d.rol!=='admin'?`
+      <div style="background:var(--s2);border:1px solid var(--border);border-radius:9px;padding:12px 14px;margin-bottom:8px;">
+        <div style="font-size:11px;font-weight:800;letter-spacing:1px;color:var(--text3);text-transform:uppercase;margin-bottom:10px;">🔐 Permisos de acceso</div>
+        ${PERMISOS_DEF.map(section=>`
+          <div style="font-size:10px;font-weight:800;letter-spacing:1px;color:var(--accent);text-transform:uppercase;margin:8px 0 6px">${section.section}</div>
+          ${section.items.map(p=>{
+            const val = d.permisos?.[p.key]===true;
+            return `<div style="display:flex;align-items:center;justify-content:space-between;padding:5px 0;border-bottom:1px solid var(--border);">
+              <span style="font-size:12px;color:var(--text2)">${p.label}</span>
+              <button onclick="togglePermiso('${uid}','${p.key}',${!val})"
+                style="width:36px;height:20px;border-radius:20px;border:none;cursor:pointer;
+                background:${val?'var(--green)':'var(--border2)'};
+                display:flex;align-items:center;padding:2px;
+                justify-content:${val?'flex-end':'flex-start'};transition:all .2s;flex-shrink:0">
+                <span style="width:16px;height:16px;border-radius:50%;background:#fff;display:block"></span>
+            </button>
+            </div>`;
+          }).join('')}
+        `).join('')}
+      </div>`:''}
+`);
     });
     c.innerHTML=rows.join('');
   }catch(e){
@@ -5706,6 +5779,25 @@ async function renderUsers(){
   }
 }
 
+async function togglePermiso(uid, key, value){
+    console.log('togglePermiso llamado:', uid, key, value);
+  if(!isAdmin()) return;
+  try{
+    await cloudDb.collection('users').doc(uid).update({
+      [`permisos.${key}`]: value,
+      updatedAt: Date.now()
+    });
+    if(currentUser?.uid === uid){
+      if(!currentUserProfile.permisos) currentUserProfile.permisos={};
+      currentUserProfile.permisos[key] = value;
+      applyUserPermissions();
+    }
+  }catch(e){
+    toast('❌ Error guardando permiso: '+e.message);
+    return;
+  }
+  renderUsers(); // Re-renderizar para reflejar el cambio visual
+}
 async function copyInvitationFor(uid){
   const doc=await cloudDb.collection('users').doc(uid).get();
   if(!doc.exists){ toast('Usuario no encontrado','error'); return; }
