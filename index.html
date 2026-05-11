@@ -472,7 +472,7 @@ input[type="date"]::-webkit-calendar-picker-indicator{
   </div>
 </div>
 <!-- MODAL CONFIG BRIEFING -->
-<div id="briefConfigModal" class="modal">
+<div id="briefConfigModal" class="overlay">
   <div class="modal-content" style="max-width:500px">
     <div class="modal-header">
       <h3>⚙️ Configuración de Briefing</h3>
@@ -2464,6 +2464,7 @@ function switchTab(t){
   if(t==='knowClient')renderKnowClient();
   if(t==='users')renderUsers();
   if(t==='briefing'){ loadBriefConfig().then(()=>renderBriefing()); }
+  closeBriefConfigModal();
 }
 
 // ═══════════════════════════════════════════════════════
@@ -6107,18 +6108,19 @@ async function saveBriefConfig(){
 }
 
 function openBriefConfigModal(){
-  // Solo permitir en pestaña briefing
-  if(S.activeTab !== 'briefing'){
-    toast('⚠️ Esta configuración solo está disponible en la pestaña de Briefing');
+  const activeTab = document.querySelector('.tab.active')?.dataset?.tab
+                 || document.querySelector('.tab.on')?.dataset?.tab;
+  if(activeTab !== 'briefing'){
+    toast('⚠️ Solo disponible en la pestaña Briefing');
     return;
   }
-  document.getElementById('cfgMonthlyDelayLimit').value = briefConfig.monthlyDelayLimit;
-  document.getElementById('cfgCurrentMonthDelays').value = briefConfig.currentMonthDelays;
-  document.getElementById('briefConfigModal').classList.add('active');
+  document.getElementById('cfgMonthlyDelayLimit').value = briefConfig.monthlyDelayLimit || 73;
+  document.getElementById('cfgCurrentMonthDelays').value = briefConfig.currentMonthDelays || 0;
+  document.getElementById('briefConfigModal').classList.add('open');
 }
 
 function closeBriefConfigModal(){
-  document.getElementById('briefConfigModal').classList.remove('active');
+  document.getElementById('briefConfigModal').classList.remove('open');
 }
 </script>
 </body>
