@@ -27,7 +27,7 @@ header{background:var(--s1);border-bottom:1px solid var(--border);padding:0 14px
 .date-pill{font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--text2);background:var(--s2);border:1px solid var(--border);padding:4px 10px;border-radius:20px;white-space:nowrap;}
 .hactions{display:flex;gap:5px;flex-shrink:0;}
 .tabs{background:var(--s1);border-bottom:1px solid var(--border);display:flex;padding:0 14px;overflow-x:auto;}
-.tab{padding:10px 12px;font-size:11px;font-weight:700;letter-spacing:.5px;color:var(--text3);cursor:pointer;border-bottom:2px solid transparent;transition:all .15s;text-transform:uppercase;white-space:nowrap;}
+.tab{padding:10px 12px;font-size:11px;font-weight:700;letter-spacing:.5px;color:var(--text2);cursor:pointer;border-bottom:2px solid transparent;transition:all .15s;text-transform:uppercase;white-space:nowrap;}
 .tab:hover{color:var(--text2);}.tab.active{color:var(--accent);border-bottom-color:var(--accent);}
 .app{display:flex;height:calc(100vh - 94px);overflow:hidden;}
 .page{display:none;flex:1;overflow:hidden;}.page.active{display:flex;}
@@ -35,7 +35,7 @@ header{background:var(--s1);border-bottom:1px solid var(--border);padding:0 14px
 .board-wrap{flex:1;overflow-y:auto;padding:14px;}
 .out-panel{width:300px;min-width:260px;border-left:1px solid var(--border);display:flex;flex-direction:column;}
 .out-head{padding:10px 14px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;flex-shrink:0;}
-.out-title{font-size:11px;font-weight:800;letter-spacing:1px;color:var(--text3);text-transform:uppercase;}
+.out-title{font-size:11px;font-weight:800;letter-spacing:1px;color:var(--text2);text-transform:uppercase;}
 .out-body{flex:1;overflow-y:auto;padding:12px;font-family:'IBM Plex Mono',monospace;font-size:11px;line-height:1.8;color:var(--text2);white-space:pre-wrap;}
 .btn{border:1px solid var(--border2);background:var(--s2);color:var(--text);padding:6px 12px;border-radius:7px;cursor:pointer;font-size:12px;font-weight:700;font-family:'Barlow',sans-serif;transition:all .15s;white-space:nowrap;}
 .btn:hover{border-color:var(--accent);color:var(--accent);}
@@ -47,7 +47,7 @@ header{background:var(--s1);border-bottom:1px solid var(--border);padding:0 14px
 .shift-head{padding:10px 14px;display:flex;align-items:center;gap:8px;border-bottom:1px solid var(--border);}
 .shift-tag{font-size:11px;font-weight:800;padding:3px 9px;border-radius:5px;letter-spacing:.5px;}
 .shift-time{font-size:11px;font-family:'IBM Plex Mono',monospace;color:var(--text3);flex:1;}
-.shift-count{font-size:11px;color:var(--text3);}
+.shift-count{font-size:12px;color:var(--text2);}
 .shift-add{width:26px;height:26px;border-radius:6px;background:var(--s2);border:1px solid var(--border2);color:var(--text3);cursor:pointer;font-size:16px;display:flex;align-items:center;justify-content:center;transition:all .15s;flex-shrink:0;}
 .shift-add:hover{border-color:var(--accent);color:var(--accent);}
 .shift-body{padding:10px;}
@@ -58,10 +58,10 @@ header{background:var(--s1);border-bottom:1px solid var(--border);padding:0 14px
 .atop{display:flex;align-items:center;gap:8px;margin-bottom:6px;}
 .av{width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;flex-shrink:0;}
 .aname{font-size:12px;font-weight:700;line-height:1.2;}
-.aterm{font-size:10px;color:var(--text3);}
+.aterm{font-size:12px;color:var(--text2);}
 .drows{display:flex;flex-direction:column;gap:2px;}
 .drow{display:flex;align-items:baseline;gap:5px;font-size:11px;}
-.dlabel{color:var(--text3);font-size:10px;min-width:62px;flex-shrink:0;}
+.dlabel{color:var(--text2);font-size:12px;min-width:62px;flex-shrink:0;}
 .bp{color:var(--accent);font-family:'IBM Plex Mono',monospace;font-weight:700;font-size:11px;}
 .bm{color:var(--amber);font-size:11px;}
 .bt{color:var(--green);font-size:11px;}
@@ -69,12 +69,12 @@ header{background:var(--s1);border-bottom:1px solid var(--border);padding:0 14px
 .stats-bar{display:flex;gap:10px;margin-bottom:12px;flex-wrap:wrap;}
 .stat{background:var(--s1);border:1px solid var(--border);border-radius:8px;padding:8px 14px;font-size:11px;}
 .stat-n{font-size:20px;font-weight:900;line-height:1;}
-.stat-l{color:var(--text3);font-size:10px;margin-top:2px;}
+.stat-l{color:var(--text2);font-size:12px;margin-top:2px;}
 .sup-bar{background:rgba(232,69,69,.07);border:1px solid rgba(232,69,69,.2);border-radius:8px;padding:8px 12px;margin-bottom:10px;display:flex;align-items:center;flex-wrap:wrap;gap:6px;}
-.sup-lbl{font-size:10px;font-weight:800;letter-spacing:1px;color:var(--red);text-transform:uppercase;margin-right:4px;}
+.sup-lbl{font-size:11px;font-weight:800;letter-spacing:1px;color:var(--red);text-transform:uppercase;margin-right:4px;}
 .sup-chip{font-size:12px;font-weight:700;color:var(--red);}
 .unassigned-bar{background:rgba(240,165,0,.06);border:1px solid rgba(240,165,0,.2);border-radius:8px;padding:8px 12px;margin-bottom:10px;}
-.unassigned-label{font-size:10px;font-weight:800;letter-spacing:1px;color:var(--amber);text-transform:uppercase;margin-bottom:5px;}
+.unassigned-label{font-size:11px;font-weight:800;letter-spacing:1px;color:var(--amber);text-transform:uppercase;margin-bottom:5px;}
 .unassigned-chips{display:flex;flex-wrap:wrap;gap:5px;}
 .uchip{font-size:11px;font-weight:700;padding:2px 8px;border-radius:12px;border:1px solid var(--border2);color:var(--text2);cursor:pointer;transition:all .15s;}
 .uchip:hover{border-color:var(--accent);color:var(--accent);}
@@ -86,18 +86,18 @@ header{background:var(--s1);border-bottom:1px solid var(--border);padding:0 14px
 .modal{background:var(--s1);border:1px solid var(--border2);border-radius:14px;padding:20px;width:520px;max-width:96vw;max-height:90vh;overflow-y:auto;}
 .modal-title{font-size:16px;font-weight:900;margin-bottom:14px;}
 .form-group{display:flex;flex-direction:column;gap:5px;flex:1;margin-bottom:10px;}
-.fl{font-size:10px;font-weight:800;letter-spacing:.5px;color:var(--text3);text-transform:uppercase;}
+.fl{font-size:11px;font-weight:800;letter-spacing:.5px;color:var(--text2);text-transform:uppercase;}
 .fi{background:var(--s2);border:1px solid var(--border2);border-radius:7px;padding:7px 10px;color:var(--text);font-size:13px;font-family:'Barlow',sans-serif;outline:none;}
 .fi:focus{border-color:var(--accent);}
 .fs{background:var(--s2);border:1px solid var(--border2);border-radius:7px;padding:7px 10px;color:var(--text);font-size:13px;font-family:'Barlow',sans-serif;outline:none;width:100%;}
 .fta{background:var(--s2);border:1px solid var(--border2);border-radius:7px;padding:8px 10px;color:var(--text);font-size:12px;font-family:'Barlow',sans-serif;outline:none;width:100%;resize:vertical;min-height:60px;}
 .frow{display:flex;gap:10px;flex-wrap:wrap;}
 .divider{display:flex;align-items:center;gap:8px;margin:10px 0 6px;}
-.divider span{font-size:10px;font-weight:800;letter-spacing:1px;color:var(--text3);text-transform:uppercase;white-space:nowrap;}
+.divider span{font-size:11px;font-weight:800;letter-spacing:1px;color:var(--text2);text-transform:uppercase;white-space:nowrap;}
 .divider::before,.divider::after{content:'';flex:1;height:1px;background:var(--border);}
 .mactions{display:flex;gap:8px;justify-content:flex-end;margin-top:14px;flex-wrap:wrap;}
 .pos-section{background:var(--s2);border:1px solid var(--border);border-radius:7px;padding:8px 10px;margin-bottom:5px;}
-.pos-section-label{font-size:10px;font-weight:800;letter-spacing:.5px;color:var(--text3);text-transform:uppercase;margin-bottom:5px;}
+.pos-section-label{font-size:11px;font-weight:800;letter-spacing:.5px;color:var(--text2);text-transform:uppercase;margin-bottom:5px;}
 .pos-buttons{display:flex;flex-wrap:wrap;gap:4px;}
 .pos-btn{background:var(--s1);border:1px solid var(--border2);border-radius:5px;color:var(--text3);padding:4px 7px;font-size:11px;font-weight:700;cursor:pointer;font-family:'IBM Plex Mono',monospace;transition:all .15s;}
 .pos-btn:hover{border-color:var(--accent);color:var(--accent);}
@@ -113,11 +113,11 @@ header{background:var(--s1);border-bottom:1px solid var(--border);padding:0 14px
 .team-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:8px;margin-top:12px;}
 .team-card{background:var(--s2);border:1px solid var(--border2);border-radius:9px;padding:12px;}
 .sched-row{display:flex;gap:3px;flex-wrap:wrap;margin-top:5px;}
-.sched-pip{font-size:10px;font-weight:800;padding:2px 5px;border-radius:4px;font-family:'IBM Plex Mono',monospace;}
+.sched-pip{font-size:11px;font-weight:800;padding:2px 5px;border-radius:4px;font-family:'IBM Plex Mono',monospace;}
 .swap-card{background:var(--s2);border:1px solid var(--border2);border-radius:8px;padding:11px;margin-bottom:7px;display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
-.changes-section-label{font-size:10px;font-weight:800;letter-spacing:1px;color:var(--text3);text-transform:uppercase;margin-bottom:8px;}
+.changes-section-label{font-size:11px;font-weight:800;letter-spacing:1px;color:var(--text2);text-transform:uppercase;margin-bottom:8px;}
 .analysis-sec{background:var(--s2);border:1px solid var(--border2);border-radius:8px;padding:12px;margin-bottom:10px;}
-.analysis-sec-title{font-size:10px;font-weight:800;letter-spacing:1px;color:var(--text3);text-transform:uppercase;margin-bottom:10px;}
+.analysis-sec-title{font-size:11px;font-weight:800;letter-spacing:1px;color:var(--text2);text-transform:uppercase;margin-bottom:10px;}
 .zone-bar-wrap{display:flex;align-items:center;gap:8px;margin-bottom:7px;}
 .zone-bar-label{font-size:12px;font-weight:600;min-width:145px;color:var(--text);}
 .zone-bar-track{flex:1;background:var(--bg);border-radius:4px;height:8px;overflow:hidden;}
@@ -126,7 +126,7 @@ header{background:var(--s1);border-bottom:1px solid var(--border);padding:0 14px
 .analysis-person-row{display:flex;align-items:center;gap:8px;padding:7px 0;border-bottom:1px solid var(--border);}
 .analysis-person-row:last-child{border-bottom:none;}
 .analysis-pos{font-family:'IBM Plex Mono',monospace;font-size:12px;font-weight:800;color:var(--accent);background:rgba(45,122,238,.1);border:1px solid rgba(45,122,238,.3);border-radius:5px;padding:2px 8px;white-space:nowrap;flex-shrink:0;}
-.analysis-reason{font-size:11px;color:var(--text3);margin-top:2px;}
+.analysis-reason{font-size:12px;color:var(--text2);margin-top:2px;}
 .shift-tab-bar{display:flex;gap:5px;flex-wrap:wrap;margin-bottom:10px;}
 .shift-tab{font-size:11px;font-weight:700;padding:4px 10px;border-radius:6px;border:1px solid var(--border2);background:var(--bg);color:var(--text3);cursor:pointer;transition:all .15s;}
 .shift-tab.on{background:rgba(45,122,238,.15);border-color:var(--accent);color:var(--accent);}
@@ -135,7 +135,7 @@ header{background:var(--s1);border-bottom:1px solid var(--border);padding:0 14px
 .analysis-person-row{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--border);}
 .analysis-person-row:last-child{border-bottom:none;}
 .analysis-pos{font-size:12px;font-weight:800;padding:3px 9px;border-radius:6px;background:rgba(45,122,238,.15);color:var(--accent);font-family:'IBM Plex Mono',monospace;white-space:nowrap;}
-.analysis-reason{font-size:11px;color:var(--text3);margin-top:1px;}
+.analysis-reason{font-size:12px;color:var(--text2);margin-top:1px;}
 .toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%) translateY(20px);background:var(--s1);border:1px solid var(--green);border-radius:8px;padding:10px 18px;font-size:13px;font-weight:700;opacity:0;transition:all .3s;z-index:9999;pointer-events:none;white-space:nowrap;}
 .toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
 @keyframes spin{to{transform:rotate(360deg)}}
@@ -170,7 +170,7 @@ input[type="date"]::-webkit-calendar-picker-indicator{
   .frow{flex-direction:column;}
   .frow .form-group[style*="flex:0"]{flex:1!important;}
   /* Tabs */
-  .tab{padding:8px 8px;font-size:10px;}
+  .tab{padding:8px 8px;font-size:11px;}
   /* Changes buttons */
   #page-changes .btn{font-size:11px;padding:5px 8px;}
 }
@@ -179,21 +179,21 @@ input[type="date"]::-webkit-calendar-picker-indicator{
 .brief-kpi-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin-bottom:16px;}
 .brief-kpi{background:var(--s1);border:1px solid var(--border);border-radius:10px;padding:14px 16px;position:relative;overflow:hidden;}
 .brief-kpi-accent{position:absolute;top:0;left:0;right:0;height:3px;border-radius:10px 10px 0 0;}
-.brief-kpi-label{font-size:10px;color:var(--text3);letter-spacing:1px;text-transform:uppercase;margin-bottom:4px;}
+.brief-kpi-label{font-size:12px;color:var(--text2);letter-spacing:1px;text-transform:uppercase;margin-bottom:4px;}
 .brief-kpi-value{font-size:30px;font-weight:900;line-height:1;margin-bottom:2px;font-family:'IBM Plex Mono',monospace;}
-.brief-kpi-sub{font-size:10px;color:var(--text3);}
+.brief-kpi-sub{font-size:12px;color:var(--text2);}
 .brief-section{background:var(--s1);border:1px solid var(--border);border-radius:10px;padding:16px;margin-bottom:12px;}
-.brief-section-label{font-size:10px;font-weight:800;letter-spacing:1.5px;color:var(--text3);text-transform:uppercase;margin-bottom:12px;}
+.brief-section-label{font-size:11px;font-weight:800;letter-spacing:1.5px;color:var(--text2);text-transform:uppercase;margin-bottom:12px;}
 .brief-heat-table{width:100%;border-collapse:collapse;table-layout:auto;}
-.brief-heat-table th{font-size:10px;color:var(--text3);font-weight:700;padding:5px 4px;text-align:center;border-bottom:1px solid var(--border);white-space:nowrap;}
+.brief-heat-table th{font-size:11px;color:var(--text2);font-weight:700;padding:5px 4px;text-align:center;border-bottom:1px solid var(--border);white-space:nowrap;}
 .brief-heat-table th:first-child{text-align:left;min-width:48px;}
 .brief-heat-table td{padding:3px 2px;text-align:center;}
 .brief-heat-table td:first-child{font-size:11px;font-weight:800;color:var(--accent);text-align:left;font-family:'IBM Plex Mono',monospace;}
 .brief-heat-cell{border-radius:5px;width:34px;height:26px;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;margin:0 auto;transition:transform .1s;}
 .brief-heat-cell:hover{transform:scale(1.2);}
-.brief-grp-row td{font-size:10px;font-weight:800;letter-spacing:1.5px;text-transform:uppercase;padding:8px 0 3px;border-bottom:1px solid var(--border);}
+.brief-grp-row td{font-size:11px;font-weight:800;letter-spacing:1.5px;text-transform:uppercase;padding:8px 0 3px;border-bottom:1px solid var(--border);}
 .brief-total-row td{font-size:12px;font-weight:800;padding:7px 4px;border-top:1px solid var(--border);color:var(--text2);}
-.brief-total-row td:first-child{font-size:10px;letter-spacing:1px;text-transform:uppercase;color:var(--text3);}
+.brief-total-row td:first-child{font-size:11px;letter-spacing:1px;text-transform:uppercase;color:var(--text2);}
 .brief-equip-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:8px;}
 .brief-equip-card{background:var(--s2);border:1px solid var(--border2);border-radius:8px;padding:12px;display:flex;align-items:center;gap:10px;}
 .brief-delay-row{display:flex;align-items:center;gap:12px;margin-bottom:8px;flex-wrap:wrap;}
@@ -238,7 +238,7 @@ input[type="date"]::-webkit-calendar-picker-indicator{
   <div style="max-width:400px;margin:40px auto;padding:30px 24px;background:var(--s1);border:1px solid var(--border);border-radius:14px">
     <div style="text-align:center;margin-bottom:24px">
       <div style="font-size:24px;font-weight:900">Airlines Support <span style="color:var(--cyan)">HUB</span></div>
-      <div style="font-size:12px;color:var(--text3);margin-top:4px">Inicio de sesión</div>
+      <div style="font-size:12px;color:var(--text2);margin-top:4px">Inicio de sesión</div>
     </div>
     <div class="form-group">
       <label class="fl">Correo electrónico</label>
@@ -359,15 +359,15 @@ input[type="date"]::-webkit-calendar-picker-indicator{
       </div>
     </div>
     <div id="flightPosPreview" style="display:none;background:var(--s1);border:1px solid var(--border);border-radius:9px;padding:12px;margin-bottom:12px;">
-      <div style="font-size:10px;font-weight:800;letter-spacing:1px;color:var(--green);text-transform:uppercase;margin-bottom:8px;">✈️ Posiciones detectadas en lista de vuelos de hoy</div>
+      <div style="font-size:11px;font-weight:800;letter-spacing:1px;color:var(--green);text-transform:uppercase;margin-bottom:8px;">✈️ Posiciones detectadas en lista de vuelos de hoy</div>
       <div id="flightPosMap" style="display:flex;flex-wrap:wrap;gap:5px;"></div>
     </div>
     <div style="background:var(--s1);border:1px solid var(--border);border-radius:9px;padding:12px;margin-bottom:12px;">
-      <div style="font-size:10px;font-weight:800;letter-spacing:1px;color:var(--text3);text-transform:uppercase;margin-bottom:8px;">Aerolíneas registradas</div>
+      <div style="font-size:11px;font-weight:800;letter-spacing:1px;color:var(--text2);text-transform:uppercase;margin-bottom:8px;">Aerolíneas registradas</div>
       <div id="airlineList"></div>
     </div>
     <div style="background:var(--s1);border:1px solid var(--border);border-radius:9px;padding:12px;">
-      <div style="font-size:10px;font-weight:800;letter-spacing:1px;color:var(--text3);text-transform:uppercase;margin-bottom:8px;">Persona → Aerolínea asignada</div>
+      <div style="font-size:11px;font-weight:800;letter-spacing:1px;color:var(--text2);text-transform:uppercase;margin-bottom:8px;">Persona → Aerolínea asignada</div>
       <div id="personAirlineList"></div>
     </div>
     <div style="margin-top:10px;padding:9px 12px;background:rgba(240,165,0,.07);border:1px solid rgba(240,165,0,.2);border-radius:7px;font-size:12px;color:var(--amber);">
@@ -503,7 +503,7 @@ input[type="date"]::-webkit-calendar-picker-indicator{
       <!-- Header -->
       <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;margin-bottom:16px;">
         <div>
-          <div style="font-size:10px;letter-spacing:2px;color:var(--cyan);text-transform:uppercase;margin-bottom:3px;">Aeropuerto Internacional Punta Cana — PUJ</div>
+          <div style="font-size:11px;letter-spacing:2px;color:var(--cyan);text-transform:uppercase;margin-bottom:3px;">Aeropuerto Internacional Punta Cana — PUJ</div>
           <h2 style="font-size:20px;font-weight:900;margin:0;">📊 Briefing Operacional</h2>
           <div style="font-size:12px;color:var(--text3);margin-top:3px;font-family:'IBM Plex Mono',monospace" id="briefingDateLabel"></div>
         </div>
@@ -544,7 +544,7 @@ input[type="date"]::-webkit-calendar-picker-indicator{
           <div class="brief-section-label" style="margin:0;">Heatmap — vuelos por posición y franja</div>
           <div style="display:flex;gap:5px;flex-wrap:wrap;" id="briefingHeatTabs"></div>
         </div>
-        <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:10px;font-size:10px;color:var(--text3);">
+        <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:10px;font-size:12px;color:var(--text2);">
           <span><span style="display:inline-block;width:12px;height:12px;border-radius:3px;background:rgba(23,201,122,.7);margin-right:4px;vertical-align:middle"></span>1–2</span>
           <span><span style="display:inline-block;width:12px;height:12px;border-radius:3px;background:rgba(45,122,238,.8);margin-right:4px;vertical-align:middle"></span>3–4</span>
           <span><span style="display:inline-block;width:12px;height:12px;border-radius:3px;background:rgba(240,165,0,.85);margin-right:4px;vertical-align:middle"></span>5–6</span>
@@ -556,7 +556,7 @@ input[type="date"]::-webkit-calendar-picker-indicator{
       <!-- Equipos -->
       <div class="brief-section">
         <div class="brief-section-label">Equipos requeridos</div>
-        <div style="font-size:11px;color:var(--text3);margin-bottom:12px">
+        <div style="font-size:12px;color:var(--text2);margin-bottom:12px">
           Pico simultáneo: <span id="briefingPeakLabel" style="color:var(--amber);font-weight:800;font-family:'IBM Plex Mono',monospace"></span>
         </div>
         <div class="brief-equip-grid" id="briefingEquip"></div>
@@ -588,7 +588,7 @@ input[type="date"]::-webkit-calendar-picker-indicator{
       <input class="fi" id="userPassword" type="text" placeholder="Mínimo 6 caracteres" style="flex:1;font-family:'IBM Plex Mono',monospace">
       <button class="btn btn-outline" type="button" onclick="generateRandomPassword()" style="font-size:11px;white-space:nowrap">🎲 Generar</button>
     </div>
-    <div style="font-size:10px;color:var(--text3);margin-top:3px">💡 El usuario la cambiará en su primer inicio de sesión.</div>
+    <div style="font-size:12px;color:var(--text2);margin-top:3px">💡 El usuario la cambiará en su primer inicio de sesión.</div>
   </div>
   <div class="form-group">
     <label class="fl">Rol</label>
@@ -640,7 +640,7 @@ input[type="date"]::-webkit-calendar-picker-indicator{
   <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;">
     <div>
       <div class="modal-title" style="margin:0">📊 Análisis del día</div>
-      <div id="analysisFecha" style="font-size:11px;color:var(--text3);margin-top:2px;font-family:'IBM Plex Mono',monospace"></div>
+      <div id="analysisFecha" style="font-size:12px;color:var(--text2);margin-top:2px;font-family:'IBM Plex Mono',monospace"></div>
     </div>
     <button onclick="closeModal('analysisModal')" style="background:none;border:none;color:var(--text3);font-size:20px;cursor:pointer">✕</button>
   </div>
@@ -658,12 +658,12 @@ input[type="date"]::-webkit-calendar-picker-indicator{
   <p style="font-size:12px;color:var(--text3);margin-bottom:12px">Sube el archivo de vuelos, pega el texto, o carga desde LACOPS en tiempo real.</p>
   <!-- LACOPS live fetch -->
   <div style="background:var(--s2);border:1px solid var(--border2);border-radius:8px;padding:12px;margin-bottom:12px;">
-    <div style="font-size:10px;font-weight:800;letter-spacing:1px;color:var(--cyan);text-transform:uppercase;margin-bottom:8px;">🔗 Cargar desde LACOPS (tiempo real)</div>
+    <div style="font-size:11px;font-weight:800;letter-spacing:1px;color:var(--cyan);text-transform:uppercase;margin-bottom:8px;">🔗 Cargar desde LACOPS (tiempo real)</div>
     <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
       <input class="fi" id="lacopsDate" type="date" style="flex:1;min-width:130px;font-size:12px;padding:5px 9px">
       <button class="btn btn-primary" style="white-space:nowrap" onclick="fetchLACOPS()">⬇️ Cargar vuelos</button>
     </div>
-    <div id="lacopsStatus" style="margin-top:8px;font-size:11px;color:var(--text3);display:none"></div>
+    <div id="lacopsStatus" style="margin-top:8px;font-size:12px;color:var(--text2);display:none"></div>
   </div>
   <div style="border:2px dashed var(--border2);border-radius:9px;padding:18px;text-align:center;margin-bottom:12px;">
     <div style="font-size:24px;margin-bottom:6px">📂</div>
@@ -672,16 +672,16 @@ input[type="date"]::-webkit-calendar-picker-indicator{
     <input type="file" id="flightFileInput" accept=".xlsx,.xls,.csv,.pdf" style="display:none" onchange="handleFlightFile(this.files[0]);this.value=''">
   </div>
   <div id="flightFileStatus" style="display:none;padding:8px 12px;border-radius:7px;margin-bottom:10px;font-size:12px;font-weight:600;"></div>
-  <div style="font-size:10px;font-weight:800;letter-spacing:1px;color:var(--text3);text-transform:uppercase;margin-bottom:5px">O pega el texto</div>
+  <div style="font-size:11px;font-weight:800;letter-spacing:1px;color:var(--text2);text-transform:uppercase;margin-bottom:5px">O pega el texto</div>
   <textarea class="fta" id="flightTextInput" style="min-height:100px;font-family:'IBM Plex Mono',monospace;font-size:11px" placeholder="Pega aquí los datos de vuelos..." oninput="onFlightTextChange()"></textarea>
-  <div id="flightCharCount" style="font-size:10px;color:var(--text3);margin-top:4px;font-family:'IBM Plex Mono',monospace"></div>
+  <div id="flightCharCount" style="font-size:12px;color:var(--text2);margin-top:4px;font-family:'IBM Plex Mono',monospace"></div>
   <div class="mactions">
     <button class="btn btn-danger" onclick="clearFlightData()">🗑 Limpiar</button>
     <button class="btn btn-outline" onclick="closeModal('flightModal')">Cancelar</button>
     <button class="btn btn-primary" onclick="saveFlightData()">✅ Guardar</button>
   </div>
   <div id="flightSuggestionsWrap" style="display:none;margin-top:12px;border-top:1px solid var(--border);padding-top:12px;">
-    <div style="font-size:10px;font-weight:800;letter-spacing:1px;color:var(--green);text-transform:uppercase;margin-bottom:10px;">💡 Sugerencias de asignación</div>
+    <div style="font-size:11px;font-weight:800;letter-spacing:1px;color:var(--green);text-transform:uppercase;margin-bottom:10px;">💡 Sugerencias de asignación</div>
     <div id="flightSuggestions"></div>
   </div>
 </div>
@@ -717,7 +717,7 @@ input[type="date"]::-webkit-calendar-picker-indicator{
   <!-- Dynamic shift sections -->
   <div id="shiftSections"></div>
   <!-- Position legend -->
-  <div style="display:flex;gap:10px;margin-bottom:8px;flex-wrap:wrap;font-size:10px;color:var(--text3);">
+  <div style="display:flex;gap:10px;margin-bottom:8px;flex-wrap:wrap;font-size:12px;color:var(--text2);">
     <span><span style="display:inline-block;width:10px;height:10px;border-radius:2px;background:rgba(45,122,238,.2);border:1px solid var(--accent);margin-right:3px;vertical-align:middle"></span>Seleccionada</span>
     <span><span style="display:inline-block;width:10px;height:10px;border-radius:2px;background:rgba(240,165,0,.05);border:1px solid rgba(240,165,0,.4);margin-right:3px;vertical-align:middle"></span>Ya asignada</span>
   </div>
@@ -734,7 +734,7 @@ input[type="date"]::-webkit-calendar-picker-indicator{
     <div class="frow" style="align-items:center;gap:8px">
       <label class="fl" style="white-space:nowrap;margin:0">Vehículo hasta las</label>
       <input class="fi" id="vehHasta" type="time" style="width:110px;font-size:13px;padding:5px 8px" placeholder="ej: 17:00">
-      <span style="font-size:11px;color:var(--text3)">opcional</span>
+      <span style="font-size:12px;color:var(--text2)">opcional</span>
     </div>
   </div>
   <!-- Cubrir primeras ops (solo A y T9) -->
@@ -845,7 +845,7 @@ input[type="date"]::-webkit-calendar-picker-indicator{
     <label style="display:flex;align-items:center;gap:7px;cursor:pointer">
       <input type="checkbox" id="memNoLicencia" style="width:14px;height:14px">
       <div><div style="font-size:13px;font-weight:600">🚫 Sin licencia de conducir</div>
-      <div style="font-size:11px;color:var(--text3)">Activa si esta persona NO tiene licencia. No se le asignará vehículo ni TTP/CGP.</div></div>
+      <div style="font-size:12px;color:var(--text2)">Activa si esta persona NO tiene licencia. No se le asignará vehículo ni TTP/CGP.</div></div>
     </label>
   </div>
   <div class="mactions">
@@ -2488,7 +2488,7 @@ function renderBoard(){
   const sups=S.team.filter(m=>m.sup&&resolvedShift(m,date)!==null);
   if(sups.length){
     html+=`<div class="sup-bar"><span class="sup-lbl">Supervisores hoy</span>`;
-    sups.forEach(s=>{ const sh=resolvedShift(s,date); html+=`<span class="sup-chip">${s.name}${sh?' <span style="font-size:10px;opacity:.7">'+sh+'</span>':''}</span>`; });
+    sups.forEach(s=>{ const sh=resolvedShift(s,date); html+=`<span class="sup-chip">${s.name}${sh?' <span style="font-size:11px;opacity:.7">'+sh+'</span>':''}</span>`; });
     html+=`</div>`;
   }
 
@@ -2501,7 +2501,7 @@ function renderBoard(){
     unassignedMembers.forEach(m=>{
       const sh=resolvedShift(m,date);
       const sdef=SHIFT_DEFS.find(s=>s.id===sh);
-      html+=`<span class="uchip" style="border-color:${sdef?.color||'var(--border2)'}33;color:${sdef?.color||'var(--text2)'}" onclick="openAssignModal('${sh}',null,'${m.id}')">${m.name} <span style="font-size:10px">${sh}</span></span>`;
+      html+=`<span class="uchip" style="border-color:${sdef?.color||'var(--border2)'}33;color:${sdef?.color||'var(--text2)'}" onclick="openAssignModal('${sh}',null,'${m.id}')">${m.name} <span style="font-size:11px">${sh}</span></span>`;
     });
     html+=`</div></div>`;
   }
@@ -2550,8 +2550,8 @@ orderedShifts.forEach(shift=>{
         // position limit warning
         const posCount=countPositions(d.primaryPos)+countPositions(d.coverPos)+countPositions(d.afterMealPos);
         const hasVeh=d.specialTasks&&(d.specialTasks.includes('TPe119')||d.specialTasks.includes('CGP17'));
-        if(posCount>3&&!hasVeh) rows=`<div style="font-size:10px;color:var(--red);font-weight:700;margin-bottom:3px">⚠️ +3 pos sin vehículo</div>`+rows;
-        if(m.noLicencia&&hasVeh) rows=`<div style="font-size:10px;color:var(--amber);font-weight:700;margin-bottom:3px">⚠️ Sin licencia — vehículo asignado</div>`+rows;
+        if(posCount>3&&!hasVeh) rows=`<div style="font-size:11px;color:var(--red);font-weight:700;margin-bottom:3px">⚠️ +3 pos sin vehículo</div>`+rows;
+        if(m.noLicencia&&hasVeh) rows=`<div style="font-size:11px;color:var(--amber);font-weight:700;margin-bottom:3px">⚠️ Sin licencia — vehículo asignado</div>`+rows;
         html+=`<div class="agent-card" onclick="openAssignModal('${shift.id}',${i},null)">
           <div class="atop">
             <div class="av" style="background:${m.color}22;color:${m.color}">${init}</div>
@@ -2569,7 +2569,7 @@ orderedShifts.forEach(shift=>{
   const obs=(S.observations[date]||[]);
   html+=`<div class="obs-sec">
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
-      <div style="font-size:10px;font-weight:800;letter-spacing:1px;color:var(--text3);text-transform:uppercase">📋 Observaciones</div>
+      <div style="font-size:11px;font-weight:800;letter-spacing:1px;color:var(--text2);text-transform:uppercase">📋 Observaciones</div>
     </div>
     ${obs.map((o,i)=>`<div class="obs-item"><span>• ${o}</span><button onclick="removeObs(${i})" style="background:none;border:none;color:var(--text3);cursor:pointer;font-size:14px;padding:0 4px">✕</button></div>`).join('')}
     <div style="display:flex;gap:6px;margin-top:8px;">
@@ -2845,7 +2845,7 @@ function posPicker(prefix){
     <div class="pos-section"><div class="pos-section-label" style="color:var(--cyan)">Rampa Norte B — N6 al N13</div><div class="pos-buttons" id="pb_${prefix}_NB"></div></div>
     <div style="display:flex;align-items:center;gap:8px;margin-top:2px;">
       <div style="font-size:11px;color:var(--accent);font-family:'IBM Plex Mono',monospace;font-weight:700;min-height:18px" id="pd_${prefix}">—</div>
-      <button type="button" class="btn btn-outline" style="font-size:10px;padding:2px 7px" onclick="clearPicker('${prefix}')">✕ Limpiar</button>
+      <button type="button" class="btn btn-outline" style="font-size:11px;padding:2px 7px" onclick="clearPicker('${prefix}')">✕ Limpiar</button>
     </div>
   </div>`;
 }
@@ -3188,7 +3188,7 @@ function buildShiftSections(shiftId, saved){
           <option value="19:00">19:00</option>
         </select>
       </div>
-      <div id="cenaReturn" style="font-size:11px;color:var(--text3);padding-top:18px;margin-left:8px"></div>
+      <div id="cenaReturn" style="font-size:12px;color:var(--text2);padding-top:18px;margin-left:8px"></div>
     </div>`;
   }
 
@@ -3309,7 +3309,7 @@ function addCoverRow(data){
   div.innerHTML=`
     <select class="fs cover-who" style="flex:1" onchange="autofillCoverPos(this)">${opts}</select>
     <input class="fi c-time" placeholder="Hora" value="${data?.time||''}" style="flex:0 0 80px;font-size:12px;padding:5px 8px" oninput="detectCoverType(this)">
-    <span class="cover-type-badge" style="font-size:10px;font-weight:800;padding:3px 7px;border-radius:5px;background:var(--s1);border:1px solid var(--border2);color:var(--text3);white-space:nowrap;align-self:flex-end;margin-bottom:1px">${detectMealType(data?.time||'')}</span>
+    <span class="cover-type-badge" style="font-size:11px;font-weight:800;padding:3px 7px;border-radius:5px;background:var(--s1);border:1px solid var(--border2);color:var(--text3);white-space:nowrap;align-self:flex-end;margin-bottom:1px">${detectMealType(data?.time||'')}</span>
     <input class="fi c-pos" placeholder="Posición" value="${data?.pos||''}" style="flex:0 0 95px;font-size:12px;padding:5px 8px">
     <button type="button" class="btn btn-danger" style="font-size:11px;padding:4px 8px" onclick="this.parentElement.remove()">✕</button>`;
   c.appendChild(div);
@@ -3652,7 +3652,7 @@ function buildSuggestionsPanel(){
     html+=`<div style="display:flex;align-items:center;gap:8px;margin-bottom:5px">
       <span style="font-size:11px;min-width:130px;color:var(--text2)">${name}</span>
       <div style="flex:1;background:var(--s2);border-radius:3px;height:7px;overflow:hidden"><div style="width:${pct}%;height:100%;background:${col};border-radius:3px"></div></div>
-      <span style="font-size:11px;color:var(--text3);min-width:65px;text-align:right">${cnt} vuelos</span>
+      <span style="font-size:12px;color:var(--text2);min-width:65px;text-align:right">${cnt} vuelos</span>
     </div>`;
   });
   html+=`</div>`;
@@ -3666,14 +3666,14 @@ function buildSuggestionsPanel(){
       const sug=bestPosForPerson(m);
       const airlines=(S.personAirlines||{})[m.id]||[];
       html+=`<div style="display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid var(--border)">
-        <div style="width:26px;height:26px;border-radius:50%;background:${m.color}22;color:${m.color};display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:800;flex-shrink:0">${init}</div>
+        <div style="width:26px;height:26px;border-radius:50%;background:${m.color}22;color:${m.color};display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;flex-shrink:0">${init}</div>
         <div style="flex:1">
-          <div style="font-size:12px;font-weight:700">${m.name}${m.noLicencia?' <span style="font-size:10px;color:var(--amber)">🚫</span>':''}</div>
-          <div style="font-size:10px;color:var(--text3)">${airlines.slice(0,2).join(', ')||'Sin aerolínea'}</div>
+          <div style="font-size:12px;font-weight:700">${m.name}${m.noLicencia?' <span style="font-size:11px;color:var(--amber)">🚫</span>':''}</div>
+          <div style="font-size:12px;color:var(--text2)">${airlines.slice(0,2).join(', ')||'Sin aerolínea'}</div>
         </div>
         ${sug
-          ? `<div style="text-align:right"><div style="font-size:12px;font-weight:800;color:var(--accent);font-family:'IBM Plex Mono',monospace">POS ${sug.pos}</div><div style="font-size:10px;color:var(--text3)">${sug.airline} · ${sug.vuelos} vuelo${sug.vuelos>1?'s':''}</div></div>`
-          : `<div style="font-size:11px;color:var(--text3);text-align:right">Sin vuelos<br>de su aerolínea</div>`
+          ? `<div style="text-align:right"><div style="font-size:12px;font-weight:800;color:var(--accent);font-family:'IBM Plex Mono',monospace">POS ${sug.pos}</div><div style="font-size:12px;color:var(--text2)">${sug.airline} · ${sug.vuelos} vuelo${sug.vuelos>1?'s':''}</div></div>`
+          : `<div style="font-size:12px;color:var(--text2);text-align:right">Sin vuelos<br>de su aerolínea</div>`
         }
       </div>`;
     });
@@ -3707,7 +3707,7 @@ function renderAirlines(){
     }).join('');
     return `<div style="display:flex;align-items:center;gap:8px;padding:8px 0;border-bottom:1px solid var(--border);flex-wrap:wrap">
       <div style="display:flex;align-items:center;gap:6px;min-width:150px">
-        <div style="width:26px;height:26px;border-radius:50%;background:${m.color}22;color:${m.color};display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:800">${init}</div>
+        <div style="width:26px;height:26px;border-radius:50%;background:${m.color}22;color:${m.color};display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800">${init}</div>
         <span style="font-size:12px;font-weight:700">${m.name}</span>
       </div>
       <div style="display:flex;flex-wrap:wrap;gap:4px">${chips}</div>
@@ -3816,9 +3816,9 @@ function renderTeamGrid(){
         <div style="flex:1">
           <div style="font-size:12px;font-weight:700${m.sup?';color:var(--red)':''}">
             ${m.sup?'⭐ ':''}${m.name}
-            ${m.noLicencia?'<span style="font-size:10px;background:rgba(240,165,0,.15);color:var(--amber);border:1px solid rgba(240,165,0,.3);border-radius:4px;padding:1px 5px;margin-left:3px;vertical-align:middle">🚫 Sin lic.</span>':'<span style="font-size:10px;color:var(--green);margin-left:3px;vertical-align:middle">🪪</span>'}
+            ${m.noLicencia?'<span style="font-size:11px;background:rgba(240,165,0,.15);color:var(--amber);border:1px solid rgba(240,165,0,.3);border-radius:4px;padding:1px 5px;margin-left:3px;vertical-align:middle">🚫 Sin lic.</span>':'<span style="font-size:11px;color:var(--green);margin-left:3px;vertical-align:middle">🪪</span>'}
           </div>
-          <div style="font-size:10px;color:var(--text3)">${m.role||(m.terminal?'Term.'+m.terminal:'')}</div>
+          <div style="font-size:12px;color:var(--text2)">${m.role||(m.terminal?'Term.'+m.terminal:'')}</div>
         </div>
         <button onclick="openMemberModal('${m.id}')" style="background:none;border:none;color:var(--text3);cursor:pointer;font-size:14px">✏️</button>
         <button onclick="deleteMember('${m.id}')" style="background:none;border:none;color:var(--text3);cursor:pointer;font-size:14px">🗑</button>
@@ -4085,13 +4085,13 @@ function renderChanges(){
           <div style="font-size:13px;font-weight:700;color:${m?.color||'var(--text)'}">
             ${emoji} ${m?.name||'?'}
           </div>
-          <div style="font-size:11px;color:var(--text3);font-family:'IBM Plex Mono',monospace;margin-top:2px">
+          <div style="font-size:12px;color:var(--text2);font-family:'IBM Plex Mono',monospace;margin-top:2px">
             ${fmtRange(item.start,item.end)}${item.days?' · '+item.days+' días':''}${extra?' · '+extra:''}
           </div>
           ${item.note?`<div style="font-size:11px;color:var(--text2);margin-top:2px">${item.note}</div>`:''}
         </div>
-        <button class="btn btn-outline" style="font-size:10px;padding:2px 7px" onclick="${editFn}('${item.id}')">✏️</button>
-        <button class="btn btn-danger" style="font-size:10px;padding:2px 7px" onclick="${deleteFn}('${item.id}')">✕</button>
+        <button class="btn btn-outline" style="font-size:11px;padding:2px 7px" onclick="${editFn}('${item.id}')">✏️</button>
+        <button class="btn btn-danger" style="font-size:11px;padding:2px 7px" onclick="${deleteFn}('${item.id}')">✕</button>
       </div>`;
     }).join('');
   }
@@ -4111,12 +4111,12 @@ function renderChanges(){
     return `<div class="swap-card" style="border-color:rgba(45,122,238,.2)">
       <div style="flex:1">
         <div style="font-size:13px;font-weight:700;color:${m?.color||'var(--text)'}">${m?.name||'?'}</div>
-        <div style="font-size:11px;color:var(--text3);font-family:'IBM Plex Mono',monospace;margin-top:2px">
+        <div style="font-size:12px;color:var(--text2);font-family:'IBM Plex Mono',monospace;margin-top:2px">
           ${d} · <span style="font-weight:800;padding:1px 6px;border-radius:4px;background:${SC(ov.shift)}22;color:${SC(ov.shift)}">${ov.shift}</span>${ov.reason?' · '+ov.reason:''}
         </div>
       </div>
-      <button class="btn btn-outline" style="font-size:10px;padding:2px 7px" onclick="${ov.type==='cambioTurno'?`openCambioTurnoModal('${mid}','${date}')`:`openOverrideModal('${mid}','${date}')`}">✏️</button>
-      <button class="btn btn-danger" style="font-size:10px;padding:2px 7px" onclick="deleteOverride('${mid}','${date}')">✕</button>
+      <button class="btn btn-outline" style="font-size:11px;padding:2px 7px" onclick="${ov.type==='cambioTurno'?`openCambioTurnoModal('${mid}','${date}')`:`openOverrideModal('${mid}','${date}')`}">✏️</button>
+      <button class="btn btn-danger" style="font-size:11px;padding:2px 7px" onclick="deleteOverride('${mid}','${date}')">✕</button>
     </div>`;
   }
 
@@ -4140,15 +4140,15 @@ function renderChanges(){
         <div style="font-size:13px;font-weight:700">
           <span style="color:${mA?.color||'var(--text)'}">${mA?.name||'?'}</span>
           <span style="color:var(--text3);margin:0 5px;font-size:11px">trabaja ${dA}</span>
-          <span style="color:var(--text3);font-size:11px">⇄</span>
+          <span style="color:var(--text2);font-size:12px">⇄</span>
           <span style="color:${mB?.color||'var(--text)'}"> ${mB?.name||'?'}</span>
           <span style="color:var(--text3);margin:0 5px;font-size:11px">trabaja ${dB}</span>
         </div>
-        ${s.notes?`<div style="font-size:11px;color:var(--text3);margin-top:2px">${s.notes}</div>`:''}
+        ${s.notes?`<div style="font-size:12px;color:var(--text2);margin-top:2px">${s.notes}</div>`:''}
       </div>
-      <span style="font-size:10px;font-weight:700;padding:2px 8px;border-radius:14px;background:${s.pending?'rgba(240,165,0,.12)':'rgba(23,201,122,.1)'};color:${s.pending?'var(--amber)':'var(--green)'}">${s.pending?'⏳':'✅'}</span>
-      <button class="btn btn-outline" style="font-size:10px;padding:2px 7px" onclick="toggleSwapPending('${s.id}')">${s.pending?'Saldar':'Reabrir'}</button>
-      <button class="btn btn-danger" style="font-size:10px;padding:2px 7px" onclick="deleteSwap('${s.id}')">✕</button>
+      <span style="font-size:11px;font-weight:700;padding:2px 8px;border-radius:14px;background:${s.pending?'rgba(240,165,0,.12)':'rgba(23,201,122,.1)'};color:${s.pending?'var(--amber)':'var(--green)'}">${s.pending?'⏳':'✅'}</span>
+      <button class="btn btn-outline" style="font-size:11px;padding:2px 7px" onclick="toggleSwapPending('${s.id}')">${s.pending?'Saldar':'Reabrir'}</button>
+      <button class="btn btn-danger" style="font-size:11px;padding:2px 7px" onclick="deleteSwap('${s.id}')">✕</button>
     </div>`;
   }).join(''):'<div style="color:var(--text3);font-size:12px">Sin cambios registrados.</div>';
 }
@@ -4246,7 +4246,7 @@ function renderHistory(){
     const total=SHIFT_DEFS.reduce((a,s)=>a+((S.duties[date]?.[s.id])||[]).length,0);
     return `<div class="hcard">
       <div class="hcard-head">
-        <div><div style="font-size:13px;font-weight:700">${label}</div><div style="font-size:11px;color:var(--text3);font-family:'IBM Plex Mono',monospace;margin-top:2px">${total} agente${total!==1?'s':''} asignado${total!==1?'s':''}</div></div>
+        <div><div style="font-size:13px;font-weight:700">${label}</div><div style="font-size:12px;color:var(--text2);font-family:'IBM Plex Mono',monospace;margin-top:2px">${total} agente${total!==1?'s':''} asignado${total!==1?'s':''}</div></div>
         <div style="display:flex;gap:6px">
           <button class="btn btn-outline" style="font-size:11px;padding:4px 9px" onclick="openHistView('${date}')">👁 Ver</button>
           <button class="btn btn-outline" style="font-size:11px;padding:4px 9px" onclick="copyDay('${date}')">📋</button>
@@ -4359,7 +4359,7 @@ function renderKnowClient(){
       <div onclick="toggleAirlineExpand('${name.replace(/'/g,"\\'")}')" style="display:flex;align-items:center;gap:10px;padding:12px 14px;cursor:pointer;${expanded?'border-bottom:1px solid var(--border);background:var(--s2)':''}">
         <div style="width:28px;height:28px;border-radius:7px;background:${col}22;border:1px solid ${col}44;display:flex;align-items:center;justify-content:center;color:${col};font-weight:900;font-size:13px;flex-shrink:0">${name.charAt(0)}</div>
         <div style="flex:1"><div style="font-size:13px;font-weight:700">${name}</div>
-          <div style="font-size:10px;color:var(--text3);margin-top:1px">${data.diferencias||data.requerimientos?'✓ Información registrada':'Sin información cargada'}</div>
+          <div style="font-size:12px;color:var(--text2);margin-top:1px">${data.diferencias||data.requerimientos?'✓ Información registrada':'Sin información cargada'}</div>
         </div>
         <div style="font-size:18px;color:var(--text3);transition:transform .2s;${expanded?'transform:rotate(90deg)':''}">▶</div>
       </div>
@@ -4393,7 +4393,7 @@ function knowSection(title, icon, airline, field, content){
     return `<div style="background:var(--s2);border:1px solid var(--border2);border-radius:8px;padding:12px">
       <div style="font-size:11px;font-weight:800;color:var(--accent);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px">${icon} ${title}</div>
       <div style="background:var(--s1);border:1px solid var(--border);border-radius:6px;padding:10px;margin-bottom:10px;font-size:11px;color:var(--text2);line-height:1.6">
-        📄 <strong>PDF esperado en:</strong> <code style="color:var(--accent);font-family:'IBM Plex Mono',monospace;font-size:10px">${url}</code><br>
+        📄 <strong>PDF esperado en:</strong> <code style="color:var(--accent);font-family:'IBM Plex Mono',monospace;font-size:11px">${url}</code><br>
         Sube el PDF al repo en esa ruta exacta (o texto debajo como fallback).
       </div>
       <textarea
@@ -4402,22 +4402,22 @@ function knowSection(title, icon, airline, field, content){
         placeholder="Texto fallback si no hay PDF…"
         onchange="saveAirlineInfo('${safeAirline}','${field}',this.value)"
       >${content||''}</textarea>
-      <div style="font-size:10px;color:var(--text3);margin-top:5px">💡 El PDF tiene prioridad. Si no existe, se muestra este texto.</div>
+      <div style="font-size:12px;color:var(--text2);margin-top:5px">💡 El PDF tiene prioridad. Si no existe, se muestra este texto.</div>
     </div>`;
   }
 
   // Fallback HTML (text if provided, or empty message)
   const fallbackHtml=content
-    ? `<div style="padding:14px"><div style="font-size:10px;color:var(--amber);margin-bottom:8px">⚠️ PDF no disponible — mostrando texto</div><div style="font-size:12px;color:var(--text2);line-height:1.6;white-space:pre-wrap">${formatKnowText(content)}</div></div>`
-    : `<div style="padding:30px;text-align:center;color:var(--text3);font-size:12px">📄 Sin documento registrado aún.<br><span style="font-size:10px;color:var(--text3);opacity:.7">Esperado en: ${url}</span></div>`;
+    ? `<div style="padding:14px"><div style="font-size:11px;color:var(--amber);margin-bottom:8px">⚠️ PDF no disponible — mostrando texto</div><div style="font-size:12px;color:var(--text2);line-height:1.6;white-space:pre-wrap">${formatKnowText(content)}</div></div>`
+    : `<div style="padding:30px;text-align:center;color:var(--text3);font-size:12px">📄 Sin documento registrado aún.<br><span style="font-size:12px;color:var(--text2);opacity:.7">Esperado en: ${url}</span></div>`;
   const encodedFallback=encodeURIComponent(fallbackHtml);
 
   return `<div style="background:var(--s2);border:1px solid var(--border2);border-radius:8px;overflow:hidden" data-pdf-section>
     <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 12px;border-bottom:1px solid var(--border);background:var(--s1);flex-wrap:wrap;gap:6px">
       <div style="font-size:11px;font-weight:800;color:var(--accent);text-transform:uppercase;letter-spacing:.5px">${icon} ${title}</div>
       <div style="display:flex;gap:6px;flex-wrap:wrap">
-        <button class="btn btn-outline" style="font-size:10px;padding:3px 8px" onclick="openPdfFullscreen('${url.replace(/'/g,"\\'")}')" title="Ver en pantalla completa">🔍 Ampliar</button>
-        <a href="${url}" target="_blank" rel="noopener" class="btn btn-outline" style="font-size:10px;padding:3px 8px;text-decoration:none;display:inline-flex;align-items:center" title="Descargar PDF">↓ Descargar</a>
+        <button class="btn btn-outline" style="font-size:11px;padding:3px 8px" onclick="openPdfFullscreen('${url.replace(/'/g,"\\'")}')" title="Ver en pantalla completa">🔍 Ampliar</button>
+        <a href="${url}" target="_blank" rel="noopener" class="btn btn-outline" style="font-size:11px;padding:3px 8px;text-decoration:none;display:inline-flex;align-items:center" title="Descargar PDF">↓ Descargar</a>
       </div>
     </div>
     <div id="${viewerId}" data-pdf-url="${url}" data-fallback="${encodedFallback}" style="min-height:420px;position:relative;background:var(--s2)">
@@ -4444,7 +4444,7 @@ async function renderPdfInline(viewerId){
     const numPages=pdf.numPages;
 
     el.innerHTML=`
-      <div style="display:flex;align-items:center;justify-content:space-between;padding:6px 10px;background:var(--s1);border-bottom:1px solid var(--border);font-size:11px;color:var(--text3)">
+      <div style="display:flex;align-items:center;justify-content:space-between;padding:6px 10px;background:var(--s1);border-bottom:1px solid var(--border);font-size:12px;color:var(--text2)">
         <span>📄 ${numPages} página${numPages>1?'s':''}</span>
         <span style="font-family:'IBM Plex Mono',monospace" id="${viewerId}_page">1 / ${numPages}</span>
       </div>
@@ -4590,8 +4590,8 @@ function showPdfGuide(){
     const slug=airlineSlug(name);
     return `<tr style="border-bottom:1px solid var(--border)">
       <td style="padding:5px 8px;font-size:11px;font-weight:700">${name}</td>
-      <td style="padding:5px 8px;font-size:10px;font-family:'IBM Plex Mono',monospace;color:var(--accent)">pdfs/airlines/${slug}_diferencias.pdf</td>
-      <td style="padding:5px 8px;font-size:10px;font-family:'IBM Plex Mono',monospace;color:var(--green)">pdfs/airlines/${slug}_requerimientos.pdf</td>
+      <td style="padding:5px 8px;font-size:11px;font-family:'IBM Plex Mono',monospace;color:var(--accent)">pdfs/airlines/${slug}_diferencias.pdf</td>
+      <td style="padding:5px 8px;font-size:11px;font-family:'IBM Plex Mono',monospace;color:var(--green)">pdfs/airlines/${slug}_requerimientos.pdf</td>
     </tr>`;
   }).join('');
   const modal=document.getElementById('pdfGuideModal')||(()=>{
@@ -4613,9 +4613,9 @@ function showPdfGuide(){
       <table style="width:100%;border-collapse:collapse;font-size:11px">
         <thead>
           <tr style="background:var(--s1);position:sticky;top:0">
-            <th style="padding:7px 8px;text-align:left;font-size:10px;font-weight:800;color:var(--text3);text-transform:uppercase;letter-spacing:.5px">Aerolínea</th>
-            <th style="padding:7px 8px;text-align:left;font-size:10px;font-weight:800;color:var(--text3);text-transform:uppercase;letter-spacing:.5px">🔄 Diferencias</th>
-            <th style="padding:7px 8px;text-align:left;font-size:10px;font-weight:800;color:var(--text3);text-transform:uppercase;letter-spacing:.5px">📋 Requerimientos</th>
+            <th style="padding:7px 8px;text-align:left;font-size:11px;font-weight:800;color:var(--text3);text-transform:uppercase;letter-spacing:.5px">Aerolínea</th>
+            <th style="padding:7px 8px;text-align:left;font-size:11px;font-weight:800;color:var(--text3);text-transform:uppercase;letter-spacing:.5px">🔄 Diferencias</th>
+            <th style="padding:7px 8px;text-align:left;font-size:11px;font-weight:800;color:var(--text3);text-transform:uppercase;letter-spacing:.5px">📋 Requerimientos</th>
           </tr>
         </thead>
         <tbody>${rows}</tbody>
@@ -4832,9 +4832,9 @@ function buildAnalysisBodyHTML(){
 
   function intensityBadge(count,max){
     const r=count/max;
-    if(r>0.6) return `<span style="font-size:10px;font-weight:700;padding:1px 7px;border-radius:4px;background:rgba(232,69,69,.15);color:var(--red)">alta</span>`;
-    if(r>0.3) return `<span style="font-size:10px;font-weight:700;padding:1px 7px;border-radius:4px;background:rgba(240,165,0,.15);color:var(--amber)">media</span>`;
-    return `<span style="font-size:10px;font-weight:700;padding:1px 7px;border-radius:4px;background:var(--s2);color:var(--text3)">baja</span>`;
+    if(r>0.6) return `<span style="font-size:11px;font-weight:700;padding:1px 7px;border-radius:4px;background:rgba(232,69,69,.15);color:var(--red)">alta</span>`;
+    if(r>0.3) return `<span style="font-size:11px;font-weight:700;padding:1px 7px;border-radius:4px;background:rgba(240,165,0,.15);color:var(--amber)">media</span>`;
+    return `<span style="font-size:11px;font-weight:700;padding:1px 7px;border-radius:4px;background:var(--s2);color:var(--text3)">baja</span>`;
   }
 
   function zoneBar(label, count, max, color, indent){
@@ -4851,7 +4851,7 @@ function buildAnalysisBodyHTML(){
 
   // Zone bars section
   let html=`<div style="margin-bottom:14px">
-    <div style="font-size:10px;font-weight:800;letter-spacing:1px;color:var(--text3);text-transform:uppercase;margin-bottom:10px">Carga de vuelos por zona</div>`;
+    <div style="font-size:11px;font-weight:800;letter-spacing:1px;color:var(--text2);text-transform:uppercase;margin-bottom:10px">Carga de vuelos por zona</div>`;
 
   // — Terminal A total
   html+=zoneBar('🅐 Terminal A (total)',totalA,grandMax,'#2d7aee',false);
@@ -4959,7 +4959,7 @@ function buildAnalysisBodyHTML(){
     return {pos:'—',reason:`Sin vuelos de sus aerolíneas hoy — zona de mayor carga: ${zoneMap[topZone]||topZone}`,byAirline:false};
   }
 
-  html+=`<div style="font-size:10px;font-weight:800;letter-spacing:1px;color:var(--text3);text-transform:uppercase;margin-bottom:10px">Sugerencias por turno y persona</div>`;
+  html+=`<div style="font-size:11px;font-weight:800;letter-spacing:1px;color:var(--text2);text-transform:uppercase;margin-bottom:10px">Sugerencias por turno y persona</div>`;
 
   const hasData=Object.keys(onShift).length>0;
   if(!hasData){
@@ -4976,22 +4976,22 @@ function buildAnalysisBodyHTML(){
           <span style="font-size:11px;font-weight:800;padding:3px 9px;border-radius:5px;background:${shiftColors[shiftId]}22;color:${shiftColors[shiftId]};border:1px solid ${shiftColors[shiftId]}44">
             Turno ${shiftId}
           </span>
-          <span style="font-size:11px;color:var(--text3)">${members.length} persona${members.length>1?'s':''}</span>
+          <span style="font-size:12px;color:var(--text2)">${members.length} persona${members.length>1?'s':''}</span>
         </div>`;
 
       members.forEach(m=>{
         const {pos,reason,byAirline}=suggestForPerson(m);
         const init=m.name.split(' ').map(p=>p[0]).join('').slice(0,2).toUpperCase();
-        const noLicBadge=m.noLicencia?`<span style="font-size:10px;padding:1px 5px;border-radius:3px;background:rgba(240,165,0,.15);color:var(--amber);margin-left:4px">sin lic.</span>`:'';
-        const airlineBadge=byAirline?`<span style="font-size:10px;padding:1px 5px;border-radius:3px;background:rgba(23,201,122,.12);color:var(--green);margin-left:4px">aerolínea</span>`:`<span style="font-size:10px;padding:1px 5px;border-radius:3px;background:var(--s2);color:var(--text3);margin-left:4px">zona</span>`;
+        const noLicBadge=m.noLicencia?`<span style="font-size:11px;padding:1px 5px;border-radius:3px;background:rgba(240,165,0,.15);color:var(--amber);margin-left:4px">sin lic.</span>`:'';
+        const airlineBadge=byAirline?`<span style="font-size:11px;padding:1px 5px;border-radius:3px;background:rgba(23,201,122,.12);color:var(--green);margin-left:4px">aerolínea</span>`:`<span style="font-size:11px;padding:1px 5px;border-radius:3px;background:var(--s2);color:var(--text3);margin-left:4px">zona</span>`;
         html+=`<div class="analysis-person-row">
           <div style="width:30px;height:30px;border-radius:50%;background:${m.color}22;color:${m.color};display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;flex-shrink:0">${init}</div>
           <div style="flex:1;min-width:0">
-            <div style="font-size:13px;font-weight:700;color:var(--text)">${m.name}${noLicBadge}${m.terminal?`<span style="font-size:10px;color:var(--text3);margin-left:4px">T.${m.terminal}</span>`:''}</div>
+            <div style="font-size:13px;font-weight:700;color:var(--text)">${m.name}${noLicBadge}${m.terminal?`<span style="font-size:12px;color:var(--text2);margin-left:4px">T.${m.terminal}</span>`:''}</div>
             <div class="analysis-reason">${reason}</div>
           </div>
           <div style="text-align:right;flex-shrink:0">
-            ${pos!=='—'?`<div class="analysis-pos">${pos}</div>`:`<div style="font-size:11px;color:var(--text3)">sin sugerencia</div>`}
+            ${pos!=='—'?`<div class="analysis-pos">${pos}</div>`:`<div style="font-size:12px;color:var(--text2)">sin sugerencia</div>`}
             <div style="margin-top:2px">${airlineBadge}</div>
           </div>
         </div>`;
@@ -5013,7 +5013,7 @@ function buildAnalysisBodyHTML(){
         <div style="font-family:'IBM Plex Mono',monospace;font-size:12px;font-weight:800;color:var(--accent);min-width:36px">POS ${p}</div>
         <div style="flex:1">
           <div style="font-size:11px;color:var(--text2)">${topAirlines}</div>
-          ${times?`<div style="font-size:10px;color:var(--text3);margin-top:1px">🕐 ${times}</div>`:''}
+          ${times?`<div style="font-size:12px;color:var(--text2);margin-top:1px">🕐 ${times}</div>`:''}
         </div>
         <div style="font-size:12px;font-weight:700;color:var(--text2);min-width:30px;text-align:right">${data.count}</div>
       </div>`;
@@ -5027,8 +5027,8 @@ function buildAnalysisBodyHTML(){
     </button>
     <div style="display:none;margin-top:10px">
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px">
-        <div style="font-size:10px;font-weight:800;letter-spacing:1px;color:var(--text3);text-transform:uppercase">Posición · Aerolíneas · Horas</div>
-        <div style="font-size:10px;color:var(--text3)">vuelos</div>
+        <div style="font-size:11px;font-weight:800;letter-spacing:1px;color:var(--text2);text-transform:uppercase">Posición · Aerolíneas · Horas</div>
+        <div style="font-size:12px;color:var(--text2)">vuelos</div>
       </div>
       ${posDetailRows||'<div style="color:var(--text3);font-size:12px">Sin datos de posición.</div>'}
     </div>
@@ -5751,32 +5751,32 @@ async function renderUsers(){
       const roleIcon=d.rol==='admin'?'👑':d.rol==='supervisor'?'⭐':'👤';
       const roleColor=d.rol==='admin'?'var(--amber)':d.rol==='supervisor'?'var(--accent)':'var(--text2)';
       const statusBadge=d.activo===false
-        ? '<span style="font-size:10px;padding:2px 7px;border-radius:4px;background:rgba(232,69,69,.15);color:var(--red);font-weight:700">DESACTIVADO</span>'
+        ? '<span style="font-size:11px;padding:2px 7px;border-radius:4px;background:rgba(232,69,69,.15);color:var(--red);font-weight:700">DESACTIVADO</span>'
         : d.firstLogin
-          ? '<span style="font-size:10px;padding:2px 7px;border-radius:4px;background:rgba(240,165,0,.15);color:var(--amber);font-weight:700">PENDIENTE 1er LOGIN</span>'
-          : '<span style="font-size:10px;padding:2px 7px;border-radius:4px;background:rgba(23,201,122,.15);color:var(--green);font-weight:700">ACTIVO</span>';
+          ? '<span style="font-size:11px;padding:2px 7px;border-radius:4px;background:rgba(240,165,0,.15);color:var(--amber);font-weight:700">PENDIENTE 1er LOGIN</span>'
+          : '<span style="font-size:11px;padding:2px 7px;border-radius:4px;background:rgba(23,201,122,.15);color:var(--green);font-weight:700">ACTIVO</span>';
       rows.push(`<div style="background:var(--s1);border:1px solid var(--border);border-radius:9px;padding:12px 14px;margin-bottom:8px;display:flex;align-items:center;gap:10px;flex-wrap:wrap">
         <div style="font-size:22px">${roleIcon}</div>
         <div style="flex:1;min-width:180px">
           <div style="font-size:13px;font-weight:700">${d.nombre||d.email}</div>
-          <div style="font-size:11px;color:var(--text3);font-family:'IBM Plex Mono',monospace;margin-top:2px">${d.email}${member?` · vinculado a ${member.name}`:''}</div>
-          ${d.firstLogin&&d.invitationCode?`<div style="font-size:10px;color:var(--amber);margin-top:3px;font-family:'IBM Plex Mono',monospace">🎟 Código: ${d.invitationCode}</div>`:''}
+          <div style="font-size:12px;color:var(--text2);font-family:'IBM Plex Mono',monospace;margin-top:2px">${d.email}${member?` · vinculado a ${member.name}`:''}</div>
+          ${d.firstLogin&&d.invitationCode?`<div style="font-size:11px;color:var(--amber);margin-top:3px;font-family:'IBM Plex Mono',monospace">🎟 Código: ${d.invitationCode}</div>`:''}
         </div>
         <div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px">
           <span style="font-size:11px;font-weight:800;color:${roleColor};text-transform:uppercase">${d.rol||'agente'}</span>
           ${statusBadge}
         </div>
         <div style="display:flex;gap:4px">
-          ${d.firstLogin?`<button class="btn btn-outline" style="font-size:10px;padding:3px 7px" onclick="copyInvitationFor('${uid}')" title="Copiar datos de invitación">📋</button>`:''}
-          <button class="btn btn-outline" style="font-size:10px;padding:3px 7px" onclick="openUserModal('${uid}')">✏️</button>
-          ${uid!==currentUser?.uid?`<button class="btn btn-danger" style="font-size:10px;padding:3px 7px" onclick="deleteUser('${uid}','${(d.email||'').replace(/'/g,"\\'")}')">🗑</button>`:''}
+          ${d.firstLogin?`<button class="btn btn-outline" style="font-size:11px;padding:3px 7px" onclick="copyInvitationFor('${uid}')" title="Copiar datos de invitación">📋</button>`:''}
+          <button class="btn btn-outline" style="font-size:11px;padding:3px 7px" onclick="openUserModal('${uid}')">✏️</button>
+          ${uid!==currentUser?.uid?`<button class="btn btn-danger" style="font-size:11px;padding:3px 7px" onclick="deleteUser('${uid}','${(d.email||'').replace(/'/g,"\\'")}')">🗑</button>`:''}
         </div>
       </div>
       ${d.rol!=='admin'?`
       <div style="background:var(--s2);border:1px solid var(--border);border-radius:9px;padding:12px 14px;margin-bottom:8px;">
-        <div style="font-size:11px;font-weight:800;letter-spacing:1px;color:var(--text3);text-transform:uppercase;margin-bottom:10px;">🔐 Permisos de acceso</div>
+        <div style="font-size:11px;font-weight:800;letter-spacing:1px;color:var(--text2);text-transform:uppercase;margin-bottom:10px;">🔐 Permisos de acceso</div>
         ${PERMISOS_DEF.map(section=>`
-          <div style="font-size:10px;font-weight:800;letter-spacing:1px;color:var(--accent);text-transform:uppercase;margin:8px 0 6px">${section.section}</div>
+          <div style="font-size:11px;font-weight:800;letter-spacing:1px;color:var(--accent);text-transform:uppercase;margin:8px 0 6px">${section.section}</div>
           ${section.items.map(p=>{
             const val = d.permisos?.[p.key]===true;
             return `<div style="display:flex;align-items:center;justify-content:space-between;padding:5px 0;border-bottom:1px solid var(--border);">
@@ -5963,9 +5963,9 @@ async function renderBriefing(){
 // ── Render KPIs ──
   document.getElementById('briefingKpis').innerHTML = kpis.map(k => `
     <div class="brief-kpi-card" style="border-top:3px solid ${k.color}">
-      <div style="font-size:11px;color:var(--text3);margin-bottom:4px">${k.label}</div>
+      <div style="font-size:12px;color:var(--text2);margin-bottom:4px">${k.label}</div>
       <div style="font-size:32px;font-weight:900;color:${k.color};line-height:1;font-family:'IBM Plex Mono',monospace">${k.value}</div>
-      <div style="font-size:10px;color:var(--text3);margin-top:4px">${k.sub}</div>
+      <div style="font-size:12px;color:var(--text2);margin-top:4px">${k.sub}</div>
     </div>`).join('');
 
     // ── Charts ──
@@ -6072,9 +6072,9 @@ async function renderBriefing(){
     <div class="brief-equip-card">
       <div style="font-size:26px">${e.icon}</div>
       <div>
-        <div style="font-size:11px;color:var(--text3);margin-bottom:2px">${e.name}</div>
+        <div style="font-size:12px;color:var(--text2);margin-bottom:2px">${e.name}</div>
         <div class="brief-equip-count" style="font-size:28px;font-weight:900;color:var(--accent);line-height:1;font-family:'IBM Plex Mono',monospace">${e.count}</div>
-        <div style="font-size:10px;color:var(--text3)">${e.note}</div>
+        <div style="font-size:12px;color:var(--text2)">${e.note}</div>
       </div>
     </div>`).join('');
 }
