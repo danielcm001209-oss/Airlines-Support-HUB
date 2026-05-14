@@ -479,17 +479,25 @@ input[type="date"]::-webkit-calendar-picker-indicator{
       <button class="modal-close" onclick="closeBriefConfigModal()">×</button>
     </div>
     <div class="modal-body">
-      <div style="margin-bottom:16px">
-        <label class="label">Límite máximo de delays del mes</label>
-        <input type="number" class="fi" id="cfgMonthlyDelayLimit" placeholder="73" min="0">
-        <div class="hint">Máximo de delays permitidos en el mes</div>
-      </div>
-      <div style="margin-bottom:16px">
-        <label class="label">Delays del mes (acumulado actual)</label>
-        <input type="number" class="fi" id="cfgCurrentMonthDelays" placeholder="0" min="0">
-        <div class="hint">Total de delays acumulados en el mes hasta hoy</div>
-      </div>
-    </div>
+  <div style="margin-bottom:16px">
+    <label class="label">📂 Itinerario semanal (Excel)</label>
+    <input type="file" id="cfgWeeklyFile" accept=".xlsx,.xls" class="fi" style="padding:6px">
+    <div class="hint">Sube el Excel del itinerario semanal para calcular vuelos reales</div>
+    <div id="cfgWeeklyStatus" style="display:none;margin-top:8px;font-size:12px;font-family:'IBM Plex Mono',monospace"></div>
+  </div>
+  <div style="background:var(--s2);border:1px solid var(--border);border-radius:8px;padding:10px 14px;margin-bottom:16px;font-size:12px" id="cfgWeeklyPreview" style="display:none"></div>
+  <hr style="border:none;border-top:1px solid var(--border);margin:16px 0">
+  <div style="margin-bottom:16px">
+    <label class="label">Límite máximo de delays del mes</label>
+    <input type="number" class="fi" id="cfgMonthlyDelayLimit" placeholder="73" min="0">
+    <div class="hint">Máximo de delays permitidos en el mes</div>
+  </div>
+  <div style="margin-bottom:16px">
+    <label class="label">Delays del mes (acumulado actual)</label>
+    <input type="number" class="fi" id="cfgCurrentMonthDelays" placeholder="0" min="0">
+    <div class="hint">Total de delays acumulados en el mes hasta hoy</div>
+  </div>
+</div>
     <div class="modal-footer">
       <button class="btn btn-outline" onclick="closeBriefConfigModal()">Cancelar</button>
       <button class="btn btn-primary" onclick="saveBriefConfig()">💾 Guardar</button>
@@ -551,6 +559,8 @@ input[type="date"]::-webkit-calendar-picker-indicator{
           <span><span style="display:inline-block;width:12px;height:12px;border-radius:3px;background:rgba(232,69,69,.9);margin-right:4px;vertical-align:middle"></span>7+</span>
         </div>
         <div style="overflow-x:auto"><table class="brief-heat-table" id="briefingHeatmap"></table></div>
+        <div style="font-size:10px;color:var(--text3);margin-top:8px;font-style:italic">
+        * El total refleja franjas ocupadas por vuelo (STA→STD). Un vuelo puede aparecer en múltiples franjas si permanece en tierra más de 2 horas.
       </div>
 
       <!-- Equipos -->
@@ -1038,6 +1048,39 @@ input[type="date"]::-webkit-calendar-picker-indicator{
 </div>
 
 <script>
+  const AIRLINE_REQS_PRELOAD = {
+  "Aeromexico": {"requerimientos":"•  Tailstand (Barra de Cola) MAX 9","procesos":"•  Colocación de calzos y conos de forma correcta (ver diferencias)\n•Que no se envíen los primeros equipajes a los 10 minutos de iniciar la descarga, afecta el desarrollo de la operación y crea un habito se nos puede cargar como un finding en futuras auditorias.","aeronaves":[{"tipo":"B737-900","sta":"1hr 15min","std":"1hr 15min"},{"tipo":"B737-MAX 9","sta":"","std":""},{"tipo":"B737-800","sta":"1hr 10min","std":"1hr 10min"}]},
+  "Air Canada": {"requerimientos":"•  2 cintas y 2 escaleras o aviramp\n•  Escalera manual para abrir compartimientos WB","procesos":"•  Colocación de los conos correctamente antes de acoplar equipos\n•  No retirar conos hasta que se hayan removido todos los equipos\n•  Para subir o bajar la cinta se debe estar sentado y pisando el pedal del freno\n•  La escalera y/o aviramp deben estar justo debajo de la linea de indicación en todas las puertas al acoplar a la llegada de la aeronave\n•  Personal para descarga y carga simultánea\n•  Llevar coches llegando al pie de aviramp\n•  Agente guia para acoplar y retirar equipos\n▪Agente guía para subir y bajar la plataforma del loader (Situado del lado del operador)\n•  Briefing operacional (15 minutos antes de llegada del vuelo)\n• Los pasamanos de los loaders, aviramp y escaleras(si se puede) deben estar retraidos antes de acoplar y retirar de la aeronave","aeronaves":[{"tipo":"B777-300","sta":"2Hr 15min","std":"1hr 45min"},{"tipo":"B777-200","sta":"2 hr","std":"1hr 35min"},{"tipo":"B787-900","sta":"","std":"1hr 35min"},{"tipo":"B787-800","sta":"","std":"1hr 25min"},{"tipo":"A330","sta":"","std":"1hr 30min"},{"tipo":"A319","sta":"1hr 5min","std":"50 MIN"},{"tipo":"A320","sta":"1hr","std":"55 MIN"},{"tipo":"A321","sta":"1hr 15min","std":""},{"tipo":"B737","sta":"1hr 10min","std":"60 MIN"},{"tipo":"A220","sta":"","std":"45 MIN"}]},
+  "Air Century": {"requerimientos":"","procesos":"•Calzos en el tren delantero\n•Cintas con los pasamanos abajo todo el tiempo.","aeronaves":[{"tipo":"CRJ-200","sta":"45 min","std":""}]},
+  "Air Caraibes": {"requerimientos":"•  Completar formulario turnaround de la aerolínea (entregado por representante en posición)\n•  Escalera manual para abrir compartimientos","procesos":"•  Fotos de los compartimientos a la llegada y salida de la aeronave\n•  Si hay algún hallazgo de safety, completar formulario de incidencias de la aerolínea y enviar por correo (Doc en oficina)\n•  Esperar OK del Mecánico para realizar 360 y acoplar equipos","aeronaves":[{"tipo":"A330-300","sta":"2Hr","std":"2hr 10min"},{"tipo":"A330-900","sta":"","std":""},{"tipo":"A350-1000","sta":"","std":""}]},
+  "Air Transat": {"requerimientos":"•  Si hay carga comercial, dos loaders para los Wide Body\n•  Dos cintas para A321","procesos":"•  Tomar fotos de los calzos y mallas a la salida\n•primeras maletas 10 min en la correa de aduanas\n•maletas de los tripulantes no van aduanas, siempre colocarlas en el pie de la escalera delantera o Aviramp.","aeronaves":[{"tipo":"A321","sta":"1hr 15min","std":"1hr 20min"},{"tipo":"A330-200","sta":"2Hr","std":"1hr 05min"}]},
+  "Arajet": {"requerimientos":"","procesos":"• Pendientes con las conexiones para segregarlas y enviar a Make Up\n• Validar que LIR coincide con matrícula y # de vuelo\n• STD de vuelos pernoctando para gestionar personal oportunamente\n• Seguimiento a llegada de equipajes a posicion y LIR vs STD","aeronaves":[{"tipo":"B737 MAX 8","sta":"1hr 10min","std":"60 min"}]},
+  "Avelo": {"requerimientos":"•  Tail Stand (Barra de Cola), para la descarga y carga de equipajes\n•  Un par de calzos para vagones","procesos":"•  Solo 3 vagones máximo juntos","aeronaves":[{"tipo":"B737-800","sta":"1hr 10min","std":""}]},
+  "Avianca": {"requerimientos":"","procesos":"•  Tomar fotos de equipajes en mal estado\n•  Notificar con imágenes vía grupo de trabajo cuando finalizamos el cargado dentro del STD\n•  Notificar en grupo de aerolínea al buscar y finalizar búsqueda de equipajes\n•  Revisar todos los compartimientos al finalizar la descarga\n•Equipajes prior enviados en el primer vagon","aeronaves":[{"tipo":"A320","sta":"1hr 05min","std":"1hr 10min"},{"tipo":"A320-neo","sta":"1hr","std":"1hr 25min"}]},
+  "Condor": {"requerimientos":"•  Dos loaders","procesos":"•  Pendiente con calzos en contenedor de catering ya que CCS los baja para realizar el servicio.\n•El encargado siempre debe subir a verificar los calzos.\n•Se requiere que siempre se chequeen los contenedores llegando y saliendo.\n•Se prohibe que los contenedores y pallets toquen el suelo durante la ops.","aeronaves":[{"tipo":"A330neo","sta":"2hr","std":""}]},
+  "Copa Airlines": {"requerimientos":"•  Covers de bodegas\n•  Acoplar equipos del puente si están operativos (GPU-ACU)\n•  Vagones con los equineros","procesos":"•  Fotos de equipajes llegando con daños a la llegada\n•  Entrega de equipajes priority en aduanas\n•  Equipajes PTY se suben de último, primero se suben locales y después priority\n•  Vagones no deben estar perpendicular a la nariz de la aeronave\n•  Pendiente con los conos y cantidad correcta\n•  360/Tres paradas GSE","aeronaves":[{"tipo":"B737-800","sta":"1hr 10min","std":"55min"},{"tipo":"B737-MAX 9","sta":"1hr 15min","std":""}]},
+  "Delta": {"requerimientos":"•  Tail Stand (Barra de Cola) 737-900\n•  Dos cintas operaciones con carga y A321","procesos":"•  Runners deben desmontarse del tractor y revisar que no haya personas cerca de los vagones para movilizarse\n•  Dentro de lo posible, envío de vagones a aduanas según se vayan llenando\n•  Colocar equipos del puente cuando estén operativos (validar con ALA)\n•Se requiere que la hoja de carga sea firmada por cada compartimiento que se cargue.\n•No se permiten los pasamanos en la cinta en los b737","aeronaves":[{"tipo":"B737-900","sta":"1hr 15min","std":"1hr 05min"},{"tipo":"A320","sta":"1hr 5min","std":"1hr 10min"},{"tipo":"A321","sta":"1hr 15min","std":""},{"tipo":"B757","sta":"","std":""}]},
+  "Discover Airlines": {"requerimientos":"• Dos loaders\n•2 colaboradores en makeup.\n• AVIRAMP","procesos":"•  Verificar estados de los contenedores.\n•Se colocan calzos en el tren delantero, luego en el tren trasero en las gomas de afuera\ninmediatamente se colocan los del tren trasero se procede a quitar los calzos delanteros.","aeronaves":[{"tipo":"A330-300","sta":"2hr","std":"1hr 45min"}]},
+  "Edelweiss Air": {"requerimientos":"•  2 loaders","procesos":"• Espera 5 minutos despues del bloqueo para acoplar Jetbridge\n• Apertura/cierre de bodegas con cinta\n• Se colocan los calzos de atrás primero\n• Espera 5 minutos despues del bloqueo para ingresar perimetro\n• A350 necesita equipos especiales\n• Autorizacion del mecanico para retirar GPU y ACU","aeronaves":[{"tipo":"A350-900","sta":"2hr","std":"2hr"},{"tipo":"A340-300","sta":"2hr 15min","std":"1hr 50min"}]},
+  "Gol": {"requerimientos":"","procesos":"•  Cuidar trato a los equipajes ya que tienen una métrica estricta que mide los daños.\n•Verificar colocacion correcta de escalera trasera.\n•No se permite descarga ni carga simultanea\n•El tiempo para descargar todo el avion es de 14 min.\n•Verificar la LIR.\n•Colocacion de conos correctas","aeronaves":[{"tipo":"B737-800","sta":"1hr 10min","std":""},{"tipo":"B737-MAX 8","sta":"","std":""}]},
+  "JetBlue": {"requerimientos":"•  Conos dobles en el tren delantero","procesos":"•  Colocación de pasamanos para subir y bajar por la cinta\n•  Tomar fotos de la colocación de los equipajes en compartimientos a la salida (que no superen el límite de altura)\n•Cuidar los pies dentro de la bodega\n•Envio de equipajes MOSAIC a aduanas de forma prioritaria","aeronaves":[{"tipo":"A220","sta":"1hr 10min","std":"55MIN"},{"tipo":"A320","sta":"1hr 5min","std":""},{"tipo":"A321","sta":"1hr 15min","std":"70min"}]},
+  "Latam": {"requerimientos":"•  Escalera L2 para limpieza","procesos":"•  Entrega de equipajes priority en aduanas\n•  Colocar las mantas en vagones (no en el pavimento)\n•  En WB tienen contenedores en tránsito, pendiente para no bajarlos","aeronaves":[{"tipo":"B787-8","sta":"2hr","std":"1hr 30min"},{"tipo":"B787-9","sta":"","std":""},{"tipo":"A320","sta":"1hr 5min","std":""},{"tipo":"A319","sta":"1hr","std":"1hr 05min"}]},
+  "Southwest Airlines": {"requerimientos":"•  Covers de bodegas\n•  Tail Stand (Barra de Cola) 737-800, para la descarga y carga de equipajes\n•  Dos cintas y 6 agentes","procesos":"•  Parqueo con señal correcta (Ver diferencias).\n• Colocacion correcta de conos.\n•Descarga y carga simultanea.\n•Primer equipaje scan dentro de los 3 min.","aeronaves":[{"tipo":"B737-800","sta":"1hr 10min","std":"57 min"},{"tipo":"B737-MAX 8","sta":"","std":""}]},
+  "United": {"requerimientos":"•  Tail Stand (Barra de Cola) 737-900\n•  2da escalera para vuelos hacia DENVER","procesos":"•  Colocación de escalera o jetbridge 2:30 minutos después del bloqueo\n•  Colocación de pasamanos para subir y bajar por la cinta\n•  Descargar coches de primero para que personal de la aerolínea los lleve al puente\n• Señales correctas para despedir aeronave luego de pushback\n•  Parqueo con señal correcta (ver diferencias)","aeronaves":[{"tipo":"B737-900","sta":"1hr 15min","std":""},{"tipo":"B737-MAX9","sta":"","std":""},{"tipo":"B737-800","sta":"1hr 10min","std":""}]},
+  "WestJet": {"requerimientos":"•  Dos cintas","procesos":"•  Colocación de calzos y conos de forma correcta (ver diferencias).\n•Descarga y carga simultanea.\n•REQUIEREN ESPACIO DE TRES (3) PIES ENTRE LA CINTA Y EL VAGON PARA DESCARGAR/CARGAR EN EL AVION","aeronaves":[{"tipo":"B737-800","sta":"1hr 10min","std":"1hr"},{"tipo":"B737-MAX 8","sta":"","std":"1hr 05min"}]},
+  "Wingo": {"requerimientos":"•  Cover de bodega","procesos":"•  Validación de la LIR de carga","aeronaves":[{"tipo":"B737-800","sta":"1hr 10min","std":"45 min"}]},
+  "World2Fly": {"requerimientos":"","procesos":"•  Descargar contenedor de las mantas de forma prioritaria para no retrasar proceso de limpieza\n•  Tomar fotos de contenedores llegando con daños a la estación","aeronaves":[{"tipo":"A330-300","sta":"2hr","std":""},{"tipo":"A350-900","sta":"","std":""}]},
+  "British Airways": {"requerimientos":"•Personal entrenado.\n•Conos extras.\n•SAL obligatorio en posicion.","procesos":"•A LA LLEGADA, LA TRIPULACION DE CABINA ENTREGARA UNA LATA DE SPRAY DESINSECTANTE PARA SER ROSEADO EN LOS COMPARTIMIENTOS DE CARGA ANTES DE CERRAR LAS COMPUERTAS.\n•EN EL CASO DE LAS ESCALERAS Y LOS LOADERS LOS PASAMANOS DEBEN SER RETIRADOS ANTES DE PONERLOS AL AVION Y AL QUITARLOS TAMBIEN","aeronaves":[{"tipo":"B777-200","sta":"2hr","std":"1hr 50min"}]},
+  "American Airlines": {"requerimientos":"•Dos cintas A321\n•Dos cintas carga comercial.","procesos":"•En el A321 es obligatorio sin excepción descargar atrás primero y luego pasar a la parte delantera no importa qué tipo de equipaje llegue delante.","aeronaves":[{"tipo":"A321","sta":"1hr 15min","std":"60 min"},{"tipo":"A320","sta":"1hr 5min","std":""},{"tipo":"B737-800","sta":"1hr 10min","std":""}]},
+  "Sky High": {"requerimientos":"","procesos":"","aeronaves":[{"tipo":"E190","sta":"55 MIN","std":"55MIN"},{"tipo":"E145","sta":"45 MIN","std":"45MIN"}]},
+  "Iberojet": {"requerimientos":"","procesos":"•  Verificar estados de los contenedores, tomar imagenes de los daños","aeronaves":[{"tipo":"A330-300","sta":"2 hr","std":"1hr 45min"},{"tipo":"A330-900NEO","sta":"","std":"1hr 30min"},{"tipo":"A350-900","sta":"","std":"2 hr"}]},
+  "TUI": {"requerimientos":"","procesos":"","aeronaves":[{"tipo":"787","sta":"2hr","std":"2hr"}]},
+  "AllegiantAir": {"requerimientos":"","procesos":"","aeronaves":[{"tipo":"A320","sta":"1hr 5min","std":"1hr"}]},
+  "Sun Country": {"requerimientos":"","procesos":"","aeronaves":[{"tipo":"737-800","sta":"1hr 10min","std":"1hr"}]},
+  "JetSmart": {"requerimientos":"","procesos":"•La apertura de compuertas de bodegas es realizado unicamente por el personal de Trading aviation","aeronaves":[{"tipo":"A320","sta":"1hr 5min","std":"50 MIN"}]},
+  "Sky Airlines Peru": {"requerimientos":"","procesos":"","aeronaves":[{"tipo":"A320neo","sta":"1hr 10min","std":"1 hr"}]},
+  "Air France": {"requerimientos":"•PERSONAL ENTRENADO.\n•CALZOS CON SOGA","procesos":"•NO PERMITEN EL USO DE LA ESCALERA TRASERA (L4) EN EL B777 NI SIQUIERA PARA EL PERSONAL DE LIMPIEZA.\n•HAY QUE COMPLETAR UN FORMULARIO QUE PROVEERA ASSIST'AIR GROUP PARA LO DEL WALKAROUND.\n•TENEMOS QUE COMPLETAR TRES BRIEFINGS, ANTES, DURANTE Y DESPUES DE LA OPERACION.\n•UN PERSONAL MINIMO DE LIMPIEZA DEBE ESTAR PREPARADO EN LA ESCALERA DEL PUENTE PARA ENTRAR INMEDIATAMENTE SE AUTORICE A LIMPIAR LA PARTE DE PRIMERA CLASE.","aeronaves":[{"tipo":"A220","sta":"1hr 10min","std":""},{"tipo":"B777","sta":"2hr","std":""}]}
+};
 // ═══════════════════════════════════════════════════════
 // FIREBASE CONFIG
 // ═══════════════════════════════════════════════════════
@@ -2813,7 +2856,7 @@ const filtered = flights.filter(f => {
       const depTime = etd && etd!=='OVER' ? etd : (std && std!=='OVER' ? std : '');
       const type    = (f.STA&&f.STA!=='OVER')||f.ETA ? 'ARR' : 'DEP';
 
-      return [airline, flight, pos?`POS ${pos}`:'POS 0', arrTime||depTime, type, ruta, terminal?`T${terminal}`:'', dianom]
+      return [airline, flight, pos?`POS ${pos}`:'POS 0', arrTime||depTime, depTime&&depTime!==arrTime?`STD ${depTime}`:'', type, ruta, terminal?`T${terminal}`:'', dianom]
         .filter(Boolean).join('  ');
     }).join('\n');
 
@@ -3520,10 +3563,12 @@ function parseFlightList(text){
     }
     if(airline){
       // Extract time HH:MM from line
-      const timeMatch=line.match(/\b(\d{2}:\d{2})\b/);
-      const time=timeMatch?timeMatch[1]:null;
-      flights.push({airline,pos,time});
-    }
+      const timeMatches=[...line.matchAll(/\b(\d{2}:\d{2})\b/g)].map(m=>m[1]);
+      const time = timeMatches[0]||null;  // STA
+      const stdMatch = line.match(/STD\s+(\d{2}:\d{2})/);
+const std = stdMatch ? stdMatch[1] : null;
+      flights.push({airline, pos, time, std});
+          }
   });
   return flights;
 }
@@ -4262,6 +4307,8 @@ function renderHistory(){
 // ═══════════════════════════════════════════════════════
 let knowEditMode=false;
 let knowExpanded=new Set();
+let knowActiveTab = {}; // {airlineName: 'diferencias'|'requerimientos'|'procesos'|'aeronaves'}
+
 
 function toggleKnowEditMode(){
   knowEditMode=!knowEditMode;
@@ -4274,6 +4321,11 @@ function toggleKnowEditMode(){
 function toggleAirlineExpand(name){
   if(knowExpanded.has(name)) knowExpanded.delete(name);
   else knowExpanded.add(name);
+  renderKnowClient();
+}
+
+function setKnowTab(name, tab){
+  knowActiveTab[name] = tab;
   renderKnowClient();
 }
 
@@ -4303,14 +4355,16 @@ function loadDiferenciasFromDoc(){
       if(!S.airlineInfo[name]) S.airlineInfo[name]={diferencias:'',requerimientos:''};
       S.airlineInfo[name].diferencias=data.diferencias;
     }
-    // Load requerimientos
-    for(const[name,text] of Object.entries(AIRLINE_REQUERIMIENTOS_PRELOAD||{})){
+    // Load requerimientos, procesos y aeronaves desde AIRLINE_REQS_PRELOAD
+    for(const[name,data] of Object.entries(AIRLINE_REQS_PRELOAD||{})){
       if(!S.airlines[name]){
         S.airlines[name]={color:colors[Object.keys(S.airlines).length%colors.length]};
         createdCount++;
       }
-      if(!S.airlineInfo[name]) S.airlineInfo[name]={diferencias:'',requerimientos:''};
-      S.airlineInfo[name].requerimientos=text;
+      if(!S.airlineInfo[name]) S.airlineInfo[name]={diferencias:'',requerimientos:'',procesos:'',aeronaves:[]};
+      if(data.requerimientos) S.airlineInfo[name].requerimientos = data.requerimientos;
+      if(data.procesos) S.airlineInfo[name].procesos = data.procesos;
+      if(data.aeronaves?.length) S.airlineInfo[name].aeronaves = data.aeronaves;
     }
     save(); renderKnowClient();
     toast(`✅ Datos cargados${createdCount?' · '+createdCount+' aerolíneas nuevas':''}`);
@@ -4364,10 +4418,21 @@ function renderKnowClient(){
         <div style="font-size:18px;color:var(--text3);transition:transform .2s;${expanded?'transform:rotate(90deg)':''}">▶</div>
       </div>
       ${expanded?`<div style="padding:14px">
-        ${knowSection('Diferencias de líneas aéreas','🔄',name,'diferencias',data.diferencias)}
-        <div style="height:10px"></div>
-        ${knowSection('Requerimientos y procesos claves','📋',name,'requerimientos',data.requerimientos)}
-        ${knowEditMode?`<div style="margin-top:12px;text-align:right"><button class="btn btn-danger" style="font-size:11px;padding:4px 9px" onclick="deleteAirline('${name.replace(/'/g,"\\'")}')">🗑 Eliminar aerolínea</button></div>`:''}
+        <div style="display:flex;gap:5px;flex-wrap:wrap;margin-bottom:12px">
+          ${[
+            {key:'diferencias',  label:'🔄 Diferencias'},
+            {key:'requerimientos',label:'📋 Req. Fijos'},
+            {key:'procesos',      label:'⚡ Procesos Claves'},
+            {key:'aeronaves',     label:'✈️ Aeronave y Tiempo'},
+          ].map(t=>`<button class="shift-tab${knowActiveTab[name]===t.key?' on':''}"
+            onclick="setKnowTab('${name.replace(/'/g,"\\'")}','${t.key}')">${t.label}</button>`).join('')}
+          ${knowEditMode?`<button class="btn btn-danger" style="font-size:10px;padding:3px 8px;margin-left:auto" onclick="deleteAirline('${name.replace(/'/g,"\\'")}')">🗑 Eliminar</button>`:''}
+        </div>
+        ${knowActiveTab[name]==='diferencias' ? knowSection('Diferencias de líneas aéreas','🔄',name,'diferencias',data.diferencias) : ''}
+        ${knowActiveTab[name]==='requerimientos' ? knowSectionText('Requerimientos Fijos','📋',name,'requerimientos',data.requerimientos) : ''}
+        ${knowActiveTab[name]==='procesos' ? knowSectionText('Procesos Operacionales Claves','⚡',name,'procesos',data.procesos) : ''}
+        ${knowActiveTab[name]==='aeronaves' ? knowSectionAeronaves(name, data.aeronaves) : ''}
+        ${!knowActiveTab[name]?'<div style="padding:20px;text-align:center;color:var(--text3);font-size:12px">Selecciona una pestaña arriba</div>':''}
       </div>`:''}
     </div>`;
   }).join('');
@@ -4423,6 +4488,69 @@ function knowSection(title, icon, airline, field, content){
     <div id="${viewerId}" data-pdf-url="${url}" data-fallback="${encodedFallback}" style="min-height:420px;position:relative;background:var(--s2)">
       <div style="display:flex;align-items:center;justify-content:center;min-height:420px;color:var(--text3);font-size:12px">⏳ Cargando documento…</div>
     </div>
+  </div>`;
+}
+function knowSectionText(title, icon, airline, field, content){
+  const safeAirline = airline.replace(/'/g,"\\'");
+  const preload = AIRLINE_REQS_PRELOAD?.[airline];
+  const preloadContent = field==='requerimientos' ? preload?.requerimientos : preload?.procesos;
+  const displayContent = content || preloadContent || '';
+
+  if(knowEditMode){
+    return `<div style="background:var(--s2);border:1px solid var(--border2);border-radius:8px;padding:12px">
+      <div style="font-size:11px;font-weight:800;color:var(--accent);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px">${icon} ${title}</div>
+      <textarea class="fta" style="min-height:120px;font-size:12px;line-height:1.6"
+        placeholder="Escribe aquí…"
+        onchange="saveAirlineInfo('${safeAirline}','${field}',this.value)"
+      >${displayContent}</textarea>
+    </div>`;
+  }
+
+  if(!displayContent){
+    return `<div style="padding:30px;text-align:center;color:var(--text3);font-size:12px">📄 Sin información registrada.</div>`;
+  }
+
+  const lines = displayContent.split('\n').filter(l=>l.trim());
+  return `<div style="background:var(--s2);border:1px solid var(--border2);border-radius:8px;padding:14px">
+    <div style="font-size:11px;font-weight:800;color:var(--accent);text-transform:uppercase;letter-spacing:.5px;margin-bottom:10px">${icon} ${title}</div>
+    <div style="display:flex;flex-direction:column;gap:6px">
+      ${lines.map(line=>`
+        <div style="display:flex;gap:8px;align-items:flex-start;padding:7px 10px;background:var(--s1);border-radius:6px;border:1px solid var(--border)">
+          <span style="color:var(--accent);font-size:14px;flex-shrink:0;margin-top:1px">•</span>
+          <span style="font-size:12px;color:var(--text);line-height:1.5">${line.replace(/^[•▪\-]\s*/,'')}</span>
+        </div>`).join('')}
+    </div>
+  </div>`;
+}
+
+function knowSectionAeronaves(airline, savedAeronaves){
+  const preload = AIRLINE_REQS_PRELOAD?.[airline];
+  const aeronaves = (savedAeronaves && savedAeronaves.length) ? savedAeronaves : (preload?.aeronaves||[]);
+
+  if(!aeronaves.length){
+    return `<div style="padding:30px;text-align:center;color:var(--text3);font-size:12px">✈️ Sin aeronaves registradas.</div>`;
+  }
+
+  return `<div style="background:var(--s2);border:1px solid var(--border2);border-radius:8px;padding:14px">
+    <div style="font-size:11px;font-weight:800;color:var(--accent);text-transform:uppercase;letter-spacing:.5px;margin-bottom:10px">✈️ Aeronave y Tiempo en Tierra</div>
+    <table style="width:100%;border-collapse:collapse">
+      <thead>
+        <tr style="border-bottom:1px solid var(--border)">
+          <th style="text-align:left;padding:6px 10px;font-size:10px;font-weight:800;color:var(--text2);text-transform:uppercase;letter-spacing:.5px">Aeronave</th>
+          <th style="text-align:center;padding:6px 10px;font-size:10px;font-weight:800;color:var(--amber);text-transform:uppercase;letter-spacing:.5px">⏱ AVIAM</th>
+          <th style="text-align:center;padding:6px 10px;font-size:10px;font-weight:800;color:var(--cyan);text-transform:uppercase;letter-spacing:.5px">⏱ Aerolínea</th>
+        </tr>
+      </thead>
+      <tbody>
+        ${aeronaves.map((a,i)=>`
+          <tr style="border-bottom:1px solid var(--border);background:${i%2===0?'var(--s1)':'transparent'}">
+            <td style="padding:8px 10px;font-size:12px;font-weight:700;font-family:'IBM Plex Mono',monospace;color:var(--text)">${a.tipo||'—'}</td>
+            <td style="padding:8px 10px;font-size:12px;text-align:center;color:var(--amber);font-weight:700">${a.aviam||a.sta||'—'}</td>
+<td style="padding:8px 10px;font-size:12px;text-align:center;color:var(--cyan)">${a.aerolinea||a.std||'—'}</td>
+          </tr>`).join('')}
+      </tbody>
+    </table>
+    <div style="font-size:10px;color:var(--text3);margin-top:8px">⏱ AVIAM = tiempo objetivo de AVIAM · Aerolínea = tiempo mínimo requerido por la aerolínea</div>
   </div>`;
 }
 
@@ -5930,9 +6058,10 @@ async function renderBriefing(){
   allPos.forEach(p=>{ hmap[p]={}; BRIEF_SLOTS.forEach(s=>{ hmap[p][s.label]=0; }); });
   flights.forEach(f=>{
     if(!hmap[f.pos]) return;
+    const sta = briefTimeToMins(f.time||'');
+    const std = f.std ? briefTimeToMins(f.std) : sta + 60;
     BRIEF_SLOTS.forEach(s=>{
-      const t = briefTimeToMins(f.time||'');
-      if(t >= s.start && t < s.end) hmap[f.pos][s.label]++;
+      if(sta < s.end && std > s.start) hmap[f.pos][s.label]++;
     });
   });
   const colTotals = {};
@@ -5950,8 +6079,10 @@ async function renderBriefing(){
   });
 
   // ── Calcular vuelos de la semana ──
-  const flightsWeek = flights.length * 7;
-  const flightsMonth = flights.length * 30;
+  // Usar datos reales del itinerario si están disponibles
+  const wf = briefConfig.weeklyFlights;
+  const flightsWeek = wf ? wf.total : flights.length * 7;
+  const flightsMonth = wf ? Math.round(wf.total * 4.33) : flights.length * 30;
 
   const kpis = [
     {label:'Vuelos del día',      value:flights.length,                  sub:'operaciones hoy',    color:'#2d7aee'},
@@ -6061,12 +6192,55 @@ async function renderBriefing(){
     if(['34','35','36','37'].includes(pos)) return true;
     return false;
   }).length;
-  
+  // ── Remolcadores por terminal ──
+  function getPosTerminal(pos){
+    if(!pos) return null;
+    const n = parseInt(pos);
+    if(pos.startsWith('N')){
+      const nn = parseInt(pos.slice(1));
+      return nn >= 1 && nn <= 5 ? 'A' : 'B';
+    }
+    if(n >= 1 && n <= 11) return 'A';
+    if(n >= 20 && n <= 37) return 'B';
+    return null;
+  }
+
+  const ventanasA = {}, ventanasB = {};
+  flights.filter(f=>f.std).forEach(f=>{
+    const term = getPosTerminal(f.pos);
+    if(!term) return;
+    const [h,m] = f.std.split(':').map(Number);
+    const ventanaStart = Math.floor((h*60+m)/10)*10;
+    const hh = String(Math.floor(ventanaStart/60)).padStart(2,'0');
+    const mm = String(ventanaStart%60).padStart(2,'0');
+    const key = `${hh}:${mm}`;
+    if(term==='A') ventanasA[key] = (ventanasA[key]||0)+1;
+    else           ventanasB[key] = (ventanasB[key]||0)+1;
+  });
+
+  const peakA = Object.entries(ventanasA).sort((a,b)=>b[1]-a[1])[0]||['—',0];
+  const peakB = Object.entries(ventanasB).sort((a,b)=>b[1]-a[1])[0]||['—',0];
+
+  const congestionA = Object.entries(ventanasA)
+    .filter(([k,v])=>v >= Math.ceil(peakA[1]*.75))
+    .sort((a,b)=>a[0].localeCompare(b[0]))
+    .map(([k,v])=>`${k}(${v})`).join(' · ');
+
+  const congestionB = Object.entries(ventanasB)
+    .filter(([k,v])=>v >= Math.ceil(peakB[1]*.75))
+    .sort((a,b)=>a[0].localeCompare(b[0]))
+    .map(([k,v])=>`${k}(${v})`).join(' · ');
+
   const equips=[
     {icon:'🏗', name:'Belt Loaders',  count:beltLoaders,                     note:'1 por vuelo en pico'},
-    {icon:'🚜', name:'Tractores',     count:Math.ceil(peakSlot[1]*.6),       note:'60% del pico'},
+    {icon:'🚜', name:'Tractores de runners', count:Math.ceil(peakSlot[1]/2), note:'1 por cada 2 vuelos en pico'},
     {icon:'🪜', name:'Escaleras',     count:needsStairs,                     note:'Vuelos TA+NA+NB+34-37'},
-    
+    {icon:'🔧', name:'Remolcadores T.A', count:peakA[1],
+     note:`Pico: ${peakA[1]} salidas a las ${peakA[0]}`,
+     extra:congestionA},
+    {icon:'🔧', name:'Remolcadores T.B', count:peakB[1],
+     note:`Pico: ${peakB[1]} salidas a las ${peakB[0]}`,
+     extra:congestionB},
   ];
   document.getElementById('briefingEquip').innerHTML = equips.map(e=>`
     <div class="brief-equip-card">
@@ -6077,6 +6251,52 @@ async function renderBriefing(){
         <div style="font-size:12px;color:var(--text2)">${e.note}</div>
       </div>
     </div>`).join('');
+}
+function parseWeeklyItinerary(file){
+  return new Promise((resolve, reject)=>{
+    const reader = new FileReader();
+    reader.onload = e=>{
+      try{
+        const wb = XLSX.read(e.target.result, {type:'array'});
+        const ws = wb.Sheets[wb.SheetNames[0]];
+        const rows = XLSX.utils.sheet_to_json(ws, {header:1, defval:''});
+
+        const days = {
+          'LUNES':0,'MARTES':0,'MIERCOLES':0,'MIÉRCOLES':0,
+          'JUEVES':0,'VIERNES':0,'SABADO':0,'SÁBADO':0,'DOMINGO':0
+        };
+        const dayLabels = {};
+        let currentDay = null;
+
+        rows.forEach(row=>{
+          const first = String(row[0]||'').trim().toUpperCase();
+          // Detectar encabezado de día
+          const dayKey = Object.keys(days).find(d=>first.startsWith(d));
+          if(dayKey){
+            currentDay = dayKey === 'MIÉRCOLES' ? 'MIERCOLES' :
+                         dayKey === 'SÁBADO'    ? 'SABADO'    : dayKey;
+            dayLabels[currentDay] = String(row[0]||'').trim(); // ej: "LUNES 11"
+            return;
+          }
+          // Contar vuelos (filas con número en col 0)
+          if(currentDay && /^\d+$/.test(first)){
+            days[currentDay] = (days[currentDay]||0) + 1;
+          }
+        });
+
+        // Limpiar claves duplicadas
+        const result = {};
+        ['LUNES','MARTES','MIERCOLES','JUEVES','VIERNES','SABADO','DOMINGO'].forEach(d=>{
+          result[d] = days[d]||0;
+        });
+        result.labels = dayLabels;
+        result.total = Object.values(result).filter(v=>typeof v==='number').reduce((a,b)=>a+b,0);
+        resolve(result);
+      }catch(e){ reject(e); }
+    };
+    reader.onerror = reject;
+    reader.readAsArrayBuffer(file);
+  });
 }
 
 function buildBriefHeatmap(hmap, rowTotals, colTotals, maxCell){
@@ -6119,7 +6339,7 @@ function buildBriefHeatmap(hmap, rowTotals, colTotals, maxCell){
     html+=`<td style="font-size:13px;color:${c?bg.replace('transparent','var(--text3)'):'var(--text3)'}">
       ${c||'—'}</td>`;
   });
-  html+=`<td style="color:var(--text);font-size:14px">${grandTotal}</td></tr></tbody>`;
+  html+=`<td style="color:var(--text);font-size:14px" title="Total de franjas ocupadas (un vuelo puede aparecer en varias franjas)">${grandTotal}*</td></tr></tbody>`;
   document.getElementById('briefingHeatmap').innerHTML=html;
 }
 
@@ -6214,13 +6434,19 @@ async function saveBriefConfig(){
     currentMonthDelays: parseInt(document.getElementById('cfgCurrentMonthDelays').value) || 0,
     lastUpdated: firebase.firestore.FieldValue.serverTimestamp(),
   };
+
+  // Incluir datos semanales si se subió un archivo
+  if(window._pendingWeeklyFlights){
+    data.weeklyFlights = window._pendingWeeklyFlights;
+    window._pendingWeeklyFlights = null;
+  }
   
   try{
     await cloudDb.collection('briefingConfig').doc(monthKey).set(data, {merge:true});
-    briefConfig = data;
+    briefConfig = {...briefConfig, ...data};
     toast('✅ Configuración guardada');
     closeBriefConfigModal();
-    renderBriefing(); // Recargar con nueva config
+    renderBriefing();
   }catch(e){
     console.error('Error guardando config:', e);
     toast('❌ Error guardando: '+e.message);
@@ -6236,8 +6462,47 @@ function openBriefConfigModal(){
   }
   document.getElementById('cfgMonthlyDelayLimit').value = briefConfig.monthlyDelayLimit || 73;
   document.getElementById('cfgCurrentMonthDelays').value = briefConfig.currentMonthDelays || 0;
+  document.getElementById('cfgWeeklyStatus').style.display = 'none';
+
+  // Mostrar preview si hay datos semanales guardados
+  const preview = document.getElementById('cfgWeeklyPreview');
+  if(briefConfig.weeklyFlights){
+    const w = briefConfig.weeklyFlights;
+    const dias = ['LUNES','MARTES','MIERCOLES','JUEVES','VIERNES','SABADO','DOMINGO'];
+    const labels = ['Lun','Mar','Mié','Jue','Vie','Sáb','Dom'];
+    preview.style.display = 'block';
+    preview.innerHTML = `<div style="font-size:10px;font-weight:800;letter-spacing:1px;color:var(--text3);text-transform:uppercase;margin-bottom:8px">Itinerario cargado — ${w.total} vuelos</div>
+      <div style="display:flex;gap:6px;flex-wrap:wrap">
+        ${dias.map((d,i)=>`<div style="text-align:center;background:var(--s1);border:1px solid var(--border);border-radius:6px;padding:4px 8px">
+          <div style="font-size:10px;color:var(--text3)">${labels[i]}</div>
+          <div style="font-size:14px;font-weight:800;color:var(--accent)">${w[d]||0}</div>
+        </div>`).join('')}
+      </div>`;
+  } else {
+    preview.style.display = 'none';
+  }
+
   document.getElementById('briefConfigModal').classList.add('open');
 }
+document.addEventListener('change', async e=>{
+  if(e.target.id !== 'cfgWeeklyFile') return;
+  const file = e.target.files[0];
+  if(!file) return;
+  const status = document.getElementById('cfgWeeklyStatus');
+  status.style.display = 'block';
+  status.style.color = 'var(--text2)';
+  status.textContent = '⏳ Procesando Excel...';
+  try{
+    const data = await parseWeeklyItinerary(file);
+    status.style.color = 'var(--green)';
+    status.textContent = `✅ ${data.total} vuelos detectados`;
+    // Guardar temporalmente para usar en save
+    window._pendingWeeklyFlights = data;
+  }catch(err){
+    status.style.color = 'var(--red)';
+    status.textContent = '❌ Error leyendo el archivo: ' + err.message;
+  }
+});
 
 function closeBriefConfigModal(){
   document.getElementById('briefConfigModal').classList.remove('open');
