@@ -607,7 +607,17 @@ input[type="date"]::-webkit-calendar-picker-indicator{
       <option value="supervisor">⭐ Supervisor — Acceso completo excepto usuarios</option>
       <option value="admin">👑 Admin — Acceso total</option>
     </select>
+    <div style="margin-top:10px">
+  <label class="label">Cargo / Posición (opcional)</label>
+  <input type="text" class="fi" id="userCargo" placeholder="Ej: Gerente de Operaciones, Director...">
+  <div class="hint">Visible en el perfil del usuario</div>
+</div>
   </div>
+  <div style="margin-top:12px">
+  <label class="label">Cargo / Posición (opcional)</label>
+  <input type="text" class="fi" id="userCargo" placeholder="Ej: Gerente de Operaciones, Director...">
+  <div class="hint">Visible en el perfil del usuario</div>
+</div>
   <div class="form-group">
     <label style="display:flex;align-items:center;gap:7px;cursor:pointer">
       <input type="checkbox" id="userActivo" checked style="width:14px;height:14px">
@@ -5788,13 +5798,15 @@ async function saveUser(){
   const memberId=document.getElementById('userMemberId').value;
   const activo=document.getElementById('userActivo').checked;
   const errBox=document.getElementById('userModalError');
+
   errBox.style.display='none';
 
   if(_userEditUid){
     // Edit existing
     try{
+      const cargo = document.getElementById('userCargo')?.value?.trim()||'';
       await cloudDb.collection('users').doc(_userEditUid).update({
-        rol, memberId: memberId||null, activo,
+        rol, memberId: memberId||null, activo, cargo,
         updatedAt:Date.now()
       });
       toast('✅ Usuario actualizado');
@@ -5822,14 +5834,15 @@ async function saveUser(){
       const uid=cred.user.uid;
       const invitationCode=generateInvitationCode();
       const member=S.team.find(m=>m.id===memberId);
+      const cargo = document.getElementById('userCargo')?.value?.trim()||'';
       await cloudDb.collection('users').doc(uid).set({
         email, rol, memberId: memberId||null,
         nombre: member?.name || email.split('@')[0],
         activo, firstLogin:true,
-        invitationCode,
+        invitationCode, cargo,
         createdAt:Date.now(),
         createdBy: currentUserProfile?.email||'admin',
-        permisos: {...DEFAULT_PERMISOS}, // todos desactivados por defecto
+        permisos: {...DEFAULT_PERMISOS},
       });
       await secondaryAuth.signOut();
       await secondaryApp.delete();
@@ -5944,6 +5957,11 @@ async function renderUsers(){
                 <div style="font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:1px;margin-bottom:4px">Miembro vinculado</div>
                 <div style="font-size:12px">${(S.team||[]).find(m=>m.id===d.memberId)?.name||'—'}</div>
               </div>
+              ${d.cargo?`
+              <div style="background:var(--s2);border:1px solid var(--border);border-radius:8px;padding:10px 12px">
+                <div style="font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:1px;margin-bottom:4px">Cargo</div>
+                <div style="font-size:12px">${d.cargo}</div>
+              </div>`:''}
               ${d.firstLogin?`
               <div style="grid-column:1/-1;background:rgba(240,165,0,.08);border:1px solid rgba(240,165,0,.25);border-radius:8px;padding:10px 12px">
                 <div style="font-size:10px;color:var(--amber);text-transform:uppercase;letter-spacing:1px;margin-bottom:4px">⏳ Pendiente primer login</div>
@@ -6276,12 +6294,19 @@ async function renderBriefing(){
     const term = getPosTerminal(f.pos);
     if(!term) return;
     const [h,m] = f.std.split(':').map(Number);
-    const ventanaStart = Math.floor((h*60+m)/10)*10;
-    const hh = String(Math.floor(ventanaStart/60)).padStart(2,'0');
-    const mm = String(ventanaStart%60).padStart(2,'0');
-    const key = `${hh}:${mm}`;
-    if(term==='A') ventanasA[key] = (ventanasA[key]||0)+1;
-    else           ventanasB[key] = (ventanasB[key]||0)+1;
+    const stdMins = h*60+m;
+    // Ventana de ocupación: 15 min antes hasta 15 min después del STD
+    const ocupStart = stdMins - 20;
+    const ocupEnd   = stdMins + 20;
+    // Marcar todas las ventanas de 10 min que toca esta ocupación
+    for(let t = Math.floor(ocupStart/10)*10; t < ocupEnd; t+=10){
+      if(t < 0 || t >= 1440) continue;
+      const hh = String(Math.floor(t/60)).padStart(2,'0');
+      const mm = String(t%60).padStart(2,'0');
+      const key = `${hh}:${mm}`;
+      if(term==='A') ventanasA[key] = (ventanasA[key]||0)+1;
+      else           ventanasB[key] = (ventanasB[key]||0)+1;
+    }
   });
 
   const peakA = Object.entries(ventanasA).sort((a,b)=>b[1]-a[1])[0]||['—',0];
