@@ -2554,7 +2554,7 @@ function renderBoard(){
     unassignedMembers.forEach(m=>{
       const sh=resolvedShift(m,date);
       const sdef=SHIFT_DEFS.find(s=>s.id===sh);
-      html+=`<span class="uchip" style="border-color:${sdef?.color||'var(--border2)'}33;color:${sdef?.color||'var(--text2)'}" onclick="openAssignModal('${sh}',null,'${m.id}')">${m.name} <span style="font-size:11px">${sh}</span></span>`;
+      html+=`<span class="uchip" style="border-color:${sdef?.color||'var(--border2)'}33;color:${sdef?.color||'var(--text2)'}${hasPermiso('action_editBoard')?'':';cursor:default'}" ${hasPermiso('action_editBoard')?`onclick="openAssignModal('${sh}',null,'${m.id}')"`:''}>${m.name} <span style="font-size:11px">${sh}</span></span>`;
     });
     html+=`</div></div>`;
   }
@@ -2570,7 +2570,7 @@ orderedShifts.forEach(shift=>{
         <span class="shift-tag" style="background:${shift.bg};color:${shift.color};border:1px solid ${shift.color}44">${shift.label}</span>
         <span class="shift-time">${shift.time}</span>
         <span class="shift-count">${duties.length} agente${duties.length!==1?'s':''}</span>
-        <div class="shift-add" onclick="openAssignModal('${shift.id}',null,null)">+</div>
+        ${hasPermiso('action_editBoard')?`<div class="shift-add" onclick="openAssignModal('${shift.id}',null,null)">+</div>`:''}
       </div>
       <div class="shift-body">`;
     if(!duties.length){ html+=`<div class="shift-empty">Sin agentes. Haz clic en + para agregar.</div>`; }
@@ -2605,7 +2605,7 @@ orderedShifts.forEach(shift=>{
         const hasVeh=d.specialTasks&&(d.specialTasks.includes('TPe119')||d.specialTasks.includes('CGP17'));
         if(posCount>3&&!hasVeh) rows=`<div style="font-size:11px;color:var(--red);font-weight:700;margin-bottom:3px">⚠️ +3 pos sin vehículo</div>`+rows;
         if(m.noLicencia&&hasVeh) rows=`<div style="font-size:11px;color:var(--amber);font-weight:700;margin-bottom:3px">⚠️ Sin licencia — vehículo asignado</div>`+rows;
-        html+=`<div class="agent-card" onclick="openAssignModal('${shift.id}',${i},null)">
+        html+=`<div class="agent-card" ${hasPermiso('action_editBoard')?`onclick="openAssignModal('${shift.id}',${i},null)"`:'style="cursor:default"'}>
           <div class="atop">
             <div class="av" style="background:${m.color}22;color:${m.color}">${init}</div>
             <div><div class="aname">${m.name}</div>${m.terminal?`<div class="aterm">Terminal ${m.terminal}</div>`:''}</div>
