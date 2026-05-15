@@ -3876,6 +3876,8 @@ function renderTeamGrid(){
       <div class="sched-row">${pips}</div>
     </div>`;
   }).join('');
+  // Aplicar permisos después de renderizar
+  if(typeof applyUserPermissions === 'function') applyUserPermissions();
 }
 
 function openMemberModal(editId){
@@ -4121,6 +4123,7 @@ function deleteLicencia(id){ showConfirm('¿Eliminar licencia?','',()=>{S.licenc
 function renderChanges(){
   const fmtDate=d=>new Date(d+'T12:00:00').toLocaleDateString('es-DO',{day:'numeric',month:'short',year:'numeric'});
   const fmtRange=(s,e)=>fmtDate(s)+(s!==e?' → '+fmtDate(e):'');
+  if(typeof applyUserPermissions === 'function') applyUserPermissions();
 
   // Helper to render a range-based list
   function renderRangeList(containerId, list, emoji, editFn, deleteFn, extraField){
