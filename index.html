@@ -613,11 +613,6 @@ input[type="date"]::-webkit-calendar-picker-indicator{
   <div class="hint">Visible en el perfil del usuario</div>
 </div>
   </div>
-  <div style="margin-top:12px">
-  <label class="label">Cargo / Posición (opcional)</label>
-  <input type="text" class="fi" id="userCargo" placeholder="Ej: Gerente de Operaciones, Director...">
-  <div class="hint">Visible en el perfil del usuario</div>
-</div>
   <div class="form-group">
     <label style="display:flex;align-items:center;gap:7px;cursor:pointer">
       <input type="checkbox" id="userActivo" checked style="width:14px;height:14px">
@@ -3875,8 +3870,8 @@ function renderTeamGrid(){
           </div>
           <div style="font-size:12px;color:var(--text2)">${m.role||(m.terminal?'Term.'+m.terminal:'')}</div>
         </div>
-        <button onclick="openMemberModal('${m.id}')" style="background:none;border:none;color:var(--text3);cursor:pointer;font-size:14px">✏️</button>
-        <button onclick="deleteMember('${m.id}')" style="background:none;border:none;color:var(--text3);cursor:pointer;font-size:14px">🗑</button>
+        ${hasPermiso('action_editBoard')?`<button onclick="openMemberModal('${m.id}')" style="background:none;border:none;color:var(--text3);cursor:pointer;font-size:14px">✏️</button>`:''}
+        ${hasPermiso('action_editBoard')?`<button onclick="deleteMember('${m.id}')" style="background:none;border:none;color:var(--text3);cursor:pointer;font-size:14px">🗑</button>`:''}
       </div>
       <div class="sched-row">${pips}</div>
     </div>`;
@@ -5581,6 +5576,23 @@ function applyUserPermissions(){
       const el=document.getElementById(id); if(el) el.style.display='';
     });
     return;
+    // Equipo — botones de edición
+  ['openMemberModal','deleteMember','openScheduleModal'].forEach(fn=>{
+    document.querySelectorAll(`[onclick*="${fn}"]`).forEach(el=>{
+      el.style.display = hasPermiso('action_editBoard') ? '' : 'none';
+    });
+  });
+
+  // Cambios — todos los botones de agregar cambios
+  ['openVacModal','openOverrideModal','openCambioTurnoModal','openPermisoModal','openLicenciaModal','openSwapModal'].forEach(fn=>{
+    document.querySelectorAll(`[onclick*="${fn}"]`).forEach(el=>{
+      el.style.display = hasPermiso('action_editChanges') ? '' : 'none';
+    });
+  });
+
+  // Subir horario
+  const schedFileBtn = document.querySelector('[onclick*="scheduleFile"]');
+  if(schedFileBtn) schedFileBtn.style.display = hasPermiso('action_editBoard') ? '' : 'none';
   }
 
   // Permisos granulares para no-admin
