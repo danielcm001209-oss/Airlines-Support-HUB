@@ -2627,6 +2627,9 @@ orderedShifts.forEach(shift=>{
   </div>`;
 
   wrap.innerHTML=html;
+  // Aplicar permisos al panel WhatsApp
+  const outPanel = document.querySelector('.out-panel');
+  if(outPanel) outPanel.style.display = hasPermiso('action_editBoard') ? '' : 'none';
 }
 
 function dr(label,val){ return `<div class="drow"><span class="dlabel">${label}</span>${val}</div>`; }
