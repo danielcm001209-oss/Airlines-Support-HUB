@@ -3878,6 +3878,7 @@ function renderTeamGrid(){
   }).join('');
   // Aplicar permisos después de renderizar
   if(typeof applyUserPermissions === 'function') applyUserPermissions();
+  setTimeout(()=>{ if(typeof applyUserPermissions==='function') applyUserPermissions(); }, 50);
 }
 
 function openMemberModal(editId){
@@ -4123,7 +4124,6 @@ function deleteLicencia(id){ showConfirm('¿Eliminar licencia?','',()=>{S.licenc
 function renderChanges(){
   const fmtDate=d=>new Date(d+'T12:00:00').toLocaleDateString('es-DO',{day:'numeric',month:'short',year:'numeric'});
   const fmtRange=(s,e)=>fmtDate(s)+(s!==e?' → '+fmtDate(e):'');
-  if(typeof applyUserPermissions === 'function') applyUserPermissions();
 
   // Helper to render a range-based list
   function renderRangeList(containerId, list, emoji, editFn, deleteFn, extraField){
@@ -4204,6 +4204,7 @@ function renderChanges(){
       <button class="btn btn-danger" style="font-size:11px;padding:2px 7px" onclick="deleteSwap('${s.id}')">✕</button>
     </div>`;
   }).join(''):'<div style="color:var(--text3);font-size:12px">Sin cambios registrados.</div>';
+  setTimeout(()=>{ if(typeof applyUserPermissions==='function') applyUserPermissions(); }, 50);
 }
 
 function openCambioTurnoModal(mid, date){
@@ -5573,85 +5574,79 @@ function applyUserPermissions(){
   });
 
   if(isAdm){
-    // Admin ve todo
     document.querySelectorAll('#tabBar .tab').forEach(tab=>{ tab.style.display=''; });
     ['analysisBtn','flightBtn','undoBtn','redoBtn','apiKeyBtn','fbBtn'].forEach(id=>{
       const el=document.getElementById(id); if(el) el.style.display='';
     });
+    const outPanel = document.querySelector('.out-panel');
+    if(outPanel) outPanel.style.display='';
     return;
-    // Equipo — botones de edición
-  ['openMemberModal','deleteMember','openScheduleModal'].forEach(fn=>{
+  }
+
+  // ── Tabs ──
+  const tabMap = {
+    board:'tab_board', airlines:'tab_airlines', team:'tab_team',
+    changes:'tab_changes', history:'tab_history', briefing:'tab_briefing',
+    knowClient:'tab_knowClient', users:'tab_users'
+  };
+  document.querySelectorAll('#tabBar .tab').forEach(tab=>{
+    const t = tab.dataset.tab;
+    if(t === 'users'){ tab.style.display='none'; return; }
+    tab.style.display = hasPermiso(tabMap[t]||('tab_'+t)) ? '' : 'none';
+  });
+
+  // ── Header buttons ──
+  const flightBtn = document.getElementById('flightBtn');
+  if(flightBtn) flightBtn.style.display = hasPermiso('action_loadFlights') ? '' : 'none';
+  const analysisBtn = document.getElementById('analysisBtn');
+  if(analysisBtn) analysisBtn.style.display = hasPermiso('action_editBoard') ? '' : 'none';
+  ['undoBtn','redoBtn'].forEach(id=>{
+    const el=document.getElementById(id);
+    if(el) el.style.display = hasPermiso('action_editBoard') ? '' : 'none';
+  });
+  document.querySelectorAll('.hactions .btn-green,.hactions .btn-primary').forEach(b=>{
+    b.style.display = hasPermiso('action_editBoard') ? '' : 'none';
+  });
+
+  // ── Panel WhatsApp ──
+  const outPanel = document.querySelector('.out-panel');
+  if(outPanel) outPanel.style.display = hasPermiso('action_editBoard') ? '' : 'none';
+
+  // ── Botón Configurar Briefing ──
+  const cfgBriefBtn = document.querySelector('[onclick="openBriefConfigModal()"]');
+  if(cfgBriefBtn) cfgBriefBtn.style.display = hasPermiso('action_configureBriefing') ? '' : 'none';
+
+  // ── Equipo — botones header ──
+  ['openScheduleModal','triggerFile','openMemberModal'].forEach(fn=>{
     document.querySelectorAll(`[onclick*="${fn}"]`).forEach(el=>{
       el.style.display = hasPermiso('action_editBoard') ? '' : 'none';
     });
   });
 
-  // Cambios — todos los botones de agregar cambios
+  // ── Aerolíneas — botones de edición ──
+  ['addAirlineManual','importAirlinesFile','triggerFile'].forEach(fn=>{
+    document.querySelectorAll(`[onclick*="${fn}"]`).forEach(el=>{
+      el.style.display = hasPermiso('action_editBoard') ? '' : 'none';
+    });
+  });
+  // Botón guardar aerolíneas
+  document.querySelectorAll('#page-airlines [onclick*="save()"]').forEach(el=>{
+    el.style.display = hasPermiso('action_editBoard') ? '' : 'none';
+  });
+
+  // ── Cambios — botones de agregar ──
   ['openVacModal','openOverrideModal','openCambioTurnoModal','openPermisoModal','openLicenciaModal','openSwapModal'].forEach(fn=>{
     document.querySelectorAll(`[onclick*="${fn}"]`).forEach(el=>{
       el.style.display = hasPermiso('action_editChanges') ? '' : 'none';
     });
   });
 
-  // Subir horario
-  const schedFileBtn = document.querySelector('[onclick*="scheduleFile"]');
-  if(schedFileBtn) schedFileBtn.style.display = hasPermiso('action_editBoard') ? '' : 'none';
-  }
-
-  // Permisos granulares para no-admin
-  const tabMap = {
-    board:'tab_board', airlines:'tab_airlines', team:'tab_team',
-    changes:'tab_changes', history:'tab_history', briefing:'tab_briefing',
-    knowClient:'tab_knowClient', users:'tab_users'
-  };
-
-  document.querySelectorAll('#tabBar .tab').forEach(tab=>{
-    const t = tab.dataset.tab;
-    if(t === 'users'){ tab.style.display='none'; return; } // users solo admin
-    tab.style.display = hasPermiso(tabMap[t]||('tab_'+t)) ? '' : 'none';
-  });
-
-  // Botones de header según acciones
-  const flightBtn = document.getElementById('flightBtn');
-  if(flightBtn) flightBtn.style.display = hasPermiso('action_loadFlights') ? '' : 'none';
-
-  const analysisBtn = document.getElementById('analysisBtn');
-  if(analysisBtn) analysisBtn.style.display = hasPermiso('action_editBoard') ? '' : 'none';
-
-  ['undoBtn','redoBtn'].forEach(id=>{
-    const el=document.getElementById(id);
-    if(el) el.style.display = hasPermiso('action_editBoard') ? '' : 'none';
-  });
-
-  // Botón Auto y Save
-  // Botones de edición en header
-  document.querySelectorAll('.hactions .btn-green,.hactions .btn-primary').forEach(b=>{
-    b.style.display = hasPermiso('action_editBoard') ? '' : 'none';
-  });
-
-  // Ocultar botones de edición en el board
-  const editBtns = [
-    '[onclick*="openDutyModal"]',
-    '[onclick*="clearDay"]',
-    '[onclick*="autoAssign"]',
-    '[onclick*="openShiftModal"]',
-    '.duty-edit-btn',
-    '.add-duty-btn',
-  ];
-  editBtns.forEach(sel=>{
-    document.querySelectorAll(sel).forEach(el=>{
+  // ── Conociendo el cliente — botones de edición ──
+  ['addNewAirline','loadDiferenciasFromDoc','toggleKnowEditMode'].forEach(fn=>{
+    document.querySelectorAll(`[onclick*="${fn}"]`).forEach(el=>{
       el.style.display = hasPermiso('action_editBoard') ? '' : 'none';
     });
   });
-
-  // Ocultar botones de edición en equipo
-  document.querySelectorAll('[onclick*="openMemberModal"],[onclick*="deleteMember"]').forEach(el=>{
-    el.style.display = hasPermiso('action_editBoard') ? '' : 'none';
-  });
-
-  // Botón Configurar Briefing
-  const cfgBriefBtn = document.querySelector('[onclick="openBriefConfigModal()"]');
-  if(cfgBriefBtn) cfgBriefBtn.style.display = hasPermiso('action_configureBriefing') ? '' : 'none';
 
   updateUserBadge();
 }
