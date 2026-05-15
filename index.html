@@ -4307,6 +4307,8 @@ function renderHistory(){
 // ═══════════════════════════════════════════════════════
 let knowEditMode=false;
 let knowExpanded=new Set();
+let usersExpanded=new Set();
+let usersActiveTab = {}; // {uid: 'info'|'permisos'}
 let knowActiveTab = {}; // {airlineName: 'diferencias'|'requerimientos'|'procesos'|'aeronaves'}
 
 
@@ -4322,6 +4324,17 @@ function toggleAirlineExpand(name){
   if(knowExpanded.has(name)) knowExpanded.delete(name);
   else knowExpanded.add(name);
   renderKnowClient();
+}
+
+function toggleUserExpand(uid){
+  if(usersExpanded.has(uid)) usersExpanded.delete(uid);
+  else usersExpanded.add(uid);
+  renderUsers();
+}
+
+function setUserTab(uid, tab){
+  usersActiveTab[uid] = tab;
+  renderUsers();
 }
 
 function setKnowTab(name, tab){
@@ -5865,66 +5878,104 @@ Al entrar por primera vez, toca "¿Primera vez?" y usa estos datos para activar 
 
 async function renderUsers(){
   if(!isAdmin()) return;
-  const c=document.getElementById('usersList');
-  if(!cloudDb){ c.innerHTML='<div style="color:var(--red);padding:20px">Firebase no conectado</div>'; return; }
-  c.innerHTML='<div style="padding:20px;text-align:center;color:var(--text3)">Cargando usuarios…</div>';
+  const c = document.getElementById('usersList');
+  if(!c) return;
   try{
-    const snap=await cloudDb.collection('users').orderBy('createdAt','desc').get();
-    if(snap.empty){ c.innerHTML='<div style="padding:20px;text-align:center;color:var(--text3)">Sin usuarios aún. Toca "Crear usuario".</div>'; return; }
-    const rows=[];
+    const snap = await cloudDb.collection('users').orderBy('nombre').get();
+    if(snap.empty){ c.innerHTML='<div style="color:var(--text3);font-size:13px;padding:20px;text-align:center">Sin usuarios registrados.</div>'; return; }
+
+    const rows = [];
     snap.forEach(doc=>{
-      const d=doc.data();
-      const uid=doc.id;
-      const member=d.memberId?S.team.find(m=>m.id===d.memberId):null;
-      const roleIcon=d.rol==='admin'?'👑':d.rol==='supervisor'?'⭐':'👤';
-      const roleColor=d.rol==='admin'?'var(--amber)':d.rol==='supervisor'?'var(--accent)':'var(--text2)';
-      const statusBadge=d.activo===false
-        ? '<span style="font-size:11px;padding:2px 7px;border-radius:4px;background:rgba(232,69,69,.15);color:var(--red);font-weight:700">DESACTIVADO</span>'
-        : d.firstLogin
-          ? '<span style="font-size:11px;padding:2px 7px;border-radius:4px;background:rgba(240,165,0,.15);color:var(--amber);font-weight:700">PENDIENTE 1er LOGIN</span>'
-          : '<span style="font-size:11px;padding:2px 7px;border-radius:4px;background:rgba(23,201,122,.15);color:var(--green);font-weight:700">ACTIVO</span>';
-      rows.push(`<div style="background:var(--s1);border:1px solid var(--border);border-radius:9px;padding:12px 14px;margin-bottom:8px;display:flex;align-items:center;gap:10px;flex-wrap:wrap">
-        <div style="font-size:22px">${roleIcon}</div>
-        <div style="flex:1;min-width:180px">
-          <div style="font-size:13px;font-weight:700">${d.nombre||d.email}</div>
-          <div style="font-size:12px;color:var(--text2);font-family:'IBM Plex Mono',monospace;margin-top:2px">${d.email}${member?` · vinculado a ${member.name}`:''}</div>
-          ${d.firstLogin&&d.invitationCode?`<div style="font-size:11px;color:var(--amber);margin-top:3px;font-family:'IBM Plex Mono',monospace">🎟 Código: ${d.invitationCode}</div>`:''}
-        </div>
-        <div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px">
-          <span style="font-size:11px;font-weight:800;color:${roleColor};text-transform:uppercase">${d.rol||'agente'}</span>
-          ${statusBadge}
-        </div>
-        <div style="display:flex;gap:4px">
-          ${d.firstLogin?`<button class="btn btn-outline" style="font-size:11px;padding:3px 7px" onclick="copyInvitationFor('${uid}')" title="Copiar datos de invitación">📋</button>`:''}
-          <button class="btn btn-outline" style="font-size:11px;padding:3px 7px" onclick="openUserModal('${uid}')">✏️</button>
-          ${uid!==currentUser?.uid?`<button class="btn btn-danger" style="font-size:11px;padding:3px 7px" onclick="deleteUser('${uid}','${(d.email||'').replace(/'/g,"\\'")}')">🗑</button>`:''}
-        </div>
-      </div>
-      ${d.rol!=='admin'?`
-      <div style="background:var(--s2);border:1px solid var(--border);border-radius:9px;padding:12px 14px;margin-bottom:8px;">
-        <div style="font-size:11px;font-weight:800;letter-spacing:1px;color:var(--text2);text-transform:uppercase;margin-bottom:10px;">🔐 Permisos de acceso</div>
-        ${PERMISOS_DEF.map(section=>`
-          <div style="font-size:11px;font-weight:800;letter-spacing:1px;color:var(--accent);text-transform:uppercase;margin:8px 0 6px">${section.section}</div>
-          ${section.items.map(p=>{
-            const val = d.permisos?.[p.key]===true;
-            return `<div style="display:flex;align-items:center;justify-content:space-between;padding:5px 0;border-bottom:1px solid var(--border);">
-              <span style="font-size:12px;color:var(--text2)">${p.label}</span>
-              <button onclick="togglePermiso('${uid}','${p.key}',${!val})"
-                style="width:36px;height:20px;border-radius:20px;border:none;cursor:pointer;
-                background:${val?'var(--green)':'var(--border2)'};
-                display:flex;align-items:center;padding:2px;
-                justify-content:${val?'flex-end':'flex-start'};transition:all .2s;flex-shrink:0">
-                <span style="width:16px;height:16px;border-radius:50%;background:#fff;display:block"></span>
-            </button>
-            </div>`;
-          }).join('')}
-        `).join('')}
-      </div>`:''}
-`);
+      const d = doc.data();
+      const uid = doc.id;
+      const expanded = usersExpanded.has(uid);
+      const activeTab = usersActiveTab[uid] || 'info';
+      const col = d.rol==='admin' ? '#e84545' : d.rol==='supervisor' ? '#f0a500' : '#2d7aee';
+      const rolLabel = d.rol==='admin' ? 'ADMIN' : d.rol==='supervisor' ? 'SUPERVISOR' : 'AGENTE';
+      const init = (d.nombre||d.email||'?').split(' ').map(p=>p[0]).join('').slice(0,2).toUpperCase();
+
+      rows.push(`
+        <div style="background:var(--s1);border:1px solid var(--border);border-radius:10px;margin-bottom:8px;overflow:hidden">
+          <!-- Header colapsable -->
+          <div onclick="toggleUserExpand('${uid}')" style="display:flex;align-items:center;gap:10px;padding:11px 14px;cursor:pointer;${expanded?'border-bottom:1px solid var(--border);background:var(--s2)':''}">
+            <div style="width:32px;height:32px;border-radius:8px;background:${col}22;border:1px solid ${col}44;display:flex;align-items:center;justify-content:center;color:${col};font-weight:900;font-size:13px;flex-shrink:0">${init}</div>
+            <div style="flex:1;min-width:0">
+              <div style="font-size:13px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${d.nombre||d.email}</div>
+              <div style="font-size:11px;color:var(--text3);margin-top:1px">${d.email}</div>
+            </div>
+            <div style="display:flex;align-items:center;gap:6px;flex-shrink:0">
+              <span style="font-size:10px;font-weight:800;padding:2px 7px;border-radius:10px;background:${col}22;color:${col}">${rolLabel}</span>
+              ${!d.activo?`<span style="font-size:10px;font-weight:800;padding:2px 7px;border-radius:10px;background:rgba(232,69,69,.15);color:#e84545">INACTIVO</span>`:''}
+              ${d.firstLogin?`<span style="font-size:10px;font-weight:800;padding:2px 7px;border-radius:10px;background:rgba(240,165,0,.15);color:#f0a500">PENDIENTE LOGIN</span>`:''}
+              <div style="font-size:16px;color:var(--text3);transition:transform .2s;${expanded?'transform:rotate(90deg)':''}">▶</div>
+            </div>
+          </div>
+
+          ${expanded?`
+          <div style="padding:12px 14px">
+            <!-- Tabs -->
+            <div style="display:flex;gap:6px;margin-bottom:12px">
+              <button class="shift-tab${activeTab==='info'?' on':''}" onclick="setUserTab('${uid}','info')">👤 Info</button>
+              ${d.rol!=='admin'?`<button class="shift-tab${activeTab==='permisos'?' on':''}" onclick="setUserTab('${uid}','permisos')">🔐 Permisos</button>`:''}
+              <div style="flex:1"></div>
+              <button class="btn btn-outline" style="font-size:11px;padding:3px 8px" onclick="openUserModal('${uid}')">✏️ Editar</button>
+              ${d.firstLogin?`<button class="btn btn-outline" style="font-size:11px;padding:3px 8px" onclick="copyInvitationFor('${uid}')">📋 Código</button>`:''}
+              ${uid!==currentUser?.uid?`<button class="btn btn-danger" style="font-size:11px;padding:3px 8px" onclick="deleteUser('${uid}','${(d.email||'').replace(/'/g,"\\'")}')">🗑</button>`:''}
+            </div>
+
+            <!-- Tab: Info -->
+            ${activeTab==='info'?`
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+              <div style="background:var(--s2);border:1px solid var(--border);border-radius:8px;padding:10px 12px">
+                <div style="font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:1px;margin-bottom:4px">Email</div>
+                <div style="font-size:12px;font-family:'IBM Plex Mono',monospace">${d.email}</div>
+              </div>
+              <div style="background:var(--s2);border:1px solid var(--border);border-radius:8px;padding:10px 12px">
+                <div style="font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:1px;margin-bottom:4px">Rol</div>
+                <div style="font-size:12px;font-weight:700;color:${col}">${rolLabel}</div>
+              </div>
+              <div style="background:var(--s2);border:1px solid var(--border);border-radius:8px;padding:10px 12px">
+                <div style="font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:1px;margin-bottom:4px">Estado</div>
+                <div style="font-size:12px;font-weight:700;color:${d.activo?'var(--green)':'var(--red)'}">${d.activo?'✅ Activo':'❌ Inactivo'}</div>
+              </div>
+              <div style="background:var(--s2);border:1px solid var(--border);border-radius:8px;padding:10px 12px">
+                <div style="font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:1px;margin-bottom:4px">Miembro vinculado</div>
+                <div style="font-size:12px">${(S.team||[]).find(m=>m.id===d.memberId)?.name||'—'}</div>
+              </div>
+              ${d.firstLogin?`
+              <div style="grid-column:1/-1;background:rgba(240,165,0,.08);border:1px solid rgba(240,165,0,.25);border-radius:8px;padding:10px 12px">
+                <div style="font-size:10px;color:var(--amber);text-transform:uppercase;letter-spacing:1px;margin-bottom:4px">⏳ Pendiente primer login</div>
+                <div style="font-size:12px;color:var(--text2)">Código: <span style="font-family:'IBM Plex Mono',monospace;font-weight:700;color:var(--amber)">${d.invitationCode||'—'}</span></div>
+              </div>`:''}
+            </div>`:''}
+
+            <!-- Tab: Permisos -->
+            ${activeTab==='permisos'&&d.rol!=='admin'?`
+            <div style="background:var(--s2);border:1px solid var(--border);border-radius:9px;padding:12px 14px">
+              ${PERMISOS_DEF.map(section=>`
+                <div style="font-size:10px;font-weight:800;letter-spacing:1px;color:var(--accent);text-transform:uppercase;margin:8px 0 6px">${section.section}</div>
+                ${section.items.map(p=>{
+                  const val = d.permisos?.[p.key]===true;
+                  return `<div style="display:flex;align-items:center;justify-content:space-between;padding:5px 0;border-bottom:1px solid var(--border)">
+                    <span style="font-size:12px;color:var(--text2)">${p.label}</span>
+                    <button onclick="togglePermiso('${uid}','${p.key}',${!val})"
+                      style="width:36px;height:20px;border-radius:20px;border:none;cursor:pointer;
+                      background:${val?'var(--green)':'var(--border2)'};
+                      display:flex;align-items:center;padding:2px;
+                      justify-content:${val?'flex-end':'flex-start'};transition:all .2s;flex-shrink:0">
+                      <span style="width:16px;height:16px;border-radius:50%;background:#fff;display:block"></span>
+                    </button>
+                  </div>`;
+                }).join('')}
+              `).join('')}
+            </div>`:''}
+          </div>`:''}
+        </div>`);
     });
-    c.innerHTML=rows.join('');
+
+    c.innerHTML = rows.join('');
   }catch(e){
-    c.innerHTML=`<div style="color:var(--red);padding:20px">Error al cargar usuarios: ${e.message}</div>`;
+    c.innerHTML=`<div style="color:var(--red);font-size:13px;padding:20px">❌ Error: ${e.message}</div>`;
   }
 }
 
