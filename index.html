@@ -4308,6 +4308,8 @@ function renderHistory(){
 let knowEditMode=false;
 let knowExpanded=new Set();
 let usersExpanded=new Set();
+let localPermisos = {}; // cache local de permisos para UI inmediata
+let usersCache = {}; // cache local de datos de usuarios
 let usersActiveTab = {}; // {uid: 'info'|'permisos'}
 let knowActiveTab = {}; // {airlineName: 'diferencias'|'requerimientos'|'procesos'|'aeronaves'}
 
@@ -5958,7 +5960,7 @@ async function renderUsers(){
                   const val = d.permisos?.[p.key]===true;
                   return `<div style="display:flex;align-items:center;justify-content:space-between;padding:5px 0;border-bottom:1px solid var(--border)">
                     <span style="font-size:12px;color:var(--text2)">${p.label}</span>
-                    <button onclick="togglePermiso('${uid}','${p.key}',${!val})"
+                    <button id="perm_${uid}_${p.key}" onclick="event.stopPropagation();togglePermiso('${uid}','${p.key}',${!val})"
                       style="width:36px;height:20px;border-radius:20px;border:none;cursor:pointer;
                       background:${val?'var(--green)':'var(--border2)'};
                       display:flex;align-items:center;padding:2px;
@@ -5980,22 +5982,35 @@ async function renderUsers(){
 }
 
 async function togglePermiso(uid, key, value){
-  
   if(!isAdmin()) return;
-  try{
-    await cloudDb.collection('users').doc(uid).update({
-      [`permisos.${key}`]: value,
-      updatedAt: Date.now()
-    });
-    if(currentUser?.uid === uid){
-      if(!currentUserProfile.permisos) currentUserProfile.permisos={};
-      currentUserProfile.permisos[key] = value;
-      applyUserPermissions();
-    }
-  }catch(e){
-    toast('❌ Error guardando permiso: '+e.message);
+  
+  // 1. Actualizar cache local inmediatamente
+  if(!usersCache[uid]) usersCache[uid] = {};
+  if(!usersCache[uid].permisos) usersCache[uid].permisos = {};
+  usersCache[uid].permisos[key] = value;
+  
+  // 2. Actualizar UI inmediatamente
+  const btn = document.getElementById(`perm_${uid}_${key}`);
+  if(btn){
+    btn.setAttribute('onclick', `togglePermiso('${uid}','${key}',${value})`);
+    btn.style.background = value ? 'var(--green)' : 'var(--border2)';
+    btn.style.justifyContent = value ? 'flex-end' : 'flex-start';
+  }
+  
+  // 3. Guardar en Firestore en background (sin await)
+  cloudDb.collection('users').doc(uid).set(
+    { permisos: { [key]: value } },
+    { merge: true }
+  ).catch(e => toast('❌ Error: ' + e.message));
+  
+  // 4. Actualizar permisos del usuario actual si aplica
+  if(currentUser?.uid === uid){
+    if(!currentUserProfile.permisos) currentUserProfile.permisos = {};
+    currentUserProfile.permisos[key] = value;
+    applyUserPermissions();
   }
 }
+
 async function copyInvitationFor(uid){
   const doc=await cloudDb.collection('users').doc(uid).get();
   if(!doc.exists){ toast('Usuario no encontrado','error'); return; }
